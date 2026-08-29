@@ -64,22 +64,22 @@
                 <!-- Manajemen Data Group -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Manajemen Data</div>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('buku.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('buku.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-book text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Data Buku</span>
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('anggota.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('anggota.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-users text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Data Anggota</span>
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('peminjaman.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('peminjaman.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-handshake text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Peminjaman</span>
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('pengembalian.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
                     <i class="ph ph-clock-counter-clockwise text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Pengembalian</span>
                 </a>
@@ -87,7 +87,7 @@
                 <!-- Manajemen Transaksi Group -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Transaksi</div>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('transaksi.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
                     <i class="ph ph-receipt text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Riwayat Transaksi</span>
                 </a>
@@ -95,7 +95,7 @@
                 <!-- Manajemen Laporan Group -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Laporan</div>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('laporan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('laporan.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-chart-line-up text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Laporan Perpustakaan</span>
                 </a>
@@ -103,17 +103,12 @@
                 <!-- Manajemen Sistem Group -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Manajemen Sistem</div>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
-                    <i class="ph ph-user-gear text-2xl shrink-0"></i>
-                    <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Kelola User</span>
-                </a>
-
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('pengaturan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('pengaturan.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-gear text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Pengaturan</span>
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('profil.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('profil.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-user-circle text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Profil Saya</span>
                 </a>
@@ -141,7 +136,6 @@
 
                 <!-- Right Header: User Profile & Tombol Keluar -->
                 <div class="flex items-center gap-3 sm:gap-4">
-                    <!-- Menggunakan flex dengan breakpoint md:flex, tanpa kelas hidden yang konflik -->
                     <div class="items-center gap-2 text-sm hidden md:flex">
                         <i class="ph ph-user-circle text-xl"></i>
                         <span class="font-medium">Administrator</span>
