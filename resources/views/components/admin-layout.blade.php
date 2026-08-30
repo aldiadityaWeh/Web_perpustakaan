@@ -10,22 +10,25 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Alpine.js untuk interaksi Toggle Sidebar & Mobile Drawer -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans antialiased overflow-hidden">
+<body class="bg-gray-50 text-gray-800 font-sans antialiased overflow-hidden">
 
     <!-- Alpine x-data -->
     <div x-data="{ desktopOpen: true, mobileOpen: false }" class="flex h-screen w-full relative">
 
-        <!-- ================= BACKDROP OVERLAY UNTUK MOBILE ================= -->
+        <!-- BACKDROP OVERLAY UNTUK MOBILE -->
         <div
             x-show="mobileOpen"
+            x-cloak
             @click="mobileOpen = false"
             x-transition.opacity
             class="fixed inset-0 bg-black/50 z-30 lg:hidden"
-            style="display: none;"
         ></div>
 
-        <!-- ================= SIDEBAR ================= -->
+        <!-- SIDEBAR -->
         <aside
             class="bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out shrink-0 shadow-sm z-40 fixed lg:static inset-y-0 left-0"
             :class="{
@@ -35,15 +38,15 @@
                 'translate-x-0 w-64': mobileOpen
             }"
         >
-            <!-- Sidebar Header / Profil Singkat -->
+            <!-- Sidebar Header -->
             <div class="p-4 border-b border-gray-100 flex items-center justify-between gap-3 h-16">
                 <div class="flex items-center gap-3 overflow-hidden">
                     <div class="h-10 w-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-lg shrink-0">
-                        <i class="ph ph-user"></i>
+                        <i class="ph ph-books"></i>
                     </div>
                     <div x-show="desktopOpen || mobileOpen" x-transition.opacity class="overflow-hidden whitespace-nowrap">
-                        <p class="font-bold text-sm text-gray-800 leading-none">Administrator</p>
-                        <p class="text-xs text-gray-400 mt-1">Administrator</p>
+                        <p class="font-bold text-sm text-gray-800 leading-none">Perpustakaan</p>
+                        <p class="text-xs text-gray-400 mt-1">SDN 6 Cisereuh</p>
                     </div>
                 </div>
                 <button @click="mobileOpen = false" class="lg:hidden text-gray-400 hover:text-gray-600">
@@ -55,73 +58,66 @@
             <nav class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
 
                 <!-- Dashboard -->
-                <a href="{{ route('dashboard') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('dashboard') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                <a href="{{ route('dashboard.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('dashboard.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-squares-four text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Dashboard</span>
                 </a>
 
-                <!-- Manajemen Data Group -->
+                <!-- Manajemen Data -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Manajemen Data</div>
-
                 <a href="{{ route('buku.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('buku.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-book text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Data Buku</span>
                 </a>
-
                 <a href="{{ route('anggota.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('anggota.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-users text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Data Anggota</span>
                 </a>
 
+                <!-- Transaksi -->
+                <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Transaksi</div>
                 <a href="{{ route('peminjaman.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('peminjaman.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-handshake text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Peminjaman</span>
                 </a>
-
-                <a href="{{ route('pengembalian.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('pengembalian.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('pengembalian.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-clock-counter-clockwise text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Pengembalian</span>
                 </a>
-
-                <!-- Manajemen Transaksi Group -->
-                <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Transaksi</div>
-
-                <a href="{{ route('transaksi.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-gray-600 hover:bg-gray-100">
+                <a href="{{ route('transaksi.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('transaksi.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-receipt text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Riwayat Transaksi</span>
                 </a>
 
-                <!-- Manajemen Laporan Group -->
-                <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Laporan</div>
-
+                <!-- Laporan & Analisis -->
+                <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Laporan & Analisis</div>
+                <a href="{{ route('analisis.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('analisis.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="ph ph-chart-pie-slice text-2xl shrink-0"></i>
+                    <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Analisis Perpustakaan</span>
+                </a>
                 <a href="{{ route('laporan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('laporan.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="ph ph-chart-line-up text-2xl shrink-0"></i>
-                    <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Laporan Perpustakaan</span>
+                    <i class="ph ph-printer text-2xl shrink-0"></i>
+                    <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Laporan Cetak</span>
                 </a>
 
-                <!-- Manajemen Sistem Group -->
+                <!-- Manajemen Sistem (Tanpa Kelola User) -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Manajemen Sistem</div>
-
                 <a href="{{ route('pengaturan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('pengaturan.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-gear text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Pengaturan</span>
                 </a>
-
                 <a href="{{ route('profil.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('profil.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-user-circle text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Profil Saya</span>
                 </a>
-
             </nav>
         </aside>
 
-        <!-- ================= MAIN CONTENT AREA ================= -->
+        <!-- MAIN CONTENT AREA -->
         <div class="flex-1 flex flex-col overflow-hidden w-full">
 
             <!-- Topbar (Ungu) -->
             <header class="h-16 bg-[#7c3aed] text-white flex items-center justify-between px-4 sm:px-6 shadow-md z-10 shrink-0">
-
                 <div class="flex items-center gap-3 sm:gap-4">
                     <button
                         @click="if (window.innerWidth >= 1024) { desktopOpen = !desktopOpen; } else { mobileOpen = !mobileOpen; }"
@@ -130,18 +126,15 @@
                         <i class="ph ph-list text-2xl"></i>
                     </button>
                     <span class="font-bold text-base sm:text-lg tracking-wide flex items-center gap-2 truncate">
-                        <i class="ph ph-book-open shrink-0"></i> <span class="truncate">Sistem Perpustakaan</span>
+                        Sistem Perpustakaan
                     </span>
                 </div>
-
-                <!-- Right Header: User Profile & Tombol Keluar -->
+                <!-- Right Header -->
                 <div class="flex items-center gap-3 sm:gap-4">
                     <div class="items-center gap-2 text-sm hidden md:flex">
                         <i class="ph ph-user-circle text-xl"></i>
                         <span class="font-medium">Administrator</span>
                     </div>
-
-                    <!-- Tombol Keluar -->
                     <a href="{{ route('login') }}" class="bg-purple-800 hover:bg-purple-900 text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-sm border border-purple-600 shrink-0">
                         <i class="ph ph-sign-out text-base sm:text-lg"></i>
                         <span>Keluar</span>
@@ -150,7 +143,7 @@
             </header>
 
             <!-- Page Content (Slot) -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 sm:p-6">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50/50 p-4 sm:p-6">
                 {{ $slot }}
             </main>
         </div>

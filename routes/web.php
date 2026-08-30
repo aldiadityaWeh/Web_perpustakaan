@@ -3,14 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
-/*
-|--------------------------------------------------------------------------
-| Routes untuk Autentikasi (Guest)
-|--------------------------------------------------------------------------
-| Berisi rute untuk halaman login, register, dan lupa password.
-*/
+// --- Autentikasi ---
 
-// Redirect root ke login
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -28,24 +22,14 @@ Route::post('/register', function() {
 Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
 
 
-/*
-|--------------------------------------------------------------------------
-| Routes untuk Halaman Utama (Admin/User yang sudah Login)
-|--------------------------------------------------------------------------
-*/
+// --- Dashboard ---
 
-// Dashboard Route mengarah ke struktur folder baru: admin/dashboard/index
-Route::get('/dashboard', function () {
+Route::get('/admin/dashboard', function () {
     return view('admin.dashboard.index');
-})->name('dashboard');
+})->name('dashboard.index');
 
 
-/*
-|--------------------------------------------------------------------------
-| Routes untuk Manajemen Buku
-|--------------------------------------------------------------------------
-| Berisi rute untuk menampilkan daftar buku, form tambah, dan proses data buku.
-*/
+// --- Manajemen Buku ---
 
 Route::get('/admin/buku', function () {
     return view('admin.buku.index');
@@ -56,28 +40,18 @@ Route::get('/admin/buku/create', function () {
 })->name('buku.create');
 
 
-/*
-|--------------------------------------------------------------------------
-| Routes untuk Manajemen Anggota
-|--------------------------------------------------------------------------
-| Berisi rute untuk menampilkan daftar anggota dan form pendaftaran anggota baru.
-*/
+// --- Manajemen Anggota ---
 
 Route::get('/admin/anggota', function () {
     return view('admin.anggota.index');
 })->name('anggota.index');
 
 Route::get('/admin/anggota/create', function () {
-    // Rute form tambah anggota (akan dibuat nanti)
     return view('admin.anggota.create');
 })->name('anggota.create');
 
-/*
-|--------------------------------------------------------------------------
-| Routes untuk Manajemen Peminjaman
-|--------------------------------------------------------------------------
-| Berisi rute untuk menampilkan data transaksi peminjaman dan formnya.
-*/
+
+// --- Peminjaman ---
 
 Route::get('/admin/peminjaman', function () {
     return view('admin.peminjaman.index');
@@ -87,36 +61,41 @@ Route::get('/admin/peminjaman/create', function () {
     return view('admin.peminjaman.create');
 })->name('peminjaman.create');
 
-/*
-    |--------------------------------------------------------------------------
-    | Routes untuk Manajemen Pengembalian
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/admin/pengembalian', function () {
-        return view('admin.pengembalian.index');
-    })->name('pengembalian.index');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Routes untuk Riwayat Transaksi
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/admin/transaksi', function () {
-        return view('admin.transaksi.index');
-    })->name('transaksi.index');
+// --- Pengembalian ---
+
+Route::get('/admin/pengembalian', function () {
+    return view('admin.pengembalian.index');
+})->name('pengembalian.index');
 
 
-    // laporan
-    Route::get('/admin/laporan', function () {
+// --- Riwayat Transaksi ---
+
+Route::get('/admin/transaksi', function () {
+    return view('admin.transaksi.index');
+})->name('transaksi.index');
+
+
+// --- Laporan ---
+
+Route::get('/admin/laporan', function () {
     return view('admin.laporan.index');
-    })->name('laporan.index');
+})->name('laporan.index');
 
-    // pengaturan
-    Route::get('/admin/pengaturan', function () {
+// --- Analisis --- 
+Route::get('/admin/analisis', function () {
+    return view('admin.analisis.index');
+})->name('analisis.index');
+
+// --- Pengaturan ---
+
+Route::get('/admin/pengaturan', function () {
     return view('admin.pengaturan.index');
 })->name('pengaturan.index');
 
-// profil
+
+// --- Profil ---
+
 Route::get('/admin/profil', function () {
     return view('admin.profil.index');
 })->name('profil.index');
