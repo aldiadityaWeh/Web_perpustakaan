@@ -15,11 +15,30 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden max-w-4xl">
-        
+
         <div class="p-6 sm:p-8">
-            <form action="#" method="POST" id="formTambahBuku">
+            <!-- Tambahkan enctype="multipart/form-data" wajib untuk upload file -->
+            <form action="{{ route('buku.store') }}" method="POST" id="formTambahBuku" enctype="multipart/form-data">
                 @csrf
-                
+
+                <!-- Pesan Error Validasi (Akan muncul jika gagal simpan) -->
+                @if ($errors->any())
+                    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                        <ul class="list-disc pl-5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <!-- Upload Foto Sampul (Full Width) dipindah ke atas -->
+                <div class="mb-6 p-5 border border-dashed border-gray-300 rounded-xl bg-gray-50/50">
+                    <label for="gambar_sampul" class="block text-sm font-semibold text-gray-700 mb-2">Foto Sampul Buku (Opsional)</label>
+                    <input type="file" id="gambar_sampul" name="gambar_sampul" accept="image/*" class="w-full px-4 py-2.5 border border-gray-300 bg-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-2">Format yang diizinkan: JPG, JPEG, PNG, WEBP. Maksimal ukuran: 2MB.</p>
+                </div>
+
                 <!-- Judul Buku (Full Width) -->
                 <div class="mb-6">
                     <label for="judul" class="block text-sm font-semibold text-gray-700 mb-2">Judul Buku <span class="text-red-500">*</span></label>
@@ -32,7 +51,7 @@
                         <label for="isbn" class="block text-sm font-semibold text-gray-700 mb-2">ISBN <span class="text-red-500">*</span></label>
                         <input type="text" id="isbn" name="isbn" placeholder="Contoh: 978-602-1234-56-7" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 placeholder-gray-400" required>
                     </div>
-                    
+
                     <!-- Pengarang -->
                     <div>
                         <label for="pengarang" class="block text-sm font-semibold text-gray-700 mb-2">Pengarang <span class="text-red-500">*</span></label>
@@ -78,8 +97,10 @@
                         <label for="rak" class="block text-sm font-semibold text-gray-700 mb-2">Lokasi Rak <span class="text-red-500">*</span></label>
                         <input type="text" id="rak" name="rak" placeholder="Contoh: Rak A1" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 placeholder-gray-400" required>
                     </div>
+
+                    <!-- Kode upload foto yang lama di bagian bawah (md:col-span-2) SUDAH DIHAPUS DARI SINI -->
                 </div>
-                
+
                 <div class="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-end gap-3">
                     <a href="{{ route('buku.index') }}" class="w-full sm:w-auto text-center px-6 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors">
                         Batal

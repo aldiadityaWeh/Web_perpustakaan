@@ -24,42 +24,26 @@ Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm']
 
 // --- Dashboard ---
 
-Route::get('/admin/dashboard', function () {
+Route::get('/dashboard', function () {
     return view('admin.dashboard.index');
 })->name('dashboard.index');
 
 
 // --- Manajemen Buku ---
 
-Route::get('/admin/buku', function () {
-    return view('admin.buku.index');
-})->name('buku.index');
-
-Route::get('/admin/buku/create', function () {
-    return view('admin.buku.create');
-})->name('buku.create');
+Route::resource('/admin/buku', App\Http\Controllers\BukuController::class);
 
 
 // --- Manajemen Anggota ---
 
-Route::get('/admin/anggota', function () {
-    return view('admin.anggota.index');
-})->name('anggota.index');
-
-Route::get('/admin/anggota/create', function () {
-    return view('admin.anggota.create');
-})->name('anggota.create');
+Route::resource('/admin/anggota', App\Http\Controllers\AnggotaController::class);
 
 
 // --- Peminjaman ---
 
-Route::get('/admin/peminjaman', function () {
-    return view('admin.peminjaman.index');
-})->name('peminjaman.index');
+Route::resource('/admin/peminjaman', App\Http\Controllers\PeminjamanController::class);
 
-Route::get('/admin/peminjaman/create', function () {
-    return view('admin.peminjaman.create');
-})->name('peminjaman.create');
+
 
 
 // --- Pengembalian ---
@@ -82,7 +66,7 @@ Route::get('/admin/laporan', function () {
     return view('admin.laporan.index');
 })->name('laporan.index');
 
-// --- Analisis --- 
+// --- Analisis ---
 Route::get('/admin/analisis', function () {
     return view('admin.analisis.index');
 })->name('analisis.index');
