@@ -1,9 +1,8 @@
 <x-admin-layout>
-    @slot('title')
+    <x-slot:title>
         Tambah Peminjaman - Sistem Perpustakaan
-    @endslot
+    </x-slot:title>
 
-    <!-- STREAMING_CHUNK: Header Halaman dan Tombol Kembali -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Tambah Peminjaman Baru</h1>
@@ -15,27 +14,26 @@
         </a>
     </div>
 
-    <!-- STREAMING_CHUNK: Card Container untuk Form -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden max-w-3xl">
 
         <div class="p-6 sm:p-8">
-            <form action="#" method="POST">
+            <form action="{{ route('peminjaman.store') }}" method="POST">
                 @csrf
 
-                <!-- Layout 1 Kolom memanjang ke bawah -->
+                <!-- Layout 1 Kolom memanjang ke bawah sesuai referensi -->
                 <div class="flex flex-col gap-6 mb-8">
 
-                    <!-- STREAMING_CHUNK: Input Pilih Buku -->
                     <!-- Pilih Buku -->
                     <div>
                         <label for="buku_id" class="block text-sm font-semibold text-gray-700 mb-2">Pilih Buku <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <select id="buku_id" name="buku_id" class="appearance-none w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 bg-white cursor-pointer" required>
-                                <option value="" disabled selected>Pilih buku yang akan dipinjam...</option>
-                                <option value="1">Mempelajari Teknik Informatika (706498164891) - Tersedia: 10</option>
-                                <option value="2">Buku Pintar Matematika SD (9786021234567) - Tersedia: 5</option>
-                                <option value="3">Sejarah Kemerdekaan Indonesia (9786027654321) - Tersedia: 2</option>
-                                <option value="4">Dongeng Anak Nusantara (9786029876543) - Tersedia: 15</option>
+                                <option value="" disabled {{ old('buku_id') ? '' : 'selected' }}>Pilih buku yang akan dipinjam...</option>
+                                @foreach($bukus as $buku)
+                                    <option value="{{ $buku->id }}" {{ old('buku_id') == $buku->id ? 'selected' : '' }}>
+                                        {{ $buku->judul }} (Sisa Stok: {{ $buku->stok }})
+                                    </option>
+                                @endforeach
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <i class="ph ph-caret-down text-gray-500"></i>
@@ -43,17 +41,17 @@
                         </div>
                     </div>
 
-                    <!-- STREAMING_CHUNK: Input Pilih Anggota -->
                     <!-- Pilih Anggota -->
                     <div>
                         <label for="anggota_id" class="block text-sm font-semibold text-gray-700 mb-2">Pilih Anggota <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <select id="anggota_id" name="anggota_id" class="appearance-none w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 bg-white cursor-pointer" required>
-                                <option value="" disabled selected>Pilih anggota peminjam...</option>
-                                <option value="1">Agung Prastiyo (2000100) - Kelas 5A</option>
-                                <option value="2">Budi Santoso (2000101) - Kelas 4B</option>
-                                <option value="3">Citra Lestari (2000102) - Kelas 6C</option>
-                                <option value="4">Dewi Maharani (2000103) - Kelas 3A</option>
+                                <option value="" disabled {{ old('anggota_id') ? '' : 'selected' }}>Pilih anggota peminjam...</option>
+                                @foreach($anggotas as $anggota)
+                                    <option value="{{ $anggota->id }}" {{ old('anggota_id') == $anggota->id ? 'selected' : '' }}>
+                                        {{ $anggota->nama_lengkap }} (Kelas {{ $anggota->kelas }}) - NIS: {{ $anggota->nis }}
+                                    </option>
+                                @endforeach
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <i class="ph ph-caret-down text-gray-500"></i>
@@ -61,14 +59,13 @@
                         </div>
                     </div>
 
-                    <!-- STREAMING_CHUNK: Input Tanggal Jatuh Tempo -->
                     <!-- Tanggal Jatuh Tempo -->
                     <div>
-                        <label for="tanggal_kembali" class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Jatuh Tempo <span class="text-red-500">*</span></label>
-                        <input type="date" id="tanggal_kembali" name="tanggal_kembali" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
+                        <label for="tanggal_jatuh_tempo" class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Jatuh Tempo (Batas Kembali) <span class="text-red-500">*</span></label>
+                        <input type="date" id="tanggal_jatuh_tempo" name="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo', \Carbon\Carbon::now()->addDays(7)->format('Y-m-d')) }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
+                        <p class="text-xs text-gray-500 mt-2">*Otomatis diset 7 hari dari hari ini, Anda bisa mengubahnya jika perlu.</p>
                     </div>
 
-                    <!-- STREAMING_CHUNK: Input Catatan -->
                     <!-- Catatan -->
                     <div>
                         <label for="catatan" class="block text-sm font-semibold text-gray-700 mb-2">Catatan (Opsional)</label>
@@ -77,7 +74,6 @@
 
                 </div>
 
-                <!-- STREAMING_CHUNK: Tombol Aksi Bawah -->
                 <div class="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-end gap-3">
                     <a href="{{ route('peminjaman.index') }}" class="w-full sm:w-auto text-center px-6 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors">
                         Batal

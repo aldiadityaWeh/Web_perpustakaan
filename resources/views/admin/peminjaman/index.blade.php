@@ -1,7 +1,7 @@
 <x-admin-layout>
-    <x-slot:title>
+    @slot('title')
         Data Peminjaman - Sistem Perpustakaan
-    </x-slot:title>
+    @endslot
 
     <div class="flex flex-col h-full min-h-full">
 
@@ -10,8 +10,7 @@
                 <h1 class="text-2xl font-bold text-gray-800">Data Peminjaman</h1>
                 <p class="text-sm text-gray-500 mt-1">Kelola transaksi peminjaman buku</p>
             </div>
-            
-            <!-- Tombol Tambah Peminjaman -->
+
             <a href="{{ route('peminjaman.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
                 <i class="ph ph-plus text-lg"></i>
                 Tambah Peminjaman
@@ -19,6 +18,14 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+
+            @if(session('success'))
+                <div class="bg-emerald-50 border-b border-emerald-100 p-4 flex items-center gap-3 text-emerald-700 text-sm font-medium">
+                    <i class="ph ph-check-circle text-xl"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead>
@@ -26,41 +33,108 @@
                             <th class="py-4 px-6">JUDUL BUKU</th>
                             <th class="py-4 px-6">PEMINJAM</th>
                             <th class="py-4 px-6">TANGGAL PINJAM</th>
-                            <th class="py-4 px-6">TANGGAL KEMBALI</th>
+                            <th class="py-4 px-6">BATAS KEMBALI</th>
                             <th class="py-4 px-6">STATUS</th>
                             <th class="py-4 px-6 text-center">AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Empty State View -->
-                        <tr>
-                            <td colspan="6" class="py-24 text-center">
-                                <div class="flex flex-col items-center justify-center text-gray-400">
-                                    <!-- Ikon Jabat Tangan (Handshake) sesuai dengan referensi gambar -->
-                                    <i class="ph ph-handshake text-6xl mb-4 text-gray-300"></i>
-                                    <p class="text-sm font-medium text-gray-500">Belum ada data peminjaman</p>
+                        @forelse($peminjamans as $pinjam)
+                        <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors text-sm">
+                            <td class="py-4 px-6">
+                                <p class="font-bold text-gray-800">{{ $pinjam->buku->judul ?? 'Buku Dihapus' }}</p>
+                                <p class="text-xs text-gray-500">{{ $pinjam->buku->kategori ?? '-' }}</p>
+                            </td>
+                            <td class="py-4 px-6">
+                                <p class="font-bold text-gray-800">{{ $pinjam->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</p>
+                                <p class="text-xs text-gray-500">Kelas {{ $pinjam->anggota->kelas ?? '-' }}</p>
+                            </td>
+                            <td class="py-4 px-6 text-gray-600">
+                                {{ \Carbon\Carbon::parse($pinjam->tanggal_pinjam)->format('d M Y') }}
+                            </td>
+                            <td class="py-4 px-6 text-gray-600">
+                                <span class="font-medium {{ \Carbon\Carbon::parse($pinjam->tanggal_jatuh_tempo)->isPast() && $pinjam->status == 'dipinjam' ? 'text-red-600' : 'text-gray-800' }}">
+                                    {{ \Carbon\Carbon::parse($pinjam->tanggal_jatuh_tempo)->format('d M Y') }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                @if($pinjam->status == 'dipinjam')
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">Dipinjam</span>
+                                @elseif($pinjam->status == 'dikembalikan')
+                                    <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">Selesai</span>
+                                @else
+                                    <span class="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">{{ ucfirst($pinjam->status) }}</span>
+                                @endif
+                            </td>
+                            <td class="py-4 px-6 text-center">
+                                <div x-data="{ showDeleteModal: false }" class="inline-block">
+                                    <button @click="showDeleteModal = true" type="button" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Batalkan Transaksi">
+                                        <i class="ph ph-trash text-lg"></i>
+                                    </button>
+
+                                    <!-- Modal Konfirmasi Hapus -->
+                                    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-[99] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 text-left">
+                                        <div @click.away="showDeleteModal = false" class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all text-left">
+                                            <div class="flex items-center gap-4 mb-4">
+                                                <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl shrink-0">
+                                                    <i class="ph ph-warning-circle"></i>
+                                                </div>
+                                                <div>
+                                                    <h3 class="font-bold text-gray-900 text-base">Batalkan Transaksi?</h3>
+                                                    <p class="text-xs text-gray-500 mt-1">Data peminjaman ini akan dihapus dan stok buku akan dikembalikan otomatis.</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-end gap-3 mt-6">
+                                                <button @click="showDeleteModal = false" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">Batal</button>
+                                                <form action="{{ route('peminjaman.destroy', $pinjam->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700">Ya, Hapus</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="py-16 text-center">
+                                <div class="flex flex-col items-center justify-center -mt-4">
+                                    <div class="w-24 h-24 rounded-full bg-purple-50 border-8 border-white shadow-sm flex items-center justify-center mb-4">
+                                        <i class="ph ph-handshake text-4xl text-purple-500 block leading-none"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Peminjaman</h3>
+                                    <p class="text-sm font-medium text-gray-500">Catat transaksi peminjaman buku pertama Anda sekarang.</p>
+                                    <!-- Tombol 'Buat Peminjaman' dihilangkan dari sini -->
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <div class="p-4 border-t border-gray-100">
+                {{ $peminjamans->links() }}
+            </div>
         </div>
 
-        <footer class="bg-purple-800 text-white p-5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 text-sm mt-auto shadow-md">
+        <footer class="bg-white border-t border-gray-200 text-gray-500 py-4 px-6 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 text-xs mt-auto shadow-sm">
             <div class="text-center sm:text-left">
-                <p class="font-bold text-base mb-0.5">Sistem Perpustakaan Sekolah</p>
-                <p class="text-purple-300 text-xs tracking-wide">&copy; 2026 - Sistem Dibangun oleh Agung Prastiyo</p>
+                <p class="font-medium text-gray-600 mb-0.5">Sistem Perpustakaan Sekolah</p>
+                <p>&copy; 2026 - Sistem Dibangun oleh Agung Prastiyo</p>
             </div>
-            <div class="flex gap-5 text-xl">
-                <a href="#" class="text-purple-200 hover:text-white transition-colors" title="Github">
+            <div class="flex gap-4 text-lg text-gray-400">
+                <a href="#" class="hover:text-purple-600 transition-colors" title="Github">
                     <i class="ph ph-github-logo"></i>
                 </a>
-                <a href="#" class="text-purple-200 hover:text-white transition-colors" title="Bantuan">
+                <a href="#" class="hover:text-purple-600 transition-colors" title="Bantuan">
                     <i class="ph ph-question"></i>
                 </a>
             </div>
         </footer>
-        
+
     </div>
 </x-admin-layout>
