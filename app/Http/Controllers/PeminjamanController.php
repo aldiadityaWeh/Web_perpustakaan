@@ -25,12 +25,13 @@ class PeminjamanController extends Controller
      */
     public function create()
     {
-        // Hanya tampilkan buku yang stoknya lebih dari 0
-        $bukus = Buku::where('stok', '>', 0)->orderBy('judul', 'asc')->get();
-        // Hanya tampilkan anggota yang statusnya Aktif
-        $anggotas = Anggota::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get();
+        // Ambil buku stok > 0, urutkan judul, lalu KELOMPOKKAN berdasarkan 'kategori'
+        $bukusByKategori = Buku::where('stok', '>', 0)->orderBy('judul', 'asc')->get()->groupBy('kategori');
 
-        return view('admin.peminjaman.create', compact('bukus', 'anggotas'));
+        // Ambil anggota aktif, urutkan nama, KELOMPOKKAN berdasarkan 'kelas', lalu urutkan nama kelasnya (1A, 1B, dst)
+        $anggotasByKelas = Anggota::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get()->groupBy('kelas')->sortKeys();
+
+        return view('admin.peminjaman.create', compact('bukusByKategori', 'anggotasByKelas'));
     }
 
     /**

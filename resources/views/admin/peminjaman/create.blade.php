@@ -29,11 +29,18 @@
                         <div class="relative">
                             <select id="buku_id" name="buku_id" class="appearance-none w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 bg-white cursor-pointer" required>
                                 <option value="" disabled {{ old('buku_id') ? '' : 'selected' }}>Pilih buku yang akan dipinjam...</option>
-                                @foreach($bukus as $buku)
-                                    <option value="{{ $buku->id }}" {{ old('buku_id') == $buku->id ? 'selected' : '' }}>
-                                        {{ $buku->judul }} (Sisa Stok: {{ $buku->stok }})
-                                    </option>
+
+                                <!-- Looping Kategori Buku -->
+                                @foreach($bukusByKategori as $kategori => $bukus)
+                                    <optgroup label="Kategori: {{ ucfirst($kategori) }}">
+                                        @foreach($bukus as $buku)
+                                            <option value="{{ $buku->id }}" {{ old('buku_id') == $buku->id ? 'selected' : '' }}>
+                                                {{ $buku->judul }} (Sisa Stok: {{ $buku->stok }})
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
+
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <i class="ph ph-caret-down text-gray-500"></i>
@@ -47,11 +54,18 @@
                         <div class="relative">
                             <select id="anggota_id" name="anggota_id" class="appearance-none w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 bg-white cursor-pointer" required>
                                 <option value="" disabled {{ old('anggota_id') ? '' : 'selected' }}>Pilih anggota peminjam...</option>
-                                @foreach($anggotas as $anggota)
-                                    <option value="{{ $anggota->id }}" {{ old('anggota_id') == $anggota->id ? 'selected' : '' }}>
-                                        {{ $anggota->nama_lengkap }} (Kelas {{ $anggota->kelas }}) - NIS: {{ $anggota->nis }}
-                                    </option>
+
+                                <!-- Looping Kelas Anggota -->
+                                @foreach($anggotasByKelas as $kelas => $anggotas)
+                                    <optgroup label="Kelas {{ $kelas }}">
+                                        @foreach($anggotas as $anggota)
+                                            <option value="{{ $anggota->id }}" {{ old('anggota_id') == $anggota->id ? 'selected' : '' }}>
+                                                {{ $anggota->nama_lengkap }} - NIS: {{ $anggota->nis }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
+
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <i class="ph ph-caret-down text-gray-500"></i>
