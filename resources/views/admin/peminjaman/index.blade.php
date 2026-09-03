@@ -17,6 +17,23 @@
             </a>
         </div>
 
+        <!-- Kolom Pencarian (Simpel tanpa opsi) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+            <form action="{{ route('peminjaman.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3 w-full">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="ph ph-magnifying-glass text-gray-400 text-lg"></i>
+                    </div>
+                    <!-- Tambahkan autocomplete="off" di sini -->
+                    <input type="text" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Cari Nama Siswa atau Judul Buku..."
+                        class="pl-11 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-700 placeholder-gray-400">
+                </div>
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0">
+                    Cari Data
+                </button>
+            </form>
+        </div>
+
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
 
             @if(session('success'))

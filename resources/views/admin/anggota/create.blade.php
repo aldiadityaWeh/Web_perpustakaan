@@ -48,9 +48,22 @@
                         <div class="relative">
                             <select id="kelas" name="kelas" class="appearance-none w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 bg-white cursor-pointer" required>
                                 <option value="" disabled {{ old('kelas') ? '' : 'selected' }}>Pilih Kelas</option>
-                                @foreach(['1A','1B','1C','2A','2B','2C','3A','3B','3C','4A','4B','4C','5A','5B','5C','6A','6B','6C'] as $kls)
-                                    <option value="{{ $kls }}" {{ old('kelas') == $kls ? 'selected' : '' }}>Kelas {{ $kls }}</option>
+
+                                @foreach([
+                                    'Kelas 1' => ['1A','1B','1C'],
+                                    'Kelas 2' => ['2A','2B','2C'],
+                                    'Kelas 3' => ['3A','3B','3C'],
+                                    'Kelas 4' => ['4A','4B','4C'],
+                                    'Kelas 5' => ['5A','5B','5C'],
+                                    'Kelas 6' => ['6A','6B','6C']
+                                ] as $tingkat => $kelasArray)
+                                    <optgroup label="{{ $tingkat }}">
+                                        @foreach($kelasArray as $kls)
+                                            <option value="{{ $kls }}" {{ old('kelas') == $kls ? 'selected' : '' }}>Kelas {{ $kls }}</option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
+
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <i class="ph ph-caret-down text-gray-500"></i>

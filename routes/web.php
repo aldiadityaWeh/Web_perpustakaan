@@ -48,16 +48,12 @@ Route::resource('/admin/peminjaman', App\Http\Controllers\PeminjamanController::
 
 // --- Pengembalian ---
 
-Route::get('/admin/pengembalian', function () {
-    return view('admin.pengembalian.index');
-})->name('pengembalian.index');
+Route::resource('/admin/pengembalian', App\Http\Controllers\PengembalianController::class);
 
 
 // --- Riwayat Transaksi ---
+Route::resource('/admin/transaksi', App\Http\Controllers\TransaksiController::class);
 
-Route::get('/admin/transaksi', function () {
-    return view('admin.transaksi.index');
-})->name('transaksi.index');
 
 
 // --- Laporan ---

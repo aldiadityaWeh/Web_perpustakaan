@@ -13,10 +13,28 @@ class PeminjamanController extends Controller
     /**
      * Menampilkan daftar peminjaman
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil data peminjaman beserta relasi buku dan anggotanya
-        $peminjamans = Peminjaman::with(['buku', 'anggota'])->latest()->paginate(10);
+        $query = Peminjaman::with(['buku', 'anggota']);
+
+        // Logika Pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                // Cari berdasarkan Nama Siswa
+                $q->whereHas('anggota', function($subQ) use ($search) {
+                    $subQ->where('nama_lengkap', 'like', '%' . $search . '%');
+                })
+                // Atau cari berdasarkan Judul Buku
+                ->orWhereHas('buku', function($subQ) use ($search) {
+                    $subQ->where('judul', 'like', '%' . $search . '%');
+                });
+            });
+        }
+
+        // Ambil data terbaru dan tambahkan withQueryString() agar pagination tetap jalan saat mencari
+        $peminjamans = $query->latest()->paginate(10)->withQueryString();
+
         return view('admin.peminjaman.index', compact('peminjamans'));
     }
 
