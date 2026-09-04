@@ -25,22 +25,22 @@
                     </div>
                 </div>
 
-                <form action="#" method="GET" class="flex flex-col gap-4 mt-auto">
+                <form action="{{ route('laporan.peminjaman') }}" method="GET" target="_blank" class="flex flex-col gap-4 mt-auto">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Dari Tanggal</label>
-                            <input type="date" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none">
+                            <input type="date" name="start_date" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Sampai Tanggal</label>
-                            <input type="date" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none">
+                            <input type="date" name="end_date" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none">
                         </div>
                     </div>
                     <div class="flex gap-3 pt-2">
-                        <button type="button" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-pdf text-lg"></i> PDF
+                        <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                            <i class="ph ph-printer text-lg"></i> Cetak / PDF
                         </button>
-                        <button type="button" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                        <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
                             <i class="ph ph-file-xls text-lg"></i> Excel
                         </button>
                     </div>
@@ -59,22 +59,23 @@
                     </div>
                 </div>
 
-                <form action="#" method="GET" class="flex flex-col gap-4 mt-auto">
+                <form action="{{ route('laporan.buku') }}" method="GET" target="_blank" class="flex flex-col gap-4 mt-auto">
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-1">Filter Kategori (Opsional)</label>
-                        <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none bg-white">
+                        <select name="kategori" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none bg-white">
                             <option value="semua">Semua Kategori</option>
                             <option value="fiksi">Buku Fiksi</option>
+                            <option value="non-fiksi">Buku Non-Fiksi</option>
                             <option value="pelajaran">Buku Pelajaran</option>
                         </select>
                     </div>
-                    <!-- Spasi kosong agar tinggi tombol sejajar dengan kartu sebelah -->
+                    <!-- Spasi kosong agar tinggi tombol sejajar -->
                     <div class="h-[62px] hidden md:block"></div>
                     <div class="flex gap-3 pt-2">
-                        <button type="button" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-pdf text-lg"></i> PDF
+                        <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                            <i class="ph ph-printer text-lg"></i> Cetak / PDF
                         </button>
-                        <button type="button" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                        <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
                             <i class="ph ph-file-xls text-lg"></i> Excel
                         </button>
                     </div>
@@ -93,24 +94,21 @@
                     </div>
                 </div>
 
-                <form action="#" method="GET" class="flex flex-col gap-4 mt-auto">
+                <form action="{{ route('laporan.anggota') }}" method="GET" target="_blank" class="flex flex-col gap-4 mt-auto">
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-1">Filter Kelas (Opsional)</label>
-                        <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none bg-white">
-                            <option value="semua">Semua Kelas (1-6)</option>
-                            <option value="1">Kelas 1</option>
-                            <option value="2">Kelas 2</option>
-                            <option value="3">Kelas 3</option>
-                            <option value="4">Kelas 4</option>
-                            <option value="5">Kelas 5</option>
-                            <option value="6">Kelas 6</option>
+                        <select name="kelas" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none bg-white">
+                            <option value="semua">Semua Kelas</option>
+                            <option value="1A">Kelas 1A</option>
+                            <option value="2A">Kelas 2A</option>
+                            <!-- Tambahkan kelas lain sesuai kebutuhan Anda -->
                         </select>
                     </div>
                     <div class="flex gap-3 pt-2">
-                        <button type="button" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-pdf text-lg"></i> PDF
+                        <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                            <i class="ph ph-printer text-lg"></i> Cetak / PDF
                         </button>
-                        <button type="button" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                        <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
                             <i class="ph ph-file-xls text-lg"></i> Excel
                         </button>
                     </div>

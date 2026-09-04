@@ -44,8 +44,6 @@ Route::resource('/admin/anggota', App\Http\Controllers\AnggotaController::class)
 Route::resource('/admin/peminjaman', App\Http\Controllers\PeminjamanController::class);
 
 
-
-
 // --- Pengembalian ---
 
 Route::resource('/admin/pengembalian', App\Http\Controllers\PengembalianController::class);
@@ -54,18 +52,15 @@ Route::resource('/admin/pengembalian', App\Http\Controllers\PengembalianControll
 // --- Riwayat Transaksi ---
 Route::resource('/admin/transaksi', App\Http\Controllers\TransaksiController::class);
 
-
+// --- Analisis Perpustakaan ---
+Route::get('/admin/analisis', [App\Http\Controllers\AnalisisController::class, 'index'])->name('analisis.index');
 
 // --- Laporan ---
+Route::get('/admin/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+Route::get('/admin/laporan/peminjaman', [App\Http\Controllers\LaporanController::class, 'peminjaman'])->name('laporan.peminjaman');
+Route::get('/admin/laporan/buku', [App\Http\Controllers\LaporanController::class, 'buku'])->name('laporan.buku');
+Route::get('/admin/laporan/anggota', [App\Http\Controllers\LaporanController::class, 'anggota'])->name('laporan.anggota');
 
-Route::get('/admin/laporan', function () {
-    return view('admin.laporan.index');
-})->name('laporan.index');
-
-// --- Analisis ---
-Route::get('/admin/analisis', function () {
-    return view('admin.analisis.index');
-})->name('analisis.index');
 
 // --- Pengaturan ---
 
