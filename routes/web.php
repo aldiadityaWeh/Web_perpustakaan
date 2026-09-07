@@ -63,11 +63,8 @@ Route::get('/admin/laporan/anggota', [App\Http\Controllers\LaporanController::cl
 
 
 // --- Pengaturan ---
-
-Route::get('/admin/pengaturan', function () {
-    return view('admin.pengaturan.index');
-})->name('pengaturan.index');
-
+Route::get('/admin/pengaturan', [App\Http\Controllers\PengaturanController::class, 'index'])->name('pengaturan.index');
+Route::put('/admin/pengaturan', [App\Http\Controllers\PengaturanController::class, 'update'])->name('pengaturan.update');
 
 // --- Profil ---
 

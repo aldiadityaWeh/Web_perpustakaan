@@ -38,10 +38,10 @@
                     </div>
                     <div class="flex gap-3 pt-2">
                         <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-printer text-lg"></i> Cetak / PDF
+                            <i class="ph ph-file-pdf text-lg"></i> Download PDF
                         </button>
                         <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-xls text-lg"></i> Excel
+                            <i class="ph ph-file-xls text-lg"></i> Download Excel
                         </button>
                     </div>
                 </form>
@@ -73,10 +73,10 @@
                     <div class="h-[62px] hidden md:block"></div>
                     <div class="flex gap-3 pt-2">
                         <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-printer text-lg"></i> Cetak / PDF
+                            <i class="ph ph-file-pdf text-lg"></i> Download PDF
                         </button>
                         <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-xls text-lg"></i> Excel
+                            <i class="ph ph-file-xls text-lg"></i> Download Excel
                         </button>
                     </div>
                 </form>
@@ -106,10 +106,10 @@
                     </div>
                     <div class="flex gap-3 pt-2">
                         <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-printer text-lg"></i> Cetak / PDF
+                            <i class="ph ph-file-pdf text-lg"></i> Download PDF
                         </button>
                         <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-xls text-lg"></i> Excel
+                            <i class="ph ph-file-xls text-lg"></i> Download Excel
                         </button>
                     </div>
                 </form>
