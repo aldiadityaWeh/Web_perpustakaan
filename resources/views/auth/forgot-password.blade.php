@@ -1,43 +1,43 @@
-<x-guest-layout>
-    <x-slot:title>
-        Lupa Password - Sistem Manajemen Perpustakaan
-    </x-slot:title>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lupa Kata Sandi - Sistem Perpustakaan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 font-sans text-gray-800">
 
-    <div class="w-full max-w-md bg-white p-8">
-        <div class="mb-6 text-center md:text-left">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Lupa Password?</h1>
-            <p class="text-gray-500 text-sm leading-relaxed">
-                Jangan khawatir! Masukkan alamat email yang terhubung dengan akun Anda, dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi.
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+        <div class="p-8 sm:p-10 flex flex-col items-center">
+
+            <div class="h-20 w-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center text-4xl mb-6">
+                <i class="ph ph-key"></i>
+            </div>
+
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Lupa Kata Sandi?</h1>
+            <p class="text-sm text-gray-500 text-center mb-8">
+                Jangan khawatir. Masukkan alamat email yang terdaftar, dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda.
             </p>
-        </div>
 
-        <form action="{{ route('password.email') }}" method="POST" class="space-y-6">
-            @csrf
-
-            <!-- Input Email -->
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="ph ph-envelope-simple text-gray-400 text-xl"></i>
-                    </div>
-                    <input type="email" name="email" id="email" placeholder="Contoh: user@email.com"
-                        class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 outline-none transition placeholder-gray-400 text-gray-700" required>
+            <form action="#" method="POST" class="w-full flex flex-col gap-4">
+                @csrf
+                <div>
+                    <input type="email" name="email" required placeholder="Masukkan email Anda" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none transition text-sm text-center">
                 </div>
-            </div>
 
-            <!-- Tombol Kirim -->
-            <div class="pt-2">
-                <button type="submit" class="w-full bg-[#004a8c] hover:bg-blue-900 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 ease-in-out shadow-sm flex justify-center items-center gap-2">
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 rounded-xl transition-colors shadow-md">
                     Kirim Tautan Reset
-                    <i class="ph ph-paper-plane-right text-lg"></i>
                 </button>
-            </div>
-        </form>
+            </form>
 
-        <!-- Kembali ke Login -->
-        <div class="mt-8 text-center text-sm text-gray-600">
-            Ingat password Anda? <a href="{{ route('login') }}" class="font-bold text-[#004a8c] hover:text-blue-900 transition">Kembali ke halaman Masuk</a>
+            <a href="{{ route('login') }}" class="mt-8 flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
+                <i class="ph ph-arrow-left text-lg"></i>
+                Kembali ke Halaman Login
+            </a>
         </div>
     </div>
-</x-guest-layout>
+
+</body>
+</html>

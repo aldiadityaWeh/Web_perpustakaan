@@ -10,12 +10,31 @@
         </div>
     </div>
 
+    <!-- Menampilkan Alert Sukses / Error -->
+    @if(session('success'))
+        <div class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl flex items-center gap-3 text-emerald-700 text-sm font-medium shadow-sm">
+            <i class="ph ph-check-circle text-xl"></i>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-600 text-sm shadow-sm">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
 
         <!-- KARTU 1: INFORMASI PROFIL -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <form action="#" method="POST">
+            <form action="{{ route('profil.update') }}" method="POST">
                 @csrf
+                @method('PUT')
                 <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
                     <div class="h-10 w-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl shrink-0">
                         <i class="ph ph-user-circle"></i>
@@ -33,21 +52,21 @@
                             <i class="ph ph-user"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">Administrator</p>
-                            <p class="text-xs text-gray-500">Super Admin</p>
+                            <p class="text-sm font-semibold text-gray-800">{{ $user->name }}</p>
+                            <p class="text-xs text-gray-500">Administrator</p>
                         </div>
                     </div>
 
                     <!-- Nama Lengkap -->
                     <div>
                         <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Nama Tampilan</label>
-                        <input type="text" id="name" name="name" value="Administrator" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800">
+                        <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
                     </div>
 
                     <!-- Username / Email -->
                     <div>
                         <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Username / Email Login</label>
-                        <input type="text" id="email" name="email" value="admin@perpustakaan.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800">
+                        <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
                     </div>
 
                     <div class="pt-2">
@@ -61,8 +80,9 @@
 
         <!-- KARTU 2: UBAH PASSWORD -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-            <form action="#" method="POST" class="flex flex-col h-full">
+            <form action="{{ route('profil.password') }}" method="POST" class="flex flex-col h-full">
                 @csrf
+                @method('PUT')
                 <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
                     <div class="h-10 w-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xl shrink-0">
                         <i class="ph ph-lock-key"></i>
@@ -77,19 +97,19 @@
                     <!-- Password Lama -->
                     <div>
                         <label for="current_password" class="block text-sm font-semibold text-gray-700 mb-2">Kata Sandi Saat Ini</label>
-                        <input type="password" id="current_password" name="current_password" placeholder="••••••••" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800">
+                        <input type="password" id="current_password" name="current_password" placeholder="••••••••" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
                     </div>
 
                     <!-- Password Baru -->
                     <div>
                         <label for="new_password" class="block text-sm font-semibold text-gray-700 mb-2">Kata Sandi Baru</label>
-                        <input type="password" id="new_password" name="new_password" placeholder="••••••••" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800">
+                        <input type="password" id="new_password" name="new_password" placeholder="Minimal 8 karakter" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
                     </div>
 
                     <!-- Konfirmasi Password -->
                     <div>
                         <label for="new_password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Kata Sandi Baru</label>
-                        <input type="password" id="new_password_confirmation" name="new_password_confirmation" placeholder="••••••••" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800">
+                        <input type="password" id="new_password_confirmation" name="new_password_confirmation" placeholder="Ulangi kata sandi baru" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
                     </div>
 
                     <!-- Spasi agar tombol turun ke bawah -->

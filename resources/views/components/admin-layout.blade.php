@@ -100,7 +100,7 @@
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Laporan Cetak</span>
                 </a>
 
-                <!-- Manajemen Sistem (Tanpa Kelola User) -->
+                <!-- Manajemen Sistem -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Manajemen Sistem</div>
                 <a href="{{ route('pengaturan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('pengaturan.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-gear text-2xl shrink-0"></i>
@@ -129,16 +129,25 @@
                         Sistem Perpustakaan
                     </span>
                 </div>
+
                 <!-- Right Header -->
                 <div class="flex items-center gap-3 sm:gap-4">
                     <div class="items-center gap-2 text-sm hidden md:flex">
                         <i class="ph ph-user-circle text-xl"></i>
-                        <span class="font-medium">Administrator</span>
+                        <!-- Mengambil nama user yang sedang login -->
+                        <span class="font-medium">{{ Auth::user()->name ?? 'Administrator' }}</span>
                     </div>
-                    <a href="{{ route('login') }}" class="bg-purple-800 hover:bg-purple-900 text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-sm border border-purple-600 shrink-0">
-                        <i class="ph ph-sign-out text-base sm:text-lg"></i>
-                        <span>Keluar</span>
-                    </a>
+
+                    <!-- PERUBAHAN DI SINI: Tombol Logout menggunakan Form POST -->
+                    <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
+                        @csrf
+                        <button type="submit" class="bg-purple-800 hover:bg-purple-900 text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-sm border border-purple-600 shrink-0 cursor-pointer">
+                            <i class="ph ph-sign-out text-base sm:text-lg"></i>
+                            <span>Keluar</span>
+                        </button>
+                    </form>
+                    <!-- AKHIR PERUBAHAN -->
+
                 </div>
             </header>
 

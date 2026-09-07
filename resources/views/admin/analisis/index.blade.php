@@ -12,7 +12,7 @@
                 <p class="text-sm text-gray-500 mt-1">Pantau statistik, tren peminjaman, dan performa perpustakaan secara Real-Time</p>
             </div>
 
-            <!-- FORM FILTER TANGGAL BARU -->
+            <!-- FORM FILTER TANGGAL -->
             <form action="{{ route('analisis.index') }}" method="GET" class="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2 w-fit">
                 <div class="flex items-center gap-2 px-2">
                     <i class="ph ph-calendar-blank text-gray-400"></i>
@@ -183,7 +183,7 @@
             const labelKategori = @json($labelKategori);
             const dataKategori = @json($dataKategori);
 
-            // 1. Line Chart (Tren Peminjaman 7 Hari)
+            // 1. Line Chart (Tren Peminjaman)
             const ctxLine = document.getElementById('lineChartPeminjaman');
             if (ctxLine) {
                 let gradientLine = ctxLine.getContext('2d').createLinearGradient(0, 0, 0, 300);

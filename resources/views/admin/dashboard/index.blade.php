@@ -4,6 +4,8 @@
     @endslot
 
     <div class="flex flex-col h-full min-h-full">
+
+        <!-- Header -->
         <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Selamat Datang, Administrator 👋</h1>
@@ -15,54 +17,57 @@
             </div>
         </div>
 
+        <!-- Summary Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Buku -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5 hover:border-purple-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
+            <a href="{{ route('buku.index') }}" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5 hover:border-purple-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                 <div class="h-14 w-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 group-hover:bg-blue-100 transition-all duration-300">
                     <i class="ph ph-books"></i>
                 </div>
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Koleksi</p>
-                    <h3 class="text-2xl font-extrabold text-gray-800">1,240 <span class="text-sm font-normal text-gray-500">Buku</span></h3>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Stok Tersedia</p>
+                    <h3 class="text-2xl font-extrabold text-gray-800">{{ number_format($totalBuku, 0, ',', '.') }} <span class="text-sm font-normal text-gray-500">Buku</span></h3>
                 </div>
-            </div>
+            </a>
 
             <!-- Anggota Aktif -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5 hover:border-purple-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
+            <a href="{{ route('anggota.index') }}" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5 hover:border-purple-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                 <div class="h-14 w-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 group-hover:bg-emerald-100 transition-all duration-300">
                     <i class="ph ph-users"></i>
                 </div>
                 <div>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Anggota Aktif</p>
-                    <h3 class="text-2xl font-extrabold text-gray-800">356 <span class="text-sm font-normal text-gray-500">Siswa</span></h3>
+                    <h3 class="text-2xl font-extrabold text-gray-800">{{ number_format($anggotaAktif, 0, ',', '.') }} <span class="text-sm font-normal text-gray-500">Siswa</span></h3>
                 </div>
-            </div>
+            </a>
 
             <!-- Sedang Dipinjam -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5 hover:border-purple-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
+            <a href="{{ route('pengembalian.index') }}" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5 hover:border-purple-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                 <div class="h-14 w-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 group-hover:bg-amber-100 transition-all duration-300">
                     <i class="ph ph-handshake"></i>
                 </div>
                 <div>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sedang Dipinjam</p>
-                    <h3 class="text-2xl font-extrabold text-gray-800">42 <span class="text-sm font-normal text-gray-500">Buku</span></h3>
+                    <h3 class="text-2xl font-extrabold text-gray-800">{{ number_format($sedangDipinjam, 0, ',', '.') }} <span class="text-sm font-normal text-gray-500">Buku</span></h3>
                 </div>
-            </div>
+            </a>
 
             <!-- Jatuh Tempo -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5 hover:border-red-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
+            <a href="{{ route('pengembalian.index') }}" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5 hover:border-red-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                 <div class="h-14 w-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 group-hover:bg-red-100 transition-all duration-300">
                     <i class="ph ph-warning-circle"></i>
                 </div>
                 <div>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Jatuh Tempo</p>
-                    <h3 class="text-2xl font-extrabold text-gray-800">3 <span class="text-sm font-normal text-gray-500">Transaksi</span></h3>
+                    <h3 class="text-2xl font-extrabold text-gray-800">{{ number_format($jatuhTempo, 0, ',', '.') }} <span class="text-sm font-normal text-gray-500">Transaksi</span></h3>
                 </div>
-            </div>
+            </a>
         </div>
 
+        <!-- Bagian Bawah -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
+            <!-- Aksi Cepat -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
                 <h3 class="font-bold text-gray-800 text-base mb-4 flex items-center gap-2">
                     <i class="ph ph-lightning text-purple-600"></i> Aksi Cepat
@@ -87,13 +92,14 @@
                 </div>
             </div>
 
+            <!-- Perlu Perhatian -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col lg:col-span-2 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
                     <div>
                         <h3 class="font-bold text-gray-800 text-base">Perlu Perhatian</h3>
                         <p class="text-xs text-gray-500">Buku yang harus dikembalikan hari ini atau terlambat</p>
                     </div>
-                    <a href="{{ route('peminjaman.index') }}" class="text-xs font-semibold text-purple-600 hover:text-purple-700 bg-purple-50 px-3 py-1.5 rounded-lg transition-colors">Lihat Semua</a>
+                    <a href="{{ route('pengembalian.index') }}" class="text-xs font-semibold text-purple-600 hover:text-purple-700 bg-purple-50 px-3 py-1.5 rounded-lg transition-colors">Lihat Semua</a>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -102,35 +108,46 @@
                             <tr class="border-b border-gray-100 text-gray-400 text-[10px] font-bold uppercase tracking-wider">
                                 <th class="py-3 px-5">Peminjam</th>
                                 <th class="py-3 px-5">Buku</th>
-                                <th class="py-3 px-5">Tgl Kembali</th>
+                                <th class="py-3 px-5">Batas Kembali</th>
                                 <th class="py-3 px-5 text-right">Status</th>
                             </tr>
                         </thead>
                         <tbody class="text-sm">
-                            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                                <td class="py-3 px-5 font-medium text-gray-800">Dika Permana</td>
-                                <td class="py-3 px-5 text-gray-600 truncate max-w-[150px]">Matematika Kelas 5</td>
-                                <td class="py-3 px-5 text-gray-600">30 Ags 2026</td>
-                                <td class="py-3 px-5 text-right">
-                                    <span class="inline-block px-2.5 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">Terlambat</span>
-                                </td>
-                            </tr>
-                            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                                <td class="py-3 px-5 font-medium text-gray-800">Siti Aminah</td>
-                                <td class="py-3 px-5 text-gray-600 truncate max-w-[150px]">Kisah Nabi Musa</td>
-                                <td class="py-3 px-5 text-gray-600">30 Ags 2026</td>
-                                <td class="py-3 px-5 text-right">
-                                    <span class="inline-block px-2.5 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">Hari Ini</span>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50/50 transition-colors">
-                                <td class="py-3 px-5 font-medium text-gray-800">Budi Santoso</td>
-                                <td class="py-3 px-5 text-gray-600 truncate max-w-[150px]">IPA Terpadu Kelas 6</td>
-                                <td class="py-3 px-5 text-gray-600">30 Ags 2026</td>
-                                <td class="py-3 px-5 text-right">
-                                    <span class="inline-block px-2.5 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">Hari Ini</span>
-                                </td>
-                            </tr>
+                            @forelse($perluPerhatian as $trx)
+                                @php
+                                    $tglJatuhTempo = \Carbon\Carbon::parse($trx->tanggal_jatuh_tempo)->startOfDay();
+                                    $isTerlambat = $hariIni->greaterThan($tglJatuhTempo);
+                                @endphp
+                                <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                    <td class="py-3 px-5">
+                                        <p class="font-bold text-gray-800">{{ $trx->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</p>
+                                    </td>
+                                    <td class="py-3 px-5">
+                                        <p class="font-bold text-gray-800 line-clamp-1" title="{{ $trx->buku->judul ?? 'Buku Dihapus' }}">
+                                            {{ $trx->buku->judul ?? 'Buku Dihapus' }}
+                                        </p>
+                                    </td>
+                                    <td class="py-3 px-5 text-gray-600 font-medium">
+                                        {{ \Carbon\Carbon::parse($trx->tanggal_jatuh_tempo)->translatedFormat('d M Y') }}
+                                    </td>
+                                    <td class="py-3 px-5 text-right">
+                                        @if($isTerlambat)
+                                            <span class="inline-block px-2.5 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-lg uppercase tracking-wider shadow-sm">Terlambat</span>
+                                        @else
+                                            <span class="inline-block px-2.5 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg uppercase tracking-wider shadow-sm">Hari Ini</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="py-12 text-center">
+                                        <div class="flex flex-col items-center justify-center text-gray-400">
+                                            <i class="ph ph-check-circle text-4xl mb-2 text-emerald-400 block leading-none"></i>
+                                            <p class="text-sm font-medium text-gray-500">Semua aman! Tidak ada transaksi jatuh tempo.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -139,9 +156,9 @@
 
     </div>
 
+    <!-- Script Jam Realtime -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Menampilkan Tanggal Hari Ini secara dinamis
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const today = new Date().toLocaleDateString('id-ID', dateOptions);
             document.getElementById('currentDate').textContent = today;
