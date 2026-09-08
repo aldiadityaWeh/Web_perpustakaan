@@ -12,7 +12,7 @@
 
     <div class="bg-white w-full max-w-md rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
         <div class="p-8 sm:p-10">
-
+            
             <div class="text-center mb-8">
                 <div class="h-16 w-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4">
                     <i class="ph ph-books"></i>
@@ -21,6 +21,14 @@
                 <p class="text-sm text-gray-500 mt-2">Silakan masuk ke akun perpustakaan Anda</p>
             </div>
 
+            <!-- TAMBAHKAN BLOK INI UNTUK MENAMPILKAN PESAN SUKSES DARI REGISTER -->
+            @if(session('success'))
+                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm flex gap-3 shadow-sm">
+                    <i class="ph ph-check-circle text-xl shrink-0"></i>
+                    <p>{{ session('success') }}</p>
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex gap-3">
                     <i class="ph ph-warning-circle text-xl shrink-0"></i>
@@ -28,17 +36,7 @@
                 </div>
             @endif
 
-            <a href="{{ route('google.login') }}" class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border-2 border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-bold text-gray-700 transition-colors mb-6">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
-                Masuk dengan Gmail
-            </a>
-
-            <div class="flex items-center gap-4 mb-6">
-                <hr class="flex-1 border-gray-200">
-                <span class="text-xs font-semibold text-gray-400 uppercase">Atau dengan Email</span>
-                <hr class="flex-1 border-gray-200">
-            </div>
-
+            <!-- Form Login Manual Murni -->
             <form action="{{ route('login.process') }}" method="POST" class="flex flex-col gap-5">
                 @csrf
                 <div>
@@ -47,7 +45,7 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="ph ph-envelope-simple text-gray-400 text-lg"></i>
                         </div>
-                        <input type="email" name="email" value="{{ old('email') }}" required placeholder="admin@sekolah.com" class="pl-11 w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm">
+                        <input type="email" name="email" value="{{ old('email') }}" required placeholder="Email.com" class="pl-11 w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm">
                     </div>
                 </div>
 
@@ -61,8 +59,8 @@
                             <i class="ph ph-lock-key text-gray-400 text-lg"></i>
                         </div>
                         <input :type="show ? 'text' : 'password'" name="password" required placeholder="••••••••" class="pl-11 pr-12 w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm">
-
-                        <!-- Tombol Mata -->
+                        
+                        <!-- Tombol Mata (Fitur Alpine.js) -->
                         <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-purple-600 focus:outline-none transition-colors">
                             <i class="text-lg" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
                         </button>
@@ -70,7 +68,7 @@
                 </div>
 
                 <button type="submit" class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl transition-colors shadow-md shadow-purple-200">
-                    Masuk Sekarang
+                    Masuk
                 </button>
             </form>
 
