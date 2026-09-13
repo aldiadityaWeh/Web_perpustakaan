@@ -52,14 +52,14 @@
             </div>
         @endif
 
-        <div class="overflow-auto w-full">
+      <div class="overflow-auto w-full">
             <table class="w-full text-left border-collapse min-w-[800px]">
 
                 <thead class="bg-purple-50 sticky top-0 z-10 outline outline-1 outline-gray-200">
                     <tr class="text-gray-500 text-[11px] font-bold uppercase tracking-wider">
                         <th class="py-4 px-6 w-16 text-center">No</th>
-                        <th class="py-4 px-6">NIS</th>
                         <th class="py-4 px-6">Nama Lengkap</th>
+                        <th class="py-4 px-6">NISN / NIS</th>
                         <th class="py-4 px-6">Kelas</th>
                         <th class="py-4 px-6">Status</th>
                         <th class="py-4 px-6 text-center">Aksi</th>
@@ -69,21 +69,31 @@
                     @forelse($anggotas as $anggota)
                     <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors text-sm">
                         <td class="py-4 px-6 text-gray-600 font-medium text-center">{{ $anggotas->firstItem() + $loop->index }}</td>
-                        <td class="py-4 px-6 font-bold text-gray-700">{{ $anggota->nis }}</td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold uppercase">
+                                <div class="w-9 h-9 rounded-full bg-purple-100 border border-purple-200 text-purple-600 flex items-center justify-center font-bold uppercase shrink-0">
                                     {{ substr($anggota->nama_lengkap, 0, 1) }}
                                 </div>
                                 <span class="font-bold text-gray-800">{{ $anggota->nama_lengkap }}</span>
                             </div>
                         </td>
-                        <td class="py-4 px-6 text-gray-600">Kelas {{ $anggota->kelas }}</td>
+                        <td class="py-4 px-6">
+                            <span class="font-mono text-sm font-semibold text-gray-700 tracking-wide">{{ $anggota->nis }}</span>
+                        </td>
+                        <td class="py-4 px-6 text-gray-600">
+                            <span class="px-3 py-1.5 bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold rounded-lg whitespace-nowrap">
+                                Kelas {{ $anggota->kelas }}
+                            </span>
+                        </td>
                         <td class="py-4 px-6">
                             @if($anggota->status == 'Aktif')
-                                <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">Aktif</span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif
+                                </span>
                             @else
-                                <span class="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">Tidak Aktif</span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Tdk Aktif
+                                </span>
                             @endif
                         </td>
                         <td class="py-4 px-6 text-center">

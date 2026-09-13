@@ -62,6 +62,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('/admin/buku', BukuController::class);
     Route::resource('/admin/anggota', AnggotaController::class);
 
+     // --- Pengembalian Buku ---
+    Route::get('/pengembalian', [App\Http\Controllers\PengembalianController::class, 'index'])->name('pengembalian.index');
+    Route::post('/pengembalian/proses/{id}', [App\Http\Controllers\PengembalianController::class, 'store'])->name('pengembalian.store');
+
     // --- Transaksi Perpustakaan ---
     Route::resource('/admin/peminjaman', PeminjamanController::class);
     Route::resource('/admin/pengembalian', PengembalianController::class);

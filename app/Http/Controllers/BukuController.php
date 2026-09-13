@@ -26,7 +26,7 @@ class BukuController extends Controller
         // Batasi 5 data per halaman dengan pagination
         $bukus = $query->latest()->paginate(5)->withQueryString();
 
-        // Jika request datang dari AJAX (Live Search), kembalikan hanya bagian tabelnya saja
+        // Jika request datang dari AJAX (Live Search), kembalikan hanya bagian view-nya saja
         if ($request->ajax()) {
             return view('admin.buku.index', compact('bukus'));
         }
@@ -42,15 +42,22 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'isbn' => 'required|string|unique:buku,isbn|max:50',
+            // ISBN wajib 13 digit angka eksak
+            'isbn' => 'required|digits:13|unique:buku,isbn',
             'judul' => 'required|string|max:255',
             'pengarang' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
-            'tahun_terbit' => 'required|digits:4|integer|min:1900|max:' . (date('Y') + 1),
-            'kategori' => 'required|string|max:100',
+            // Tahun Terbit minimal 1980 hingga tahun berjalan saat ini
+            'tahun_terbit' => 'required|digits:4|integer|min:1980|max:' . date('Y'),
+            // Kategori dibatasi hanya untuk kode DDC
+            'kategori' => 'required|string|in:000,100,200,300,400,500,600,700,800,900',
             'stok' => 'required|integer|min:0',
-            'rak' => 'required|string|max:50', // Wajib ada agar tidak error 1364
+            'rak' => 'required|string|max:50',
             'gambar_sampul' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            // Pesan error kustom
+            'isbn.digits' => 'ISBN harus terdiri dari tepat 13 digit angka.',
+            'kategori.in' => 'Kategori tidak valid. Silakan pilih dari standar DDC.'
         ]);
 
         // Tangani proses upload gambar sampul jika ada
@@ -80,15 +87,22 @@ class BukuController extends Controller
         $buku = Buku::findOrFail($id);
 
         $validated = $request->validate([
-            'isbn' => 'required|string|max:50|unique:buku,isbn,' . $buku->id,
+            // ISBN wajib 13 digit angka eksak, abaikan validasi unik untuk ID buku ini
+            'isbn' => 'required|digits:13|unique:buku,isbn,' . $buku->id,
             'judul' => 'required|string|max:255',
             'pengarang' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
-            'tahun_terbit' => 'required|digits:4|integer|min:1900|max:' . (date('Y') + 1),
-            'kategori' => 'required|string|max:100',
+            // Tahun Terbit minimal 1980 hingga tahun berjalan saat ini
+            'tahun_terbit' => 'required|digits:4|integer|min:1980|max:' . date('Y'),
+            // Kategori dibatasi hanya untuk kode DDC
+            'kategori' => 'required|string|in:000,100,200,300,400,500,600,700,800,900',
             'stok' => 'required|integer|min:0',
-            'rak' => 'required|string|max:50', // Wajib ada
+            'rak' => 'required|string|max:50',
             'gambar_sampul' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            // Pesan error kustom
+            'isbn.digits' => 'ISBN harus terdiri dari tepat 13 digit angka.',
+            'kategori.in' => 'Kategori tidak valid. Silakan pilih dari standar DDC.'
         ]);
 
         // Jika ada upload gambar baru, hapus gambar lama lalu simpan yang baru

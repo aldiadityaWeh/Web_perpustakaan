@@ -3,115 +3,125 @@
 namespace App\Http\Controllers;
 
 use App\Models\Peminjaman;
-use App\Models\Buku;
 use App\Models\Anggota;
+use App\Models\Buku;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
-    /**
-     * Menampilkan daftar peminjaman
-     */
     public function index(Request $request)
     {
-        $query = Peminjaman::with(['buku', 'anggota']);
+        // Mengambil data peminjaman beserta relasi nama anggota dan judul bukunya
+        $query = Peminjaman::with(['anggota', 'buku']);
 
-        // Logika Pencarian
+        // Logika Pencarian Peminjaman (Live Search)
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                // Cari berdasarkan Nama Siswa
-                $q->whereHas('anggota', function($subQ) use ($search) {
-                    $subQ->where('nama_lengkap', 'like', '%' . $search . '%');
-                })
-                // Atau cari berdasarkan Judul Buku
-                ->orWhereHas('buku', function($subQ) use ($search) {
-                    $subQ->where('judul', 'like', '%' . $search . '%');
-                });
-            });
+            $query->whereHas('anggota', function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', '%' . $search . '%')
+                  ->orWhere('nis', 'like', '%' . $search . '%');
+            })->orWhereHas('buku', function($q) use ($search) {
+                $q->where('judul', 'like', '%' . $search . '%');
+            })->orWhere('status', 'like', '%' . $search . '%');
         }
 
-        // Ambil data terbaru dan tambahkan withQueryString() agar pagination tetap jalan saat mencari
+        // Logika Filter Tab (Semua, Dipinjam, Terlambat, Dikembalikan)
+        if ($request->has('filter') && $request->filter != 'semua') {
+            $filter = $request->filter;
+            $hariIni = Carbon::today();
+
+            if ($filter == 'dipinjam') {
+                $query->where('status', 'Dipinjam')->whereDate('tanggal_jatuh_tempo', '>=', $hariIni);
+            } elseif ($filter == 'terlambat') {
+                $query->where('status', 'Dipinjam')->whereDate('tanggal_jatuh_tempo', '<', $hariIni);
+            } elseif ($filter == 'dikembalikan') {
+                $query->where('status', 'Dikembalikan');
+            }
+        }
+
+        // Urutkan dari yang terbaru, batasi 10 baris per halaman
         $peminjamans = $query->latest()->paginate(10)->withQueryString();
+
+        // Cek keterlambatan secara otomatis saat data dimuat (Virtual Status)
+        foreach ($peminjamans as $pinjam) {
+            $jatuhTempo = Carbon::parse($pinjam->tanggal_jatuh_tempo)->endOfDay();
+            $sekarang = Carbon::now();
+
+            if ($pinjam->status == 'Dipinjam' && $sekarang->gt($jatuhTempo)) {
+                $pinjam->status_aktual = 'Terlambat';
+                $pinjam->hari_terlambat = $sekarang->diffInDays($jatuhTempo);
+            } else {
+                $pinjam->status_aktual = $pinjam->status;
+            }
+        }
+
+        if ($request->ajax()) {
+            return view('admin.peminjaman.index', compact('peminjamans'));
+        }
 
         return view('admin.peminjaman.index', compact('peminjamans'));
     }
 
-    /**
-     * Menampilkan form tambah peminjaman
-     */
     public function create()
     {
-        // Ambil buku stok > 0, urutkan judul, lalu KELOMPOKKAN berdasarkan 'kategori'
-        $bukusByKategori = Buku::where('stok', '>', 0)->orderBy('judul', 'asc')->get()->groupBy('kategori');
+        $anggotas = Anggota::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get();
+        $bukus = Buku::where('stok', '>', 0)->orderBy('judul', 'asc')->get();
 
-        // Ambil anggota aktif, urutkan nama, KELOMPOKKAN berdasarkan 'kelas', lalu urutkan nama kelasnya (1A, 1B, dst)
-        $anggotasByKelas = Anggota::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get()->groupBy('kelas')->sortKeys();
-
-        return view('admin.peminjaman.create', compact('bukusByKategori', 'anggotasByKelas'));
+        return view('admin.peminjaman.create', compact('anggotas', 'bukus'));
     }
 
-    /**
-     * Menyimpan transaksi peminjaman baru & Mengurangi stok buku
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'buku_id' => 'required|exists:buku,id',
+        $request->validate([
             'anggota_id' => 'required|exists:anggota,id',
-            'tanggal_jatuh_tempo' => 'required|date|after_or_equal:today',
-            'catatan' => 'nullable|string'
+            'buku_id' => 'required|array|min:1',
+            'buku_id.*' => 'required|exists:buku,id',
+            'tanggal_pinjam' => 'required|date',
+            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+        ], [
+            'buku_id.required' => 'Pilih minimal 1 buku untuk dipinjam.',
+            'tanggal_kembali.after_or_equal' => 'Tanggal kembali tidak boleh mundur dari tanggal pinjam.'
         ]);
 
-        // Cek Logika: Apakah siswa ini sedang meminjam buku yang sama dan belum dikembalikan?
-        $sedangDipinjam = Peminjaman::where('anggota_id', $validated['anggota_id'])
-                                    ->where('buku_id', $validated['buku_id'])
-                                    ->where('status', 'dipinjam')
-                                    ->exists();
+        try {
+            DB::transaction(function () use ($request) {
+                foreach ($request->buku_id as $buku_id) {
+                    $buku = Buku::lockForUpdate()->findOrFail($buku_id);
 
-        if ($sedangDipinjam) {
-            return back()->withErrors(['buku_id' => 'Siswa ini masih meminjam buku tersebut dan belum mengembalikannya.'])->withInput();
+                    if ($buku->stok <= 0) {
+                        throw new \Exception("Maaf, stok buku '{$buku->judul}' habis saat sedang diproses.");
+                    }
+
+                    Peminjaman::create([
+                        'anggota_id' => $request->anggota_id,
+                        'buku_id' => $buku_id,
+                        'tanggal_pinjam' => $request->tanggal_pinjam,
+                        'tanggal_jatuh_tempo' => $request->tanggal_kembali,
+                        'status' => 'Dipinjam',
+                    ]);
+
+                    $buku->decrement('stok');
+                }
+            });
+
+            return redirect()->route('peminjaman.index')->with('success', 'Peminjaman berhasil diproses. Stok buku telah dikurangi otomatis.');
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error_sistem' => $e->getMessage()])->withInput();
         }
-
-        // Ambil data buku untuk dicek ulang stoknya (berjaga-jaga)
-        $buku = Buku::findOrFail($validated['buku_id']);
-        if ($buku->stok < 1) {
-            return back()->withErrors(['buku_id' => 'Maaf, stok buku habis.'])->withInput();
-        }
-
-        // Simpan Transaksi Peminjaman
-        Peminjaman::create([
-            'buku_id' => $validated['buku_id'],
-            'anggota_id' => $validated['anggota_id'],
-            'tanggal_pinjam' => Carbon::now()->toDateString(),
-            'tanggal_jatuh_tempo' => $validated['tanggal_jatuh_tempo'],
-            'status' => 'dipinjam',
-            'catatan' => $validated['catatan']
-        ]);
-
-        // Kurangi stok buku secara otomatis
-        $buku->decrement('stok', 1);
-
-        return redirect()->route('peminjaman.index')->with('success', 'Transaksi peminjaman berhasil dicatat, dan stok buku otomatis berkurang!');
     }
 
-    /**
-     * Menghapus catatan peminjaman (Opsional, jika salah ketik/batal pinjam)
-     */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // Jika buku berstatus dipinjam lalu dihapus, kembalikan stok bukunya +1
-        if ($peminjaman->status == 'dipinjam') {
-            $buku = Buku::find($peminjaman->buku_id);
-            if ($buku) {
-                $buku->increment('stok', 1);
-            }
+        if($peminjaman->status == 'Dipinjam') {
+            $peminjaman->buku->increment('stok');
         }
 
         $peminjaman->delete();
-        return redirect()->route('peminjaman.index')->with('success', 'Data transaksi berhasil dihapus!');
+        return redirect()->route('peminjaman.index')->with('success', 'Riwayat peminjaman berhasil dibatalkan dan stok dikembalikan.');
     }
 }

@@ -3,82 +3,70 @@
 namespace App\Http\Controllers;
 
 use App\Models\Peminjaman;
-use App\Models\Buku;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PengembalianController extends Controller
 {
-    /**
-     * Menampilkan daftar buku yang SEDANG DIPINJAM (Belum dikembalikan)
-     */
+    // Menampilkan halaman tabel Riwayat Pengembalian
     public function index(Request $request)
     {
-        $query = Peminjaman::with(['buku', 'anggota'])->where('status', 'dipinjam');
+        // Hanya ambil data yang statusnya 'Dikembalikan'
+        $query = Peminjaman::with(['anggota', 'buku'])->where('status', 'Dikembalikan');
 
-        // Logika Pencarian
+        // Logika Live Search
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                // Cari berdasarkan Nama Siswa
-                $q->whereHas('anggota', function($subQ) use ($search) {
-                    $subQ->where('nama_lengkap', 'like', '%' . $search . '%');
-                })
-                // Atau cari berdasarkan Judul Buku
-                ->orWhereHas('buku', function($subQ) use ($search) {
-                    $subQ->where('judul', 'like', '%' . $search . '%');
-                });
+            $query->whereHas('anggota', function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', '%' . $search . '%')
+                  ->orWhere('nis', 'like', '%' . $search . '%');
+            })->orWhereHas('buku', function($q) use ($search) {
+                $q->where('judul', 'like', '%' . $search . '%');
             });
         }
 
-        // Ambil data dan tambahkan withQueryString() agar filter pencarian tidak hilang saat pindah halaman (pagination)
-        $peminjamans = $query->orderBy('tanggal_jatuh_tempo', 'asc')->paginate(10)->withQueryString();
+        // Urutkan berdasarkan waktu pengembalian (updated_at) terbaru
+        $pengembalians = $query->latest('updated_at')->paginate(10)->withQueryString();
 
-        return view('admin.pengembalian.index', compact('peminjamans'));
+        if ($request->ajax()) {
+            return view('admin.pengembalian.index', compact('pengembalians'));
+        }
+
+        return view('admin.pengembalian.index', compact('pengembalians'));
     }
 
-    /**
-     * Memproses pengembalian buku, menghitung denda, dan mengembalikan stok
-     */
-    public function update(Request $request, string $id)
+    // Fungsi Utama: Eksekusi Tombol Verifikasi "Belum Kembali"
+    public function store(string $id)
     {
-        $peminjaman = Peminjaman::findOrFail($id);
+        // Cari data transaksi peminjaman berdasarkan ID
+        $pinjam = Peminjaman::with('buku')->findOrFail($id);
 
-        // Mencegah double klik / proses
-        if ($peminjaman->status != 'dipinjam') {
-            return back()->withErrors(['pesan' => 'Buku ini sudah dikembalikan sebelumnya.']);
+        // Keamanan: Jika sudah dikembalikan sebelumnya, batalkan
+        if ($pinjam->status == 'Dikembalikan') {
+            return back()->with('error', 'Buku ini sudah diproses pengembaliannya sebelumnya.');
         }
 
-        $hariIni = Carbon::now()->startOfDay();
-        $tglJatuhTempo = Carbon::parse($peminjaman->tanggal_jatuh_tempo)->startOfDay();
-        $denda = 0;
-        $status = 'dikembalikan';
+        try {
+            // Gunakan Database Transaction agar aman
+            DB::transaction(function () use ($pinjam) {
 
-        // Cek Keterlambatan
-        if ($hariIni->greaterThan($tglJatuhTempo)) {
-            $selisihHari = $hariIni->diffInDays($tglJatuhTempo);
-            $denda = $selisihHari * 500; // Contoh denda: Rp 500 per hari
-            $status = 'terlambat';
+                // 1. Ubah status transaksi menjadi 'Dikembalikan'
+                $pinjam->update([
+                    'status' => 'Dikembalikan',
+                    // Note: 'updated_at' akan otomatis tercatat sebagai waktu (jam/hari) pengembalian
+                ]);
+
+                // 2. Kembalikan (tambah) stok buku +1
+                if ($pinjam->buku) {
+                    $pinjam->buku->increment('stok');
+                }
+            });
+
+            // Berhasil! Kembali ke halaman peminjaman dengan pesan sukses
+            return back()->with('success', 'Buku "' . ($pinjam->buku->judul ?? 'Tidak diketahui') . '" berhasil diverifikasi. Stok buku telah bertambah!');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan sistem saat memproses pengembalian: ' . $e->getMessage());
         }
-
-        // Update data transaksi
-        $peminjaman->update([
-            'tanggal_kembali' => Carbon::now()->toDateString(),
-            'status' => $status,
-            'denda' => $denda,
-        ]);
-
-        // Kembalikan stok buku (+1)
-        $buku = Buku::find($peminjaman->buku_id);
-        if ($buku) {
-            $buku->increment('stok', 1);
-        }
-
-        $pesan = 'Buku berhasil dikembalikan. Stok bertambah!';
-        if ($denda > 0) {
-            $pesan = 'Buku dikembalikan dengan TERLAMBAT. Denda: Rp ' . number_format($denda, 0, ',', '.');
-        }
-
-        return redirect()->route('pengembalian.index')->with('success', $pesan);
     }
 }

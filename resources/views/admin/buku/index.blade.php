@@ -3,6 +3,7 @@
         Data Buku - Sistem Perpustakaan
     </x-slot:title>
 
+    <!-- Menggunakan flex-1 tanpa h-full agar tabel bisa memanjang ke bawah dan scroll normal -->
     <div class="flex flex-col flex-1">
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -48,13 +49,12 @@
             </div>
         @endif
 
-        <div class="overflow-auto w-full">
+        <div class="overflow-x-auto w-full">
             <table class="w-full text-left border-collapse min-w-[800px]">
 
                 <thead class="bg-purple-50 sticky top-0 z-10 outline outline-1 outline-gray-200">
                     <tr class="text-gray-500 text-[11px] font-bold uppercase tracking-wider">
                         <th class="py-4 px-6 w-16 text-center">No</th>
-                        <th class="py-4 px-6">ISBN</th>
                         <th class="py-4 px-6">Judul Buku</th>
                         <th class="py-4 px-6">Kategori</th>
                         <th class="py-4 px-6">Stok</th>
@@ -65,15 +65,14 @@
                     @forelse($bukus as $buku)
                     <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors text-sm">
                         <td class="py-4 px-6 text-gray-600 font-medium text-center">{{ $bukus->firstItem() + $loop->index }}</td>
-                        <td class="py-4 px-6 font-bold text-gray-700">{{ $buku->isbn }}</td>
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-3">
-                                <!-- Menampilkan Foto Sampul Buku Asli atau Placeholder -->
+                                <!-- FITUR FOTO SAMPUL BUKU (Dengan Fallback Error) -->
                                 @if($buku->gambar_sampul)
-                                    <img src="{{ asset('storage/' . $buku->gambar_sampul) }}" alt="Sampul {{ $buku->judul }}" class="w-10 h-14 object-cover rounded-lg shadow-sm border border-gray-200 shrink-0">
+                                    <img src="{{ asset('storage/' . $buku->gambar_sampul) }}" alt="Sampul {{ $buku->judul }}" onerror="this.onerror=null;this.src='https://placehold.co/40x56/f3f4f6/a1a1aa?text=X'" class="w-10 h-14 object-cover rounded-lg shadow-sm border border-gray-200 shrink-0">
                                 @else
                                     <div class="w-10 h-14 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center font-bold border border-blue-100 shrink-0">
-                                        <i class="ph ph-book text-xl"></i>
+                                        <i class="ph ph-image text-xl"></i>
                                     </div>
                                 @endif
                                 <div>
@@ -83,8 +82,24 @@
                             </div>
                         </td>
                         <td class="py-4 px-6 text-gray-600">
-                            <span class="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-md">
-                                {{ ucfirst($buku->kategori) }}
+                            @php
+                                // Menerjemahkan Kode DDC menjadi Nama Kategori
+                                $kategoriLabel = [
+                                    '000' => 'Komputer & Informasi',
+                                    '100' => 'Filsafat & Psikologi',
+                                    '200' => 'Agama',
+                                    '300' => 'Ilmu Sosial',
+                                    '400' => 'Bahasa',
+                                    '500' => 'Sains & Matematika',
+                                    '600' => 'Teknologi Terapan',
+                                    '700' => 'Seni & Olahraga',
+                                    '800' => 'Kesusastraan',
+                                    '900' => 'Sejarah & Geografi',
+                                ];
+                                $namaKategori = $kategoriLabel[$buku->kategori] ?? ucfirst($buku->kategori);
+                            @endphp
+                            <span class="px-2.5 py-1 bg-gray-100 text-gray-700 text-[11px] font-bold rounded-md whitespace-nowrap border border-gray-200">
+                                {{ $namaKategori }}
                             </span>
                         </td>
                         <td class="py-4 px-6 font-bold text-gray-800">
@@ -146,6 +161,7 @@
             </table>
         </div>
 
+        <!-- FITUR PAGINATION -->
         <div class="p-4 border-t border-gray-100">
             {{ $bukus->links() }}
         </div>
