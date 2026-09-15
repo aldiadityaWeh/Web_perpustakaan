@@ -8,13 +8,16 @@ use Illuminate\Support\Facades\DB;
 
 class PengembalianController extends Controller
 {
-    // Menampilkan halaman tabel Riwayat Pengembalian
+    // =====================================================================
+    // 1. FUNGSI INDEX: Menampilkan halaman tabel Riwayat Pengembalian
+    // =====================================================================
     public function index(Request $request)
     {
-        // Hanya ambil data yang statusnya 'Dikembalikan'
+        // Menarik data peminjaman beserta relasi (anggota & buku)
+        // HANYA yang statusnya sudah 'Dikembalikan'
         $query = Peminjaman::with(['anggota', 'buku'])->where('status', 'Dikembalikan');
 
-        // Logika Live Search
+        // Logika untuk fitur pencarian (Live Search)
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->whereHas('anggota', function($q) use ($search) {
@@ -25,48 +28,52 @@ class PengembalianController extends Controller
             });
         }
 
-        // Urutkan berdasarkan waktu pengembalian (updated_at) terbaru
+        // Mengurutkan dari tanggal dikembalikan yang paling baru (updated_at)
         $pengembalians = $query->latest('updated_at')->paginate(10)->withQueryString();
 
+        // Jika request dari JavaScript (Live Search), kembalikan hanya bagian tabelnya
         if ($request->ajax()) {
             return view('admin.pengembalian.index', compact('pengembalians'));
         }
 
+        // Tampilan normal halaman penuh
         return view('admin.pengembalian.index', compact('pengembalians'));
     }
 
-    // Fungsi Utama: Eksekusi Tombol Verifikasi "Belum Kembali"
+    // =====================================================================
+    // 2. FUNGSI STORE: Mengeksekusi Tombol Verifikasi "Belum Kembali"
+    // =====================================================================
     public function store(string $id)
     {
-        // Cari data transaksi peminjaman berdasarkan ID
+        // 1. Cari data peminjamannya berdasarkan ID yang diklik, ambil juga relasi bukunya
         $pinjam = Peminjaman::with('buku')->findOrFail($id);
 
-        // Keamanan: Jika sudah dikembalikan sebelumnya, batalkan
+        // 2. Cek Keamanan: Mencegah error jika admin mengklik tombol 2x berturut-turut
         if ($pinjam->status == 'Dikembalikan') {
-            return back()->with('error', 'Buku ini sudah diproses pengembaliannya sebelumnya.');
+            return back()->with('error', 'Peringatan: Buku ini sudah diverifikasi pengembaliannya.');
         }
 
         try {
-            // Gunakan Database Transaction agar aman
+            // Gunakan DB Transaction agar jika ada error di tengah jalan, stok tidak terlanjur rusak
             DB::transaction(function () use ($pinjam) {
 
-                // 1. Ubah status transaksi menjadi 'Dikembalikan'
+                // 3. Ubah status di tabel peminjaman menjadi 'Dikembalikan'
                 $pinjam->update([
-                    'status' => 'Dikembalikan',
-                    // Note: 'updated_at' akan otomatis tercatat sebagai waktu (jam/hari) pengembalian
+                    'status' => 'Dikembalikan'
                 ]);
 
-                // 2. Kembalikan (tambah) stok buku +1
+                // 4. Tambah (+1) stok buku kembali ke dalam inventaris perpustakaan
                 if ($pinjam->buku) {
                     $pinjam->buku->increment('stok');
                 }
             });
 
-            // Berhasil! Kembali ke halaman peminjaman dengan pesan sukses
-            return back()->with('success', 'Buku "' . ($pinjam->buku->judul ?? 'Tidak diketahui') . '" berhasil diverifikasi. Stok buku telah bertambah!');
+            // 5. Kembali ke halaman Peminjaman dengan notifikasi hijau
+            return back()->with('success', 'Verifikasi Sukses! Buku berhasil dikembalikan dan stok otomatis bertambah.');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan sistem saat memproses pengembalian: ' . $e->getMessage());
+            // 6. Jika server error, batalkan semua dan tampilkan notifikasi merah
+            return back()->with('error', 'Terjadi kesalahan pada sistem database: ' . $e->getMessage());
         }
     }
 }

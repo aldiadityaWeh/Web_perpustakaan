@@ -42,18 +42,24 @@ class PeminjamanController extends Controller
         }
 
         // Urutkan dari yang terbaru, batasi 10 baris per halaman
-        $peminjamans = $query->latest()->paginate(10)->withQueryString();
+        $peminjamans = $query->latest()->paginate(6)->withQueryString();
 
-        // Cek keterlambatan secara otomatis saat data dimuat (Virtual Status)
+        // Cek keterlambatan & KALKULASI DENDA secara otomatis saat data dimuat
         foreach ($peminjamans as $pinjam) {
             $jatuhTempo = Carbon::parse($pinjam->tanggal_jatuh_tempo)->endOfDay();
             $sekarang = Carbon::now();
 
-            if ($pinjam->status == 'Dipinjam' && $sekarang->gt($jatuhTempo)) {
+            // Menggunakan strtolower agar pengecekan kebal huruf besar/kecil
+            if (strtolower(trim($pinjam->status)) == 'dipinjam' && $sekarang->gt($jatuhTempo)) {
                 $pinjam->status_aktual = 'Terlambat';
                 $pinjam->hari_terlambat = $sekarang->diffInDays($jatuhTempo);
+
+                // FITUR DENDA: Telat dikali Rp 1.000
+                $pinjam->denda = $pinjam->hari_terlambat * 1000;
             } else {
                 $pinjam->status_aktual = $pinjam->status;
+                $pinjam->hari_terlambat = 0;
+                $pinjam->denda = 0; // Tidak ada denda
             }
         }
 
@@ -113,6 +119,28 @@ class PeminjamanController extends Controller
         }
     }
 
+    // FUNGSI BARU UNTUK HALAMAN DETAIL (IKON MATA)
+    public function show($id)
+    {
+        $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
+
+        $jatuhTempo = \Carbon\Carbon::parse($peminjaman->tanggal_jatuh_tempo)->endOfDay();
+        $sekarang = \Carbon\Carbon::now();
+
+        // Kalkulasi Denda juga dilakukan di halaman Detail agar sinkron
+        if (strtolower(trim($peminjaman->status)) == 'dipinjam' && $sekarang->gt($jatuhTempo)) {
+            $peminjaman->status_aktual = 'Terlambat';
+            $peminjaman->hari_terlambat = $sekarang->diffInDays($jatuhTempo);
+            $peminjaman->denda = $peminjaman->hari_terlambat * 1000;
+        } else {
+            $peminjaman->status_aktual = $peminjaman->status;
+            $peminjaman->hari_terlambat = 0;
+            $peminjaman->denda = 0;
+        }
+
+        return view('admin.peminjaman.show', compact('peminjaman'));
+    }
+
     public function destroy($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
@@ -123,5 +151,67 @@ class PeminjamanController extends Controller
 
         $peminjaman->delete();
         return redirect()->route('peminjaman.index')->with('success', 'Riwayat peminjaman berhasil dibatalkan dan stok dikembalikan.');
+    }
+    public function formKembali($id)
+    {
+        $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
+
+        // Hitung denda keterlambatan saat ini (Sama seperti logika di index)
+        $jatuhTempo = \Carbon\Carbon::parse($peminjaman->tanggal_jatuh_tempo)->endOfDay();
+        $sekarang = \Carbon\Carbon::now();
+        $dendaTerlambat = 0;
+
+        if (strtolower(trim($peminjaman->status)) == 'dipinjam' && $sekarang->gt($jatuhTempo)) {
+            $hariTerlambat = $sekarang->diffInDays($jatuhTempo);
+            $dendaTerlambat = $hariTerlambat * 1000; // Denda Rp 1.000 / hari
+        }
+
+        return view('admin.peminjaman.kembali', compact('peminjaman', 'dendaTerlambat'));
+    }
+
+    public function formValidasi($id)
+    {
+        $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
+
+        $jatuhTempo = \Carbon\Carbon::parse($peminjaman->tanggal_jatuh_tempo)->endOfDay();
+        $sekarang = \Carbon\Carbon::now();
+        $dendaTerlambat = 0;
+
+        if (strtolower(trim($peminjaman->status)) == 'dipinjam' && $sekarang->gt($jatuhTempo)) {
+            $hariTerlambat = $sekarang->diffInDays($jatuhTempo);
+            $dendaTerlambat = $hariTerlambat * 1000;
+        }
+
+        // PANGGIL VIEW VALIDASI
+        return view('admin.peminjaman.validasi', compact('peminjaman', 'dendaTerlambat'));
+    }
+
+    // 2. Memproses Simpan Pengembalian
+    public function prosesValidasi(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        $request->validate([
+            'kondisi_buku' => 'required|in:Baik,Rusak,Hilang',
+            'denda' => 'required|numeric|min:0',
+            'catatan' => 'nullable|string'
+        ]);
+
+        $catatanAkhir = $request->catatan;
+        if ($request->kondisi_buku != 'Baik') {
+            $catatanAkhir = "Kondisi Buku: " . $request->kondisi_buku . " | " . $request->catatan;
+        }
+
+        $peminjaman->update([
+            'status' => 'Dikembalikan',
+            'denda' => $request->denda,
+            'catatan' => $catatanAkhir,
+        ]);
+
+        if ($request->kondisi_buku != 'Hilang') {
+            $peminjaman->buku->increment('stok');
+        }
+
+        return redirect()->route('peminjaman.index')->with('success', 'Pengembalian buku berhasil divalidasi dan disimpan!');
     }
 }

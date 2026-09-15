@@ -67,6 +67,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/pengembalian/proses/{id}', [App\Http\Controllers\PengembalianController::class, 'store'])->name('pengembalian.store');
 
     // --- Transaksi Perpustakaan ---
+    Route::get('/admin/peminjaman/{id}/validasi', [PeminjamanController::class, 'formValidasi'])->name('peminjaman.validasi');
+Route::post('/admin/peminjaman/{id}/validasi', [PeminjamanController::class, 'prosesValidasi'])->name('peminjaman.prosesValidasi');
     Route::resource('/admin/peminjaman', PeminjamanController::class);
     Route::resource('/admin/pengembalian', PengembalianController::class);
     Route::resource('/admin/transaksi', TransaksiController::class);

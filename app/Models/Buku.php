@@ -9,15 +9,33 @@ class Buku extends Model
 {
     use HasFactory;
 
-    // Mendefinisikan nama tabel secara eksplisit (Menghilangkan huruf 's')
     protected $table = 'buku';
 
-    // Mengizinkan semua kolom diisi (Mass Assignment)
     protected $guarded = ['id'];
 
-    // Relasi: Satu Buku bisa memiliki banyak riwayat Peminjaman
     public function peminjamans()
     {
         return $this->hasMany(Peminjaman::class);
+    }
+
+    // FUNGSI PENERJEMAH ANGKA KE TEKS KATEGORI
+   public function getNamaKategoriAttribute()
+    {
+        // Standar Klasifikasi Dewey Decimal (DDC)
+        $kategoriDDC = [
+            '000' => 'Komputer, Informasi & Referensi',
+            '100' => 'Filsafat & Psikologi',
+            '200' => 'Agama',
+            '300' => 'Ilmu Sosial',
+            '400' => 'Bahasa',
+            '500' => 'Sains & Matematika',
+            '600' => 'Teknologi & Ilmu Terapan',
+            '700' => 'Kesenian & Rekreasi',
+            '800' => 'Sastra',
+            '900' => 'Sejarah & Geografi',
+        ];
+
+        // Cocokkan kode (misal '000') dengan teksnya
+        return $kategoriDDC[$this->kategori] ?? 'Kategori Tidak Diketahui';
     }
 }

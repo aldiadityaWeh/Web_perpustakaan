@@ -3,177 +3,142 @@
         Data Peminjaman - Sistem Perpustakaan
     </x-slot:title>
 
-    <div class="flex flex-col flex-1">
-        <!-- Header -->
+    <!-- Wrapper utama dibuat flex-col agar footer (mt-auto) terdorong ke bawah -->
+    <div class="flex flex-col flex-1 min-h-[85vh] w-full">
+
+        <!-- HEADER -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Data Peminjaman</h1>
-                <p class="text-sm text-gray-500 mt-1">Kelola transaksi peminjaman dan pengembalian buku</p>
-
-                <div class="mt-2 inline-block bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-purple-200">
-                    <i class="ph ph-books mr-1"></i> Total Sedang Dipinjam: {{ \App\Models\Peminjaman::where('status', 'Dipinjam')->count() }} Buku
-                </div>
+                <p class="text-sm text-gray-500 mt-1">Kelola transaksi peminjaman buku</p>
             </div>
 
-            <a href="{{ route('peminjaman.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
-                <i class="ph ph-plus text-lg"></i>
-                Proses Peminjaman
+             <a href="{{ route('peminjaman.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0">
+                <i class="ph ph-plus font-bold"></i>
+                Tambah Peminjaman
             </a>
         </div>
 
-        <!-- TOMBOL FILTER (TABS) -->
-        @php
-            $currentFilter = request('filter', 'semua');
-            $searchQuery = request('search');
-        @endphp
-        <div class="flex flex-nowrap overflow-x-auto gap-3 mb-4 pb-2 scrollbar-hide">
-            <a href="{{ route('peminjaman.index', ['filter' => 'semua', 'search' => $searchQuery]) }}" class="whitespace-nowrap px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ $currentFilter == 'semua' ? 'bg-gray-800 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-                <i class="ph ph-list-dashes mr-1"></i> Semua Transaksi
-            </a>
-            <a href="{{ route('peminjaman.index', ['filter' => 'dipinjam', 'search' => $searchQuery]) }}" class="whitespace-nowrap px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ $currentFilter == 'dipinjam' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-                <i class="ph ph-clock mr-1"></i> Sedang Diproses
-            </a>
-            <a href="{{ route('peminjaman.index', ['filter' => 'terlambat', 'search' => $searchQuery]) }}" class="whitespace-nowrap px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ $currentFilter == 'terlambat' ? 'bg-red-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-                <i class="ph ph-warning-circle mr-1"></i> Telat Dikembalikan
-            </a>
-            <a href="{{ route('peminjaman.index', ['filter' => 'dikembalikan', 'search' => $searchQuery]) }}" class="whitespace-nowrap px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ $currentFilter == 'dikembalikan' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-                <i class="ph ph-check-circle mr-1"></i> Sudah Kembali
-            </a>
-        </div>
-
-        <!-- Kolom Pencarian -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-            <form id="searchFormPeminjaman" data-url="{{ route('peminjaman.index') }}" action="{{ route('peminjaman.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3 w-full">
-                <input type="hidden" name="filter" id="filterPeminjaman" value="{{ $currentFilter }}">
-
-                <div class="relative flex-1">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <!-- PENCARIAN (Desain Kartu Putih Sesuai Gambar) -->
+        <div class="mb-6 w-full bg-white p-3.5 rounded-xl border border-gray-100 shadow-sm">
+            <form action="{{ route('peminjaman.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3 w-full">
+                <!-- Kotak Input -->
+                <div class="relative w-full">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <i class="ph ph-magnifying-glass text-gray-400 text-lg"></i>
                     </div>
-                    <input type="text" id="searchInputPeminjaman" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Cari nama siswa, NIS, judul buku, atau status..."
-                        class="pl-11 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-700 placeholder-gray-400">
+                    <input type="text" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik Nama Siswa, NIS, atau Kelas..."
+                        class="pl-10 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-700 bg-white">
                 </div>
-                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0 flex items-center gap-2">
-                    <span id="searchLabelPeminjaman">Cari Data</span>
-                    <i id="loadingSpinnerPeminjaman" class="ph ph-spinner-gap animate-spin hidden text-lg"></i>
+
+                <!-- Tombol Cari Data -->
+                <button type="submit" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-8 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center whitespace-nowrap shrink-0">
+                    Cari Data
                 </button>
             </form>
         </div>
 
-        <!-- Target JS Table Container Peminjaman -->
-        <div id="table-container-peminjaman" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8 transition-opacity duration-300">
+        <!-- WADAH TABEL -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
 
+            <!-- Notifikasi Berhasil -->
             @if(session('success'))
-                <div class="bg-emerald-50 border-b border-emerald-100 p-4 flex items-center gap-3 text-emerald-700 text-sm font-medium">
-                    <i class="ph ph-check-circle text-xl"></i>
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="bg-red-50 border-b border-red-100 p-4 flex items-center gap-3 text-red-700 text-sm font-medium">
-                    <i class="ph ph-warning-circle text-xl"></i>
-                    {{ session('error') }}
+                <div class="bg-emerald-50 p-4 text-emerald-700 text-sm font-medium border-b border-emerald-100">
+                    <i class="ph ph-check-circle text-lg align-middle mr-1"></i> {{ session('success') }}
                 </div>
             @endif
 
             <div class="overflow-x-auto w-full">
                 <table class="w-full text-left border-collapse min-w-[900px]">
-                    <thead class="bg-purple-50 sticky top-0 z-10 outline outline-1 outline-purple-200">
-                        <tr class="text-purple-700 text-[11px] font-bold uppercase tracking-wider">
-                            <th class="py-4 px-6 w-16 text-center">No</th>
-                            <th class="py-4 px-6">Peminjam (Siswa)</th>
-                            <th class="py-4 px-6">Buku</th>
-                            <th class="py-4 px-6">Tgl Pinjam</th>
-                            <th class="py-4 px-6">Jatuh Tempo</th>
+                    <thead class="bg-purple-50/50 border-b border-gray-200">
+                        <tr class="text-gray-500 text-xs font-bold uppercase tracking-wider">
+                            <th class="py-4 px-6">Judul Buku</th>
+                            <th class="py-4 px-6">Peminjam</th>
+                            <th class="py-4 px-6 text-center">Tanggal Pinjam</th>
+                            <th class="py-4 px-6 text-center">Tanggal Kembali</th>
                             <th class="py-4 px-6 text-center">Status</th>
-                            <th class="py-4 px-6 text-center">Aksi (Verifikasi)</th>
+                            <th class="py-4 px-6 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
                         @forelse($peminjamans as $pinjam)
-                        <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors text-sm">
-                            <td class="py-4 px-6 text-gray-600 font-medium text-center">{{ $peminjamans->firstItem() + $loop->index }}</td>
+                        @php
+                            $statusAkurat = strtolower(trim($pinjam->status_aktual));
+                        @endphp
 
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm">
+                            <!-- Kolom Judul Buku -->
                             <td class="py-4 px-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold uppercase shrink-0">
-                                        {{ substr($pinjam->anggota->nama_lengkap ?? '?', 0, 1) }}
-                                    </div>
-                                    <div>
-                                        <span class="font-bold text-gray-800 block">{{ $pinjam->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</span>
-                                        <span class="text-xs text-gray-500 font-semibold bg-gray-100 px-2 py-0.5 rounded">Kelas {{ $pinjam->anggota->kelas ?? '-' }}</span>
-                                    </div>
-                                </div>
+                                <span class="font-semibold text-gray-800 block">{{ $pinjam->buku->judul ?? 'Buku Dihapus' }}</span>
+                                <span class="text-xs text-gray-500 mt-0.5 block">ISBN: {{ $pinjam->buku->isbn ?? '-' }}</span>
                             </td>
 
+                            <!-- Kolom Peminjam -->
                             <td class="py-4 px-6">
-                                <div class="flex items-center gap-2">
-                                    <i class="ph ph-book-open text-gray-400 text-lg shrink-0"></i>
-                                    <span class="font-semibold text-gray-700 line-clamp-2">
-                                        {{ $pinjam->buku->judul ?? 'Buku Dihapus' }}
-                                    </span>
-                                </div>
+                                <span class="font-semibold text-gray-800 block">{{ $pinjam->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</span>
+                                <span class="text-xs text-gray-500 mt-0.5 block">NIS: {{ $pinjam->anggota->nis ?? '-' }}</span>
                             </td>
 
-                            <td class="py-4 px-6 text-gray-600 text-xs">
-                                {{ \Carbon\Carbon::parse($pinjam->tanggal_pinjam)->translatedFormat('d M Y') }}
+                            <!-- Kolom Tanggal Pinjam -->
+                            <td class="py-4 px-6 text-center text-gray-600">
+                                {{ \Carbon\Carbon::parse($pinjam->tanggal_pinjam)->format('d/m/Y') }}
                             </td>
 
-                            <td class="py-4 px-6 text-gray-600 text-xs font-semibold">
-                                @if($pinjam->status_aktual == 'Terlambat')
-                                    <span class="text-red-600 flex items-center gap-1"><i class="ph ph-warning-circle"></i> {{ \Carbon\Carbon::parse($pinjam->tanggal_jatuh_tempo)->translatedFormat('d M Y') }}</span>
-                                @else
-                                    {{ \Carbon\Carbon::parse($pinjam->tanggal_jatuh_tempo)->translatedFormat('d M Y') }}
+                            <!-- Kolom Tanggal Kembali & Denda -->
+                            <td class="py-4 px-6 text-center text-gray-600">
+                                {{ \Carbon\Carbon::parse($pinjam->tanggal_jatuh_tempo)->format('d/m/Y') }}
+                                @if($statusAkurat == 'terlambat')
+                                    <span class="block text-red-600 text-[10px] mt-1 font-bold">Telat {{ $pinjam->hari_terlambat }} Hari</span>
                                 @endif
                             </td>
 
+                            <!-- Kolom Status -->
                             <td class="py-4 px-6 text-center">
-                                @if($pinjam->status == 'Dikembalikan')
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap">
-                                        <i class="ph ph-check-circle text-sm"></i> Dikembalikan
-                                    </span>
-                                @elseif($pinjam->status_aktual == 'Terlambat')
-                                    <div class="flex flex-col items-center justify-center">
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap">
-                                            <i class="ph ph-warning-circle text-sm"></i> Terlambat
+                                <div class="flex flex-col items-center justify-center gap-1">
+                                    @if($statusAkurat == 'dipinjam')
+                                        <span class="inline-block px-4 py-1.5 bg-[#fdf4d6] text-[#8a611c] text-xs font-semibold rounded-full lowercase tracking-wide">
+                                            dipinjam
                                         </span>
-                                        <span class="text-[10px] text-red-500 font-bold mt-1">Lwt {{ $pinjam->hari_terlambat }} Hari</span>
-                                    </div>
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap">
-                                        <i class="ph ph-clock text-sm"></i> Dipinjam
-                                    </span>
-                                @endif
+                                    @elseif($statusAkurat == 'terlambat')
+                                        <span class="inline-block px-4 py-1.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full lowercase tracking-wide">
+                                            terlambat
+                                        </span>
+                                        <span class="text-[10px] font-bold text-red-600">
+                                            Denda: Rp {{ number_format($pinjam->denda, 0, ',', '.') }}
+                                        </span>
+                                    @elseif($statusAkurat == 'dikembalikan' || $statusAkurat == 'sudah kembali')
+                                        <span class="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full lowercase tracking-wide">
+                                            selesai
+                                        </span>
+                                    @else
+                                        <span class="inline-block px-4 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full lowercase tracking-wide">
+                                            {{ $pinjam->status_aktual }}
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
 
-                            <!-- KOLOM AKSI / TOMBOL VERIFIKASI PENGEMBALIAN -->
+                            <!-- Kolom Aksi -->
                             <td class="py-4 px-6 text-center">
-                                @if($pinjam->status == 'Dikembalikan')
-                                    <span class="inline-flex items-center gap-1 text-emerald-600 font-bold text-xs bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100 whitespace-nowrap">
-                                        <i class="ph ph-check-circle text-base"></i> Sudah Kembali
-                                    </span>
-                                @else
-                                    <!-- TOMBOL MERAH VERIFIKASI PENGEMBALIAN -->
-                                    <form action="{{ route('pengembalian.store', $pinjam->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin buku ini sudah dikembalikan? Stok buku akan otomatis bertambah.');">
-                                        @csrf
-                                        <button type="submit" class="inline-flex items-center gap-1.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap group shadow-sm">
-                                            <i class="ph ph-arrow-u-down-left text-base group-hover:-rotate-45 transition-transform"></i>
-                                            Belum Kembali
-                                        </button>
-                                    </form>
-                                @endif
+                                <div class="flex items-center justify-center gap-3">
+                                    @if($statusAkurat == 'dipinjam' || $statusAkurat == 'terlambat')
+                                        <a href="{{ route('peminjaman.validasi', $pinjam->id) }}" class="text-emerald-500 hover:text-emerald-700 transition-colors" title="Validasi Pengembalian">
+                                            <i class="ph ph-arrow-counter-clockwise text-xl font-bold"></i>
+                                        </a>
+                                    @else
+                                        <span class="w-5"></span>
+                                    @endif
+
+                                    <a href="{{ route('peminjaman.show', $pinjam->id) }}" class="text-blue-600 hover:text-blue-800 transition-colors" title="Lihat Detail">
+                                        <i class="ph ph-eye text-xl font-bold"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="py-16 text-center">
-                                <div class="flex flex-col items-center justify-center -mt-4">
-                                    <div class="w-24 h-24 rounded-full bg-purple-50 border-8 border-white shadow-sm flex items-center justify-center mb-4">
-                                        <i class="ph ph-handshake text-4xl text-purple-500 block leading-none"></i>
-                                    </div>
-                                    <h3 class="text-lg font-bold text-gray-800 mb-1">Data Peminjaman Kosong</h3>
-                                    <p class="text-sm font-medium text-gray-500 mb-6">Pencarian tidak cocok atau belum ada transaksi.</p>
-                                </div>
+                            <td colspan="6" class="py-12 text-center text-gray-500 text-sm">
+                                Belum ada data peminjaman buku.
                             </td>
                         </tr>
                         @endforelse
@@ -182,19 +147,51 @@
             </div>
 
             <!-- PAGINATION -->
-            <div class="p-4 border-t border-gray-100">
+            <div id="area-pagination" class="p-4 border-t border-gray-100 bg-gray-50/50">
+                <style>
+                    #area-pagination nav svg { width: 1.25rem; height: 1.25rem; display: inline-block; }
+                    #area-pagination nav p { margin-top: 0; margin-bottom: 0; }
+                </style>
                 {{ $peminjamans->links() }}
             </div>
         </div>
 
-        <footer class="bg-white border-t border-gray-200 text-gray-500 py-4 px-6 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 text-xs mt-auto shadow-sm">
+        <!-- FOOTER BAWAAN ANDA (Akan selalu di bawah karena mt-auto) -->
+        <footer class="bg-white border-t border-gray-200 text-gray-500 py-4 px-6 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 text-xs mt-auto shadow-sm mb-4">
             <div class="text-center sm:text-left">
                 <p class="font-medium text-gray-600 mb-0.5">Sistem Perpustakaan Sekolah</p>
-                <p>&copy; {{ date('Y') }} - Sistem Dibangun oleh Agung Prastiyo</p>
+                <p>&copy; 2026 - Sistem Dibangun oleh Agung Prastiyo</p>
             </div>
         </footer>
+
     </div>
 
-    <!-- Panggil Javascript untuk Live Search -->
-    <script src="{{ asset('js/sching-peminjaman.js') }}"></script>
+    <!-- LIBRARY SWEETALERT2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- SCRIPT LOGIKA VERIFIKASI -->
+    <script>
+        function konfirmasiPengembalian(button) {
+            Swal.fire({
+                title: 'Verifikasi Pengembalian?',
+                text: "Pastikan Anda sudah menerima buku fisik dari siswa yang bersangkutan.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Ya, Verifikasi!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-2xl shadow-lg border border-gray-100',
+                    confirmButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm',
+                    cancelButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    button.closest('form').submit();
+                }
+            });
+        }
+    </script>
 </x-admin-layout>
