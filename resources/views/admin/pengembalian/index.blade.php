@@ -3,115 +3,95 @@
         Riwayat Pengembalian - Sistem Perpustakaan
     </x-slot:title>
 
-    <div class="flex flex-col flex-1">
+    <div class="flex flex-col flex-1 min-h-[85vh] w-full">
 
-        <!-- Header Halaman -->
+        <!-- HEADER -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Riwayat Pengembalian</h1>
-                <p class="text-sm text-gray-500 mt-1">Daftar buku yang telah selesai dikembalikan oleh siswa</p>
-
-                <div class="mt-2 inline-block bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200">
-                    <i class="ph ph-check-square-offset mr-1"></i> Total Buku Kembali: {{ \App\Models\Peminjaman::where('status', 'Dikembalikan')->count() }} Buku
-                </div>
+                <p class="text-sm text-gray-500 mt-1">Daftar buku yang telah selesai dikembalikan</p>
             </div>
-            <!-- Tombol "Proses Peminjaman" sudah dihapus dari sini agar UI lebih bersih -->
         </div>
 
-        <!-- Kolom Pencarian -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-            <form id="searchFormPengembalian" data-url="{{ route('pengembalian.index') }}" action="{{ route('pengembalian.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3 w-full">
-                <div class="relative flex-1">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <!-- PENCARIAN -->
+        <div class="mb-6 w-full bg-white p-3.5 rounded-xl border border-gray-100 shadow-sm">
+            <form action="{{ route('pengembalian.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3 w-full">
+                <div class="relative w-full">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <i class="ph ph-magnifying-glass text-gray-400 text-lg"></i>
                     </div>
-                    <input type="text" id="searchInputPengembalian" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Cari nama siswa, NIS, atau judul buku..."
-                        class="pl-11 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition text-sm text-gray-700 placeholder-gray-400">
+                    <input type="text" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik Nama Siswa, NIS, atau Judul Buku..."
+                        class="pl-10 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-700 bg-white">
                 </div>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0 flex items-center gap-2">
-                    <span id="searchLabelPengembalian">Cari Riwayat</span>
-                    <i id="loadingSpinnerPengembalian" class="ph ph-spinner-gap animate-spin hidden text-lg"></i>
+
+                <button type="submit" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-8 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center whitespace-nowrap shrink-0">
+                    Cari Data
                 </button>
             </form>
         </div>
 
-        <!-- Wadah Tabel Ajax -->
-        <div id="table-container-pengembalian" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8 transition-opacity duration-300">
-
-            @if(session('success'))
-                <div class="bg-emerald-50 border-b border-emerald-100 p-4 flex items-center gap-3 text-emerald-700 text-sm font-medium">
-                    <i class="ph ph-check-circle text-xl"></i>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <div class="overflow-auto w-full">
+        <!-- WADAH TABEL -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+            <div class="overflow-x-auto w-full">
                 <table class="w-full text-left border-collapse min-w-[900px]">
-                    <thead class="bg-blue-50 sticky top-0 z-10 outline outline-1 outline-blue-200">
-                        <tr class="text-blue-700 text-[11px] font-bold uppercase tracking-wider">
-                            <th class="py-4 px-6 w-16 text-center">No</th>
-                            <th class="py-4 px-6">Siswa Peminjam</th>
-                            <th class="py-4 px-6">Buku yang Dipinjam</th>
-                            <th class="py-4 px-6">Tgl Pinjam</th>
-                            <th class="py-4 px-6">Tgl Dikembalikan</th>
-                            <th class="py-4 px-6 text-center">Status</th>
+                    <thead class="bg-purple-50/50 border-b border-gray-200">
+                        <tr class="text-gray-500 text-xs font-bold uppercase tracking-wider">
+                            <th class="py-4 px-6">Buku & Peminjam</th>
+                            <th class="py-4 px-6 text-center">Tgl Dikembalikan</th>
+                            <th class="py-4 px-6 text-center">Denda (Rp)</th>
+                            <th class="py-4 px-6">Kondisi / Catatan</th>
+                            <th class="py-4 px-6 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
-
                         @forelse($pengembalians as $kembali)
-                        <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors text-sm">
-                            <td class="py-4 px-6 text-gray-600 font-medium text-center">{{ $pengembalians->firstItem() + $loop->index }}</td>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm">
 
+                            <!-- Kolom Buku & Peminjam -->
                             <td class="py-4 px-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold uppercase shrink-0">
-                                        {{ substr($kembali->anggota->nama_lengkap ?? '?', 0, 1) }}
-                                    </div>
-                                    <div>
-                                        <span class="font-bold text-gray-800 block">{{ $kembali->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</span>
-                                        <span class="text-xs text-gray-500 font-semibold bg-gray-100 px-2 py-0.5 rounded">Kelas {{ $kembali->anggota->kelas ?? '-' }}</span>
-                                    </div>
-                                </div>
+                                <span class="font-bold text-gray-800 block">{{ $kembali->buku->judul ?? 'Buku Dihapus' }}</span>
+                                <span class="text-xs text-gray-500 mt-1 block">Peminjam: <span class="font-medium text-gray-700">{{ $kembali->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</span></span>
                             </td>
 
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-2">
-                                    <i class="ph ph-book-open text-gray-400 text-lg shrink-0"></i>
-                                    <span class="font-semibold text-gray-700 line-clamp-2">
-                                        {{ $kembali->buku->judul ?? 'Buku Dihapus' }}
-                                    </span>
-                                </div>
+                            <!-- Kolom Tanggal Dikembalikan -->
+                            <td class="py-4 px-6 text-center text-gray-600">
+                                {{ \Carbon\Carbon::parse($kembali->updated_at)->format('d M Y') }}
+                                <span class="block text-[10px] text-gray-400 mt-0.5">{{ \Carbon\Carbon::parse($kembali->updated_at)->format('H:i') }} WIB</span>
                             </td>
 
-                            <td class="py-4 px-6 text-gray-600 text-xs">
-                                {{ \Carbon\Carbon::parse($kembali->tanggal_pinjam)->translatedFormat('d M Y') }}
-                            </td>
-
-                            <td class="py-4 px-6 text-blue-600 text-xs font-semibold">
-                                <div class="flex items-center gap-1.5">
-                                    <i class="ph ph-check-circle"></i>
-                                    {{ \Carbon\Carbon::parse($kembali->updated_at)->translatedFormat('d M Y') }}
-                                </div>
-                            </td>
-
+                            <!-- Kolom Denda -->
                             <td class="py-4 px-6 text-center">
-                                <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold rounded-lg uppercase tracking-wider mx-auto">
-                                    <i class="ph ph-check-square text-base"></i> Selesai
-                                </span>
+                                @if($kembali->denda > 0)
+                                    <span class="inline-block px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-md border border-red-100">
+                                        Rp {{ number_format($kembali->denda, 0, ',', '.') }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-400 text-xs font-medium">Gratis / Rp 0</span>
+                                @endif
+                            </td>
+
+                            <!-- Kolom Catatan -->
+                            <td class="py-4 px-6">
+                                <div class="max-w-[200px] truncate text-xs text-gray-600" title="{{ $kembali->catatan ?? 'Kondisi Aman' }}">
+                                    @if(str_contains($kembali->catatan, 'Kondisi Buku: Rusak') || str_contains($kembali->catatan, 'Hilang'))
+                                        <span class="text-red-500 font-semibold"><i class="ph ph-warning"></i> {{ $kembali->catatan }}</span>
+                                    @else
+                                        {{ $kembali->catatan ?? 'Kondisi Aman' }}
+                                    @endif
+                                </div>
+                            </td>
+
+                            <!-- Kolom Aksi (Hanya lihat detail) -->
+                            <td class="py-4 px-6 text-center">
+                                <a href="{{ route('peminjaman.show', $kembali->id) }}" class="text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 text-xs font-semibold" title="Lihat Detail Transaksi">
+                                    <i class="ph ph-eye text-lg"></i> Detail
+                                </a>
                             </td>
                         </tr>
-
                         @empty
                         <tr>
-                            <td colspan="6" class="py-16 text-center">
-                                <div class="flex flex-col items-center justify-center -mt-4">
-                                    <div class="w-24 h-24 rounded-full bg-gray-50 border-8 border-white shadow-sm flex items-center justify-center mb-4 text-gray-400">
-                                        <i class="ph ph-clock-counter-clockwise text-4xl block leading-none"></i>
-                                    </div>
-                                    <h3 class="text-lg font-bold text-gray-800 mb-1">Riwayat Kosong</h3>
-                                    <p class="text-sm font-medium text-gray-500 mb-6">Belum ada buku yang dikembalikan.</p>
-                                </div>
+                            <td colspan="5" class="py-12 text-center text-gray-500 text-sm">
+                                Belum ada riwayat pengembalian buku.
                             </td>
                         </tr>
                         @endforelse
@@ -120,19 +100,22 @@
             </div>
 
             <!-- PAGINATION -->
-            <div class="p-4 border-t border-gray-100">
+            <div id="area-pagination" class="p-4 border-t border-gray-100 bg-gray-50/50">
+                <style>
+                    #area-pagination nav svg { width: 1.25rem; height: 1.25rem; display: inline-block; }
+                    #area-pagination nav p { margin-top: 0; margin-bottom: 0; }
+                </style>
                 {{ $pengembalians->links() }}
             </div>
         </div>
 
-        <footer class="bg-white border-t border-gray-200 text-gray-500 py-4 px-6 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 text-xs mt-auto shadow-sm">
+        <!-- FOOTER BAWAAN ANDA (Selalu di bawah karena mt-auto) -->
+        <footer class="bg-white border-t border-gray-200 text-gray-500 py-4 px-6 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 text-xs mt-auto shadow-sm mb-4">
             <div class="text-center sm:text-left">
                 <p class="font-medium text-gray-600 mb-0.5">Sistem Perpustakaan Sekolah</p>
-                <p>&copy; {{ date('Y') }} - Sistem Dibangun oleh Agung Prastiyo</p>
+                <p>&copy; 2026 - Sistem Dibangun oleh Agung Prastiyo</p>
             </div>
         </footer>
-    </div>
 
-    <!-- Panggil Javascript untuk Live Search -->
-    <script src="{{ asset('js/sching-pengembalian.js') }}"></script>
+    </div>
 </x-admin-layout>

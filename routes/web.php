@@ -62,16 +62,15 @@ Route::middleware('auth')->group(function () {
     Route::resource('/admin/buku', BukuController::class);
     Route::resource('/admin/anggota', AnggotaController::class);
 
-     // --- Pengembalian Buku ---
-    Route::get('/pengembalian', [App\Http\Controllers\PengembalianController::class, 'index'])->name('pengembalian.index');
-    Route::post('/pengembalian/proses/{id}', [App\Http\Controllers\PengembalianController::class, 'store'])->name('pengembalian.store');
-
-    // --- Transaksi Perpustakaan ---
+    // --- Transaksi Perpustakaan (Sirkulasi & Kas) ---
+    // 1. Rute Khusus Validasi (Harus di atas resource agar tidak bentrok)
     Route::get('/admin/peminjaman/{id}/validasi', [PeminjamanController::class, 'formValidasi'])->name('peminjaman.validasi');
-Route::post('/admin/peminjaman/{id}/validasi', [PeminjamanController::class, 'prosesValidasi'])->name('peminjaman.prosesValidasi');
+    Route::post('/admin/peminjaman/{id}/validasi', [PeminjamanController::class, 'prosesValidasi'])->name('peminjaman.prosesValidasi');
+
+    // 2. Resource Utama
     Route::resource('/admin/peminjaman', PeminjamanController::class);
-    Route::resource('/admin/pengembalian', PengembalianController::class);
-    Route::resource('/admin/transaksi', TransaksiController::class);
+    Route::resource('/admin/pengembalian', PengembalianController::class); // Untuk Riwayat
+    Route::resource('/admin/transaksi', TransaksiController::class); // Untuk Kas Denda
 
     // --- Analisis Perpustakaan ---
     Route::get('/admin/analisis', [AnalisisController::class, 'index'])->name('analisis.index');

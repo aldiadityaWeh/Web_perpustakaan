@@ -8,14 +8,19 @@ use Illuminate\Http\Request;
 class TransaksiController extends Controller
 {
     /**
-     * Menampilkan semua riwayat transaksi (Buku Induk Log)
+     * Menampilkan riwayat pemasukan Kas Denda (Hanya yang memiliki denda)
      */
     public function index(Request $request)
     {
-        // Memanggil model Peminjaman dengan relasi buku dan anggota
-        $query = Peminjaman::with(['buku', 'anggota']);
+        // 1. Ambil data HANYA yang sudah dikembalikan dan MEMILIKI DENDA (> 0)
+        $query = Peminjaman::with(['buku', 'anggota'])
+                    ->where('status', 'Dikembalikan')
+                    ->where('denda', '>', 0);
 
-        // Logika Pencarian
+        // 2. Hitung total uang kas denda keseluruhan
+        $totalKas = Peminjaman::where('status', 'Dikembalikan')->sum('denda');
+
+        // 3. Logika Pencarian
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -32,10 +37,10 @@ class TransaksiController extends Controller
             });
         }
 
-        // Ambil semua transaksi tanpa filter status, urutkan dari yang terbaru
-        $transaksis = $query->latest()->paginate(10)->withQueryString();
+        // 4. Urutkan dari transaksi denda terbaru
+        $transaksis = $query->latest('updated_at')->paginate(10)->withQueryString();
 
-        return view('admin.transaksi.index', compact('transaksis'));
+        return view('admin.transaksi.index', compact('transaksis', 'totalKas'));
     }
 
     /**
@@ -46,19 +51,19 @@ class TransaksiController extends Controller
         // Ambil data transaksi beserta data relasi buku dan anggotanya
         $transaksi = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
 
-        // Arahkan ke file resources/views/admin/transaksi/show.blade.php
+        // Arahkan ke file resources/views/admin/transaksi/show.blade.php (Jika Anda membuatnya)
         return view('admin.transaksi.show', compact('transaksi'));
     }
 
     /**
-     * Hapus permanen riwayat (Opsional)
+     * Hapus permanen riwayat Kas/Transaksi
      */
     public function destroy(string $id)
     {
         $transaksi = Peminjaman::findOrFail($id);
 
-        // Jika yang dihapus ternyata masih berstatus 'dipinjam', otomatis kembalikan stok buku
-        if ($transaksi->status == 'dipinjam') {
+        // Keamanan tambahan: Jika yang dihapus ternyata masih berstatus 'dipinjam', otomatis kembalikan stok buku
+        if (strtolower(trim($transaksi->status)) == 'dipinjam') {
             if ($transaksi->buku) {
                 $transaksi->buku->increment('stok', 1);
             }
@@ -66,6 +71,6 @@ class TransaksiController extends Controller
 
         $transaksi->delete();
 
-        return redirect()->route('transaksi.index')->with('success', 'Riwayat transaksi berhasil dihapus permanen!');
+        return redirect()->route('transaksi.index')->with('success', 'Riwayat kas denda berhasil dihapus permanen!');
     }
 }

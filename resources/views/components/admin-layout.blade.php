@@ -74,8 +74,8 @@
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Data Anggota</span>
                 </a>
 
-                <!-- Transaksi -->
-                <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Transaksi</div>
+                <!-- Transaksi & Keuangan -->
+                <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1 px-3">Sirkulasi & Kas</div>
                 <a href="{{ route('peminjaman.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('peminjaman.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="ph ph-handshake text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Peminjaman</span>
@@ -84,9 +84,10 @@
                     <i class="ph ph-clock-counter-clockwise text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Pengembalian</span>
                 </a>
+                <!-- PERUBAHAN DI SINI: Menu Transaksi diganti menjadi Kas Denda -->
                 <a href="{{ route('transaksi.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('transaksi.*') ? 'bg-purple-100 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="ph ph-receipt text-2xl shrink-0"></i>
-                    <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Riwayat Transaksi</span>
+                    <i class="ph ph-wallet text-2xl shrink-0"></i>
+                    <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Kas Denda</span>
                 </a>
 
                 <!-- Laporan & Analisis -->
@@ -138,7 +139,6 @@
                         <span class="font-medium">{{ Auth::user()->name ?? 'Administrator' }}</span>
                     </div>
 
-                    <!-- PERUBAHAN DI SINI: Tombol Logout menggunakan Form POST -->
                     <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
                         @csrf
                         <button type="submit" class="bg-purple-800 hover:bg-purple-900 text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-sm border border-purple-600 shrink-0 cursor-pointer">
@@ -146,8 +146,6 @@
                             <span>Keluar</span>
                         </button>
                     </form>
-                    <!-- AKHIR PERUBAHAN -->
-
                 </div>
             </header>
 

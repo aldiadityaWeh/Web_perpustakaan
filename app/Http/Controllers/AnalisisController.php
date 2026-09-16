@@ -23,19 +23,19 @@ class AnalisisController extends Controller
 
         // 2. SUMMARY CARDS BERDASARKAN RENTANG TANGGAL
         $totalTransaksi = Peminjaman::whereBetween('tanggal_pinjam', [$start, $end])->count();
-
-        $bukuTerlambat = Peminjaman::where('status', 'terlambat')->count(); // Buku terlambat tetap absolut (saat ini)
+        $bukuTerlambat = Peminjaman::where('status', 'terlambat')->count(); // Absolut saat ini
 
         $totalAnggota = Anggota::count();
         $anggotaPernahPinjam = Peminjaman::distinct('anggota_id')->count('anggota_id');
         $persenAnggota = $totalAnggota > 0 ? round(($anggotaPernahPinjam / $totalAnggota) * 100) : 0;
 
-        // Rata-rata pinjam per hari dalam rentang waktu tersebut
         $pembagiHari = $diffInDays > 0 ? $diffInDays + 1 : 1;
         $rataPinjam = round($totalTransaksi / $pembagiHari);
 
+        // --- FITUR BARU: Total Kas Denda Keseluruhan ---
+        $totalKas = Peminjaman::where('status', 'Dikembalikan')->sum('denda');
+
         // 3. LINE CHART (Tren Peminjaman Dinamis)
-        // Ambil data secara efisien pakai Group By
         $peminjamanHarian = Peminjaman::whereBetween('tanggal_pinjam', [$start, $end])
             ->select(DB::raw('DATE(tanggal_pinjam) as date'), DB::raw('count(*) as total'))
             ->groupBy('date')
@@ -44,17 +44,14 @@ class AnalisisController extends Controller
         $chartDates = [];
         $chartData = [];
 
-        // Loop dari tanggal mulai sampai tanggal akhir
         for ($i = 0; $i <= $diffInDays; $i++) {
             $date = $start->copy()->addDays($i);
             $dateStr = $date->toDateString();
-
-            // Format tanggal (contoh: 01 Sep)
             $chartDates[] = $date->translatedFormat('d M');
-            $chartData[] = $peminjamanHarian[$dateStr] ?? 0; // Jika tidak ada peminjaman, set 0
+            $chartData[] = $peminjamanHarian[$dateStr] ?? 0;
         }
 
-        // 4. DONUT CHART (Distribusi Kategori Buku - Keseluruhan Inventaris)
+        // 4. DONUT CHART (Distribusi Kategori Buku)
         $kategoriStats = Buku::select('kategori', DB::raw('count(*) as total'))
                              ->groupBy('kategori')
                              ->get();
@@ -66,34 +63,35 @@ class AnalisisController extends Controller
             $dataKategori[] = $stat->total;
         }
 
-        // 5. BUKU TERPOPULER (Berdasarkan rentang tanggal yang difilter)
+        // 5. BUKU TERPOPULER (Berdasarkan rentang tanggal)
         $bukuPopuler = Peminjaman::whereBetween('tanggal_pinjam', [$start, $end])
                                  ->select('buku_id', DB::raw('count(*) as total_pinjam'))
                                  ->with('buku')
                                  ->groupBy('buku_id')
                                  ->orderByDesc('total_pinjam')
-                                 ->take(3)
+                                 ->take(5) // Diubah jadi 5 agar pas dengan UI
                                  ->get();
 
-        // 6. DAFTAR PEMINJAMAN TERBARU (Keseluruhan)
+        // --- FITUR BARU: Top 5 Anggota Teraktif ---
+        $anggotaTeraktif = Peminjaman::whereBetween('tanggal_pinjam', [$start, $end])
+                                 ->select('anggota_id', DB::raw('count(*) as total'))
+                                 ->groupBy('anggota_id')
+                                 ->orderByDesc('total')
+                                 ->take(5)
+                                 ->with('anggota')
+                                 ->get();
+
+        // 6. DAFTAR PEMINJAMAN TERBARU
         $peminjamanTerbaru = Peminjaman::with(['buku', 'anggota'])
                                        ->latest('created_at')
-                                       ->take(3)
+                                       ->take(4) // Diubah jadi 4 agar UI seimbang
                                        ->get();
 
         return view('admin.analisis.index', compact(
-            'totalTransaksi',
-            'bukuTerlambat',
-            'persenAnggota',
-            'rataPinjam',
-            'chartDates',
-            'chartData',
-            'labelKategori',
-            'dataKategori',
-            'peminjamanTerbaru',
-            'bukuPopuler',
-            'startDate',
-            'endDate'
+            'totalTransaksi', 'bukuTerlambat', 'persenAnggota', 'rataPinjam',
+            'chartDates', 'chartData', 'labelKategori', 'dataKategori',
+            'peminjamanTerbaru', 'bukuPopuler', 'startDate', 'endDate',
+            'totalKas', 'anggotaTeraktif'
         ));
     }
 }
