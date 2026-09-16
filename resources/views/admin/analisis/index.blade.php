@@ -121,7 +121,7 @@
             <!-- Peminjaman Terbaru -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col p-6">
                 <h3 class="font-bold text-gray-800 text-base mb-5">Peminjaman Terbaru</h3>
-                <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-3 flex-1">
                     @forelse($peminjamanTerbaru as $trx)
                         <div class="flex items-center justify-between p-3 bg-gray-50/80 rounded-xl border border-gray-100/50">
                             <div>
@@ -139,17 +139,32 @@
                         <p class="text-sm text-gray-400 text-center py-4">Belum ada transaksi peminjaman.</p>
                     @endforelse
                 </div>
+
+                <!-- Area Pagination -->
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <style>
+                        /* Styling khusus agar pagination Tailwind bawaan Laravel lebih rapi di dalam card */
+                        .mt-4.pt-4 nav svg { width: 1.25rem; height: 1.25rem; }
+                        .mt-4.pt-4 nav p { margin-top: 0; margin-bottom: 0; font-size: 0.75rem; }
+                    </style>
+                    {{ $peminjamanTerbaru->links() }}
+                </div>
             </div>
 
             <!-- Buku Populer -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col p-6">
                 <h3 class="font-bold text-gray-800 text-base mb-5">Buku Paling Populer</h3>
                 <div class="flex flex-col gap-3">
-                    @forelse($bukuPopuler as $populer)
+                    @forelse($bukuPopuler as $index => $populer)
                         <div class="flex items-center justify-between p-3 bg-gray-50/80 rounded-xl border border-gray-100/50">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg">
-                                    <i class="ph ph-trend-up"></i>
+                                <!-- Kotak Nomor Peringkat Berwarna -->
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm
+                                    {{ $index == 0 ? 'bg-gradient-to-br from-amber-200 to-amber-400 text-amber-900' :
+                                      ($index == 1 ? 'bg-gradient-to-br from-gray-200 to-gray-300 text-gray-700' :
+                                      ($index == 2 ? 'bg-gradient-to-br from-orange-200 to-orange-300 text-orange-900' :
+                                      'bg-purple-50 text-purple-600 border border-purple-100')) }}">
+                                    #{{ $index + 1 }}
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold text-gray-800 line-clamp-1">{{ $populer->buku->judul ?? 'Buku Dihapus' }}</p>
@@ -181,6 +196,5 @@
     </script>
 
     <!-- MEMANGGIL FILE EXTERNAL JS -->
-    <script src="{{ asset('chart-analisis.js') }}?v={{ time() }}"></script>
-
+    <script src="{{ asset('js/chart-analisis.js') }}"></script>
 </x-admin-layout>

@@ -69,10 +69,10 @@ class AnalisisController extends Controller
                                  ->with('buku')
                                  ->groupBy('buku_id')
                                  ->orderByDesc('total_pinjam')
-                                 ->take(5) // Diubah jadi 5 agar pas dengan UI
+                                 ->take(5)
                                  ->get();
 
-        // --- FITUR BARU: Top 5 Anggota Teraktif ---
+        // --- BLOK YANG TERHAPUS: Top 5 Anggota Teraktif ---
         $anggotaTeraktif = Peminjaman::whereBetween('tanggal_pinjam', [$start, $end])
                                  ->select('anggota_id', DB::raw('count(*) as total'))
                                  ->groupBy('anggota_id')
@@ -81,11 +81,11 @@ class AnalisisController extends Controller
                                  ->with('anggota')
                                  ->get();
 
-        // 6. DAFTAR PEMINJAMAN TERBARU
+        // 6. DAFTAR PEMINJAMAN TERBARU (Ditambah Pagination)
         $peminjamanTerbaru = Peminjaman::with(['buku', 'anggota'])
                                        ->latest('created_at')
-                                       ->take(4) // Diubah jadi 4 agar UI seimbang
-                                       ->get();
+                                       ->paginate(4)
+                                       ->withQueryString();
 
         return view('admin.analisis.index', compact(
             'totalTransaksi', 'bukuTerlambat', 'persenAnggota', 'rataPinjam',
