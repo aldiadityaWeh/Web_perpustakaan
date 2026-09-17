@@ -160,7 +160,7 @@
     <footer class="bg-white border-t border-gray-200 text-gray-500 py-4 px-6 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-2 text-xs mt-auto shadow-sm">
         <div class="text-center sm:text-left">
             <p class="font-medium text-gray-600 mb-0.5">Sistem Perpustakaan Sekolah</p>
-            <p>&copy; 2026 - Sistem Dibangun oleh Agung Prastiyo</p>
+            <p>&copy; 2026 - Sistem Dibangun oleh Aldi Aditya</p>
         </div>
     </footer>
 

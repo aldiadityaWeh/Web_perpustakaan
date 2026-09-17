@@ -85,9 +85,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::put('/admin/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
 
-    // --- Profil Administrator ---
-    Route::get('/admin/profil', [ProfilController::class, 'index'])->name('profil.index');
-    Route::put('/admin/profil/info', [ProfilController::class, 'update'])->name('profil.update');
-    Route::put('/admin/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
+    // --- Profil  ---
+    Route::get('/admin/profil', [App\Http\Controllers\ProfilController::class, 'index'])->name('profil.index');
+    Route::put('/admin/profil', [App\Http\Controllers\ProfilController::class, 'update'])->name('profil.update');
 
 });

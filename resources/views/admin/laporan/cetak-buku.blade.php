@@ -25,10 +25,9 @@
 <body onload="window.print()">
 
     <!-- KOP SURAT -->
-    <div class="kop-surat">
-        <h1>PERPUSTAKAAN SDN 6 CISEREUH</h1>
-        <p>Jl. Contoh Alamat Sekolah No. 123, Kabupaten Purwakarta, Jawa Barat</p>
-        <p>Email: perpus@sdn6cisereuh.sch.id | Telp: (0264) 123456</p>
+   <div class="kop-surat">
+        <h1>PERPUSTAKAAN {{ strtoupper($pengaturan->nama_sekolah ?? 'SEKOLAH') }}</h1>
+        <p>{{ $pengaturan->alamat_sekolah ?? 'Alamat Belum Diatur' }}</p>
     </div>
 
     <div class="judul-laporan">
@@ -107,8 +106,8 @@
         <p>Purwakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
         <p>Kepala Perpustakaan,</p>
         <br><br><br><br>
-        <p style="font-weight: bold; text-decoration: underline;">Agung Prastiyo</p>
-        <p>NIP. .........................</p>
+        <p style="font-weight: bold; text-decoration: underline;">{{ $pengaturan->kepala_perpustakaan ?? 'Admin' }}</p>
+        <p>NIP. {{ $pengaturan->nip_kepala ?? '-' }}</p>
     </div>
 
 </body>

@@ -1,127 +1,93 @@
 <x-admin-layout>
-    @slot('title')
+    <x-slot:title>
         Profil Saya - Sistem Perpustakaan
-    @endslot
+    </x-slot:title>
 
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+    <div class="flex flex-col flex-1 min-h-[85vh] w-full max-w-5xl mx-auto">
+
+        <!-- HEADER -->
+        <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Profil Saya</h1>
-            <p class="text-sm text-gray-500 mt-1">Kelola informasi akun dan kata sandi Anda</p>
+            <p class="text-sm text-gray-500 mt-1">Kelola informasi data diri dan keamanan akun Anda.</p>
         </div>
-    </div>
 
-    <!-- Menampilkan Alert Sukses / Error -->
-    @if(session('success'))
-        <div class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl flex items-center gap-3 text-emerald-700 text-sm font-medium shadow-sm">
-            <i class="ph ph-check-circle text-xl"></i>
-            {{ session('success') }}
-        </div>
-    @endif
+        <!-- NOTIFIKASI -->
+        @if(session('success'))
+            <div class="mb-6 bg-emerald-50 text-emerald-700 p-4 rounded-xl flex items-center gap-3 border border-emerald-100">
+                <i class="ph ph-check-circle text-xl"></i>
+                <p class="text-sm font-semibold">{{ session('success') }}</p>
+            </div>
+        @endif
 
-    @if ($errors->any())
-        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-600 text-sm shadow-sm">
-            <ul class="list-disc pl-5">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        <form action="{{ route('profil.update') }}" method="POST">
+            @csrf
+            @method('PUT')
 
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
 
-        <!-- KARTU 1: INFORMASI PROFIL -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <form action="{{ route('profil.update') }}" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl shrink-0">
-                        <i class="ph ph-user-circle"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-800">Informasi Akun</h2>
-                        <p class="text-xs text-gray-500">Perbarui data profil dan alamat email Anda</p>
-                    </div>
-                </div>
+                <!-- BAGIAN 1: DATA DIRI (Lebar 7 kolom) -->
+                <div class="md:col-span-7 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+                    <h3 class="text-base font-bold text-gray-800 mb-1 flex items-center gap-2">
+                        <i class="ph ph-user-circle text-purple-600 text-lg"></i> Informasi Akun
+                    </h3>
+                    <p class="text-xs text-gray-500 mb-6">Ubah nama lengkap dan alamat email yang digunakan untuk login.</p>
 
-                <div class="p-6 flex flex-col gap-5">
-                    <!-- Foto Profil Ilustrasi -->
-                    <div class="flex items-center gap-4 mb-2">
-                        <div class="h-20 w-20 rounded-full bg-purple-100 border-4 border-white shadow-sm flex items-center justify-center text-purple-600 text-4xl">
-                            <i class="ph ph-user"></i>
-                        </div>
+                    <div class="space-y-4">
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">{{ $user->name }}</p>
-                            <p class="text-xs text-gray-500">Administrator</p>
+                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1.5">Nama Lengkap Admin <span class="text-red-500">*</span></label>
+                            <input type="text" name="name" value="{{ old('name', $user->name) }}" required
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none text-sm transition">
+                            @error('name') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1.5">Alamat Email <span class="text-red-500">*</span></label>
+                            <input type="email" name="email" value="{{ old('email', $user->email) }}" required
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none text-sm transition">
+                            @error('email') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
                         </div>
                     </div>
-
-                    <!-- Nama Lengkap -->
-                    <div>
-                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Nama Tampilan</label>
-                        <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
-                    </div>
-
-                    <!-- Username / Email -->
-                    <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Username / Email Login</label>
-                        <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
-                    </div>
-
-                    <div class="pt-2">
-                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-purple-600 border border-transparent rounded-xl hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors shadow-sm flex items-center justify-center gap-2">
-                            Simpan Profil
-                        </button>
-                    </div>
                 </div>
-            </form>
-        </div>
 
-        <!-- KARTU 2: UBAH PASSWORD -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-            <form action="{{ route('profil.password') }}" method="POST" class="flex flex-col h-full">
-                @csrf
-                @method('PUT')
-                <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xl shrink-0">
-                        <i class="ph ph-lock-key"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-800">Ubah Kata Sandi</h2>
-                        <p class="text-xs text-gray-500">Pastikan akun Anda menggunakan kata sandi yang kuat</p>
+                <!-- BAGIAN 2: KEAMANAN (Lebar 5 kolom) -->
+                <div class="md:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+                    <h3 class="text-base font-bold text-gray-800 mb-1 flex items-center gap-2">
+                        <i class="ph ph-lock-key text-red-600 text-lg"></i> Ganti Password
+                    </h3>
+                    <p class="text-xs text-gray-500 mb-6">Kosongkan bagian ini jika Anda tidak ingin mengubah password.</p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1.5">Password Lama</label>
+                            <input type="password" name="current_password" placeholder="••••••••"
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-600 focus:border-red-600 outline-none text-sm transition">
+                            @error('current_password') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1.5">Password Baru</label>
+                            <input type="password" name="new_password" placeholder="Minimal 8 karakter"
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-600 focus:border-red-600 outline-none text-sm transition">
+                            @error('new_password') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1.5">Konfirmasi Password Baru</label>
+                            <input type="password" name="new_password_confirmation" placeholder="Ulangi password baru"
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-600 focus:border-red-600 outline-none text-sm transition">
+                        </div>
                     </div>
                 </div>
 
-                <div class="p-6 flex flex-col gap-5 flex-1">
-                    <!-- Password Lama -->
-                    <div>
-                        <label for="current_password" class="block text-sm font-semibold text-gray-700 mb-2">Kata Sandi Saat Ini</label>
-                        <input type="password" id="current_password" name="current_password" placeholder="••••••••" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
-                    </div>
+            </div>
 
-                    <!-- Password Baru -->
-                    <div>
-                        <label for="new_password" class="block text-sm font-semibold text-gray-700 mb-2">Kata Sandi Baru</label>
-                        <input type="password" id="new_password" name="new_password" placeholder="Minimal 8 karakter" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
-                    </div>
-
-                    <!-- Konfirmasi Password -->
-                    <div>
-                        <label for="new_password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Kata Sandi Baru</label>
-                        <input type="password" id="new_password_confirmation" name="new_password_confirmation" placeholder="Ulangi kata sandi baru" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800" required>
-                    </div>
-
-                    <!-- Spasi agar tombol turun ke bawah -->
-                    <div class="mt-auto pt-4">
-                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-gray-800 border border-transparent rounded-xl hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors shadow-sm flex items-center justify-center gap-2">
-                            Perbarui Kata Sandi
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+            <!-- TOMBOL SIMPAN -->
+            <div class="flex justify-end mb-8">
+                <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-10 py-3 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-md">
+                    <i class="ph ph-floppy-disk text-lg"></i> Simpan Perubahan
+                </button>
+            </div>
+        </form>
 
     </div>
-
 </x-admin-layout>

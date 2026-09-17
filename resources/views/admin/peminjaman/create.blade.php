@@ -188,4 +188,42 @@
             </form>
         </div>
     </div>
+    <!-- Otomatisasi Tanggal Kembali -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Ambil batas hari dari database Pengaturan (via Blade)
+            const batasHari = {{ $pengaturan->maksimal_hari_pinjam ?? 7 }};
+
+            // 2. Ambil elemen input tanggalnya (Pastikan input Anda memiliki id="tanggal_pinjam" dan id="tanggal_kembali")
+            const inputPinjam = document.getElementById('tanggal_pinjam');
+            const inputKembali = document.getElementById('tanggal_kembali');
+
+            // Fungsi untuk menghitung dan mengisi tanggal kembali
+            function otomatisIsiTanggalKembali() {
+                if (inputPinjam && inputKembali && inputPinjam.value) {
+                    // Buat objek Date dari tanggal pinjam yang dipilih
+                    let tgl = new Date(inputPinjam.value);
+
+                    // Tambahkan harinya sesuai batas dari Pengaturan
+                    tgl.setDate(tgl.getDate() + batasHari);
+
+                    // Format kembali menjadi YYYY-MM-DD agar terbaca oleh input type="date"
+                    let yyyy = tgl.getFullYear();
+                    let mm = String(tgl.getMonth() + 1).padStart(2, '0');
+                    let dd = String(tgl.getDate()).padStart(2, '0');
+
+                    // Set nilainya ke kolom Tanggal Kembali
+                    inputKembali.value = `${yyyy}-${mm}-${dd}`;
+                }
+            }
+
+            // Jalankan fungsi saat halaman pertama kali dibuka
+            otomatisIsiTanggalKembali();
+
+            // Jalankan ulang fungsi JIKA Admin mengubah Tanggal Pinjam
+            if (inputPinjam) {
+                inputPinjam.addEventListener('change', otomatisIsiTanggalKembali);
+            }
+        });
+    </script>
 </x-admin-layout>
