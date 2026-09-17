@@ -1,136 +1,62 @@
 <x-admin-layout>
-    @slot('title')
-        Laporan Perpustakaan - Sistem Perpustakaan
-    @endslot
+    <x-slot:title>
+        Laporan Cetak - Sistem Perpustakaan
+    </x-slot:title>
 
-    <div class="flex flex-col h-full min-h-full">
-        <!-- Header -->
+    <div class="flex flex-col flex-1 min-h-[85vh] w-full">
+        <!-- HEADER -->
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Laporan Perpustakaan</h1>
-            <p class="text-sm text-gray-500 mt-1">Buat dan unduh rekapitulasi data perpustakaan dalam format PDF atau Excel</p>
+            <h1 class="text-2xl font-bold text-gray-800">Cetak Laporan</h1>
+            <p class="text-sm text-gray-500 mt-1">Unduh atau cetak rekapitulasi data perpustakaan sebagai dokumen fisik.</p>
         </div>
 
-        <!-- Grid Menu Laporan -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
-            <!-- Kartu Laporan Peminjaman -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="h-12 w-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl shrink-0">
-                        <i class="ph ph-handshake"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-800">Laporan Peminjaman</h2>
-                        <p class="text-xs text-gray-500">Rekap transaksi peminjaman & pengembalian</p>
-                    </div>
-                </div>
+            <!-- 1. Laporan Peminjaman -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full relative overflow-hidden">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl mb-4"><i class="ph ph-handshake"></i></div>
+                <h3 class="text-lg font-bold text-gray-800">Laporan Sirkulasi</h3>
+                <p class="text-sm text-gray-500 mb-6 mt-1">Rekap data peminjaman, pengembalian, dan denda siswa.</p>
 
-                <form action="{{ route('laporan.peminjaman') }}" method="GET" target="_blank" class="flex flex-col gap-4 mt-auto">
-                    <div class="grid grid-cols-2 gap-4">
+                <form action="{{ route('laporan.peminjaman') }}" method="GET" target="_blank" class="mt-auto flex flex-col gap-3 border-t border-gray-50 pt-4">
+                    <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Dari Tanggal</label>
-                            <input type="date" name="start_date" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Dari Tgl</label>
+                            <input type="date" name="start_date" class="w-full text-xs border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-purple-500" required>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Sampai Tanggal</label>
-                            <input type="date" name="end_date" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Sampai Tgl</label>
+                            <input type="date" name="end_date" class="w-full text-xs border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-purple-500" required>
                         </div>
                     </div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-pdf text-lg"></i> Download PDF
-                        </button>
-                        <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-xls text-lg"></i> Download Excel
-                        </button>
-                    </div>
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                        <i class="ph ph-printer"></i> Cetak Peminjaman
+                    </button>
                 </form>
             </div>
 
-            <!-- Kartu Laporan Data Buku -->
+            <!-- 2. Laporan Buku -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl shrink-0">
-                        <i class="ph ph-book-open"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-800">Laporan Data Buku</h2>
-                        <p class="text-xs text-gray-500">Rekap inventaris dan stok buku per kategori</p>
-                    </div>
-                </div>
+                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mb-4"><i class="ph ph-books"></i></div>
+                <h3 class="text-lg font-bold text-gray-800">Laporan Inventaris Buku</h3>
+                <p class="text-sm text-gray-500 mb-6 mt-1">Cetak seluruh daftar buku beserta sisa stok saat ini.</p>
 
-                <form action="{{ route('laporan.buku') }}" method="GET" target="_blank" class="flex flex-col gap-4 mt-auto">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Filter Kategori (Opsional)</label>
-                        <select name="kategori" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none bg-white">
-                            <option value="semua">Semua Kategori</option>
-                            <option value="fiksi">Buku Fiksi</option>
-                            <option value="non-fiksi">Buku Non-Fiksi</option>
-                            <option value="pelajaran">Buku Pelajaran</option>
-                        </select>
-                    </div>
-                    <!-- Spasi kosong agar tinggi tombol sejajar -->
-                    <div class="h-[62px] hidden md:block"></div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-pdf text-lg"></i> Download PDF
-                        </button>
-                        <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-xls text-lg"></i> Download Excel
-                        </button>
-                    </div>
-                </form>
+                <a href="{{ route('laporan.buku') }}" target="_blank" class="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                    <i class="ph ph-printer"></i> Cetak Data Buku
+                </a>
             </div>
 
-            <!-- Kartu Laporan Anggota -->
+            <!-- 3. Laporan Anggota -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shrink-0">
-                        <i class="ph ph-users"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-800">Laporan Data Anggota</h2>
-                        <p class="text-xs text-gray-500">Rekap data siswa yang terdaftar perpustakaan</p>
-                    </div>
-                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mb-4"><i class="ph ph-users"></i></div>
+                <h3 class="text-lg font-bold text-gray-800">Laporan Data Anggota</h3>
+                <p class="text-sm text-gray-500 mb-6 mt-1">Daftar siswa yang telah terdaftar sebagai anggota perpustakaan.</p>
 
-                <form action="{{ route('laporan.anggota') }}" method="GET" target="_blank" class="flex flex-col gap-4 mt-auto">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Filter Kelas (Opsional)</label>
-                        <select name="kelas" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 outline-none bg-white">
-                            <option value="semua">Semua Kelas</option>
-                            <option value="1A">Kelas 1A</option>
-                            <option value="2A">Kelas 2A</option>
-                            <!-- Tambahkan kelas lain sesuai kebutuhan Anda -->
-                        </select>
-                    </div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" name="type" value="pdf" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-pdf text-lg"></i> Download PDF
-                        </button>
-                        <button type="submit" name="type" value="excel" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                            <i class="ph ph-file-xls text-lg"></i> Download Excel
-                        </button>
-                    </div>
-                </form>
+                <a href="{{ route('laporan.anggota') }}" target="_blank" class="mt-auto w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                    <i class="ph ph-printer"></i> Cetak Data Anggota
+                </a>
             </div>
 
         </div>
-
-        <footer class="bg-purple-800 text-white p-5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 text-sm mt-auto shadow-md">
-            <div class="text-center sm:text-left">
-                <p class="font-bold text-base mb-0.5">Sistem Perpustakaan Sekolah</p>
-                <p class="text-purple-300 text-xs tracking-wide">&copy; 2026 - Sistem Dibangun oleh Agung Prastiyo</p>
-            </div>
-            <div class="flex gap-5 text-xl">
-                <a href="#" class="text-purple-200 hover:text-white transition-colors" title="Github">
-                    <i class="ph ph-github-logo"></i>
-                </a>
-                <a href="#" class="text-purple-200 hover:text-white transition-colors" title="Bantuan">
-                    <i class="ph ph-question"></i>
-                </a>
-            </div>
-        </footer>
-
     </div>
 </x-admin-layout>

@@ -2,73 +2,79 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Cetak Laporan Anggota</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Laporan Data Anggota</title>
     <style>
-        body { font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000; }
-        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-        .header h1, .header h2 { margin: 0; padding: 2px 0; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; text-align: center; }
-        .footer-ttd { width: 100%; margin-top: 50px; }
-        .footer-ttd td { border: none; text-align: right; padding-right: 50px; }
+        body { font-family: 'Times New Roman', Times, serif; color: #000; margin: 0; padding: 20px; font-size: 12px; }
+        .kop-surat { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+        .kop-surat h1 { margin: 0; font-size: 22px; text-transform: uppercase; }
+        .kop-surat p { margin: 5px 0 0 0; font-size: 14px; }
+        .judul-laporan { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 16px; text-transform: uppercase; }
+        table { border-collapse: collapse; margin-bottom: 30px; width: 100%; }
+        table th, table td { border: 1px solid #000; padding: 8px 10px; text-align: left; }
+        table th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
+        .text-center { text-align: center; }
+        .ttd-area { float: right; width: 250px; text-align: center; margin-top: 30px; }
+
+        @media print {
+            @page { margin: 1cm; }
+            .no-print { display: none; }
+        }
     </style>
 </head>
-<body onload="window.print()"> <!-- Otomatis membuka dialog Print -->
+<body onload="window.print()">
 
-    <!-- Kop Surat -->
-    <div class="header">
-        <h2>PERPUSTAKAAN SEKOLAH</h2>
-        <h1>SDN 6 CISEREUH</h1>
-        <p>Alamat: Jl. Pendidikan No.123, Kabupaten Purwakarta</p>
+    <!-- KOP SURAT -->
+    <div class="kop-surat">
+        <h1>PERPUSTAKAAN SDN 6 CISEREUH</h1>
+        <p>Jl. Contoh Alamat Sekolah No. 123, Kabupaten Purwakarta, Jawa Barat</p>
+        <p>Email: perpus@sdn6cisereuh.sch.id | Telp: (0264) 123456</p>
     </div>
 
-    <h3 style="text-align: center;">LAPORAN DATA ANGGOTA PERPUSTAKAAN</h3>
-    <p>Kelas: <b>{{ $kelas && $kelas != 'semua' ? 'Kelas ' . $kelas : 'Semua Kelas' }}</b></p>
+    <div class="judul-laporan">
+        LAPORAN DAFTAR ANGGOTA PERPUSTAKAAN<br>
+        <span style="font-size: 12px; font-weight: normal;">
+            Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+        </span>
+    </div>
 
-    <!-- Tabel Data Anggota -->
     <table>
         <thead>
             <tr>
-                <th style="width: 5%;">No</th>
-                <th style="width: 15%;">NIS</th>
-                <th style="width: 30%;">Nama Lengkap</th>
-                <th style="width: 15%;">Kelas</th>
-                <th style="width: 15%;">L/P</th>
-                <th style="width: 20%;">Status</th>
+                <th width="5%">No</th>
+                <th width="15%">NIS / ID</th>
+                <th width="35%">Nama Lengkap</th>
+                <th width="15%">Kelas</th>
+                <th width="15%">Jenis Kelamin</th>
+                <th width="15%">Tanggal Daftar</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($data as $anggota)
-            <tr>
-                <td style="text-align: center;">{{ $loop->iteration }}</td>
-                <td style="text-align: center;">{{ $anggota->nis }}</td>
-                <td><b>{{ $anggota->nama_lengkap }}</b></td>
-                <td style="text-align: center;">{{ $anggota->kelas }}</td>
-                <td style="text-align: center;">{{ $anggota->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                <td style="text-align: center;">
-                    {{ $anggota->status == 'Aktif' ? 'Siswa Aktif' : 'Tidak Aktif / Lulus' }}
-                </td>
-            </tr>
+            @forelse($anggota as $index => $siswa)
+                <tr>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td class="text-center">{{ $siswa->nis }}</td>
+                    <td>{{ $siswa->nama_lengkap }}</td>
+                    <td class="text-center">{{ $siswa->kelas ?? '-' }}</td>
+                    <td class="text-center">{{ $siswa->jenis_kelamin ?? '-' }}</td>
+                    <td class="text-center">{{ \Carbon\Carbon::parse($siswa->created_at)->format('d/m/Y') }}</td>
+                </tr>
             @empty
-            <tr>
-                <td colspan="6" style="text-align: center;">Tidak ada data anggota.</td>
-            </tr>
+                <tr>
+                    <td colspan="6" class="text-center" style="padding: 20px;">Belum ada data anggota di dalam sistem.</td>
+                </tr>
             @endforelse
         </tbody>
     </table>
 
     <!-- Tanda Tangan -->
-    <table class="footer-ttd">
-        <tr>
-            <td>
-                Purwakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
-                Kepala Perpustakaan,<br><br><br><br>
-                <b>Budi Sudarsono, S.Pd</b><br>
-                NIP. 19801234 200501 1 001
-            </td>
-        </tr>
-    </table>
+    <div class="ttd-area">
+        <p>Purwakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+        <p>Kepala Perpustakaan,</p>
+        <br><br><br><br>
+        <p style="font-weight: bold; text-decoration: underline;">Agung Prastiyo</p>
+        <p>NIP. .........................</p>
+    </div>
 
 </body>
 </html>
