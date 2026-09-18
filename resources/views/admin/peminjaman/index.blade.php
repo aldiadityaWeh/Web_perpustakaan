@@ -27,8 +27,8 @@
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <i class="ph ph-magnifying-glass text-gray-400 text-lg"></i>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik Nama Siswa, NIS, atau Kelas..."
-                        class="pl-10 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-700 bg-white">
+                    <input type="text" id="searchInput" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik Nama Siswa, NIS, atau Kelas..."
+                    class="pl-10 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-700 bg-white">
                 </div>
 
                 <!-- Tombol Cari Data -->
@@ -39,7 +39,7 @@
         </div>
 
         <!-- WADAH TABEL -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+       <div id="table-container" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
 
             <!-- Notifikasi Berhasil -->
             @if(session('success'))
@@ -104,7 +104,7 @@
                                             terlambat
                                         </span>
                                         <span class="text-[10px] font-bold text-red-600">
-                                            Denda: Rp {{ number_format($pinjam->denda, 0, ',', '.') }}
+                                            Denda: Rp {{ number_format($pinjam->denda_berjalan, 0, ',', '.') }}
                                         </span>
                                     @elseif($statusAkurat == 'dikembalikan' || $statusAkurat == 'sudah kembali')
                                         <span class="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full lowercase tracking-wide">
@@ -193,4 +193,6 @@
             });
         }
     </script>
+    <!-- Script Live Search Peminjaman -->
+    <script src="{{ asset('js/search-peminjaman.js') }}"></script>
 </x-admin-layout>

@@ -177,5 +177,5 @@
     </div>
 
     <!-- Memanggil Script Eksternal Live Search Buku -->
-    <script src="{{ asset('js/sching-buku.js') }}"></script>
+    <script src="{{ asset('js/search-buku.js') }}"></script>
 </x-admin-layout>

@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
     {
         $query = Peminjaman::with(['anggota', 'buku']);
 
@@ -28,7 +28,7 @@ class PeminjamanController extends Controller
 
         if ($request->has('filter') && $request->filter != 'semua') {
             $filter = $request->filter;
-            $hariIni = Carbon::today();
+            $hariIni = \Carbon\Carbon::today();
 
             if ($filter == 'dipinjam') {
                 $query->where('status', 'Dipinjam')->whereDate('tanggal_jatuh_tempo', '>=', $hariIni);
@@ -41,25 +41,7 @@ class PeminjamanController extends Controller
 
         $peminjamans = $query->latest()->paginate(6)->withQueryString();
 
-        // Tarik data denda dari Pengaturan
-        $pengaturan = Pengaturan::first() ?? new Pengaturan(['denda_per_hari' => 1000]);
-
-        foreach ($peminjamans as $pinjam) {
-            $jatuhTempo = Carbon::parse($pinjam->tanggal_jatuh_tempo)->endOfDay();
-            $sekarang = Carbon::now();
-
-            if (strtolower(trim($pinjam->status)) == 'dipinjam' && $sekarang->gt($jatuhTempo)) {
-                $pinjam->status_aktual = 'Terlambat';
-                $pinjam->hari_terlambat = $sekarang->diffInDays($jatuhTempo);
-
-                // FITUR DINAMIS: Telat dikali denda dari pengaturan
-                $pinjam->denda = $pinjam->hari_terlambat * $pengaturan->denda_per_hari;
-            } else {
-                $pinjam->status_aktual = $pinjam->status;
-                $pinjam->hari_terlambat = 0;
-                $pinjam->denda = 0;
-            }
-        }
+        // ❌ HAPUS SEMUA FOREACH DAN LOGIKA CARBON DI SINI! Model sudah otomatis menghitungnya.
 
         if ($request->ajax()) {
             return view('admin.peminjaman.index', compact('peminjamans'));
@@ -158,25 +140,11 @@ class PeminjamanController extends Controller
         }
     }
 
-    public function show($id)
+   public function show($id)
     {
         $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
-        $pengaturan = Pengaturan::first() ?? new Pengaturan(['denda_per_hari' => 1000]);
 
-        $jatuhTempo = \Carbon\Carbon::parse($peminjaman->tanggal_jatuh_tempo)->endOfDay();
-        $sekarang = \Carbon\Carbon::now();
-
-        if (strtolower(trim($peminjaman->status)) == 'dipinjam' && $sekarang->gt($jatuhTempo)) {
-            $peminjaman->status_aktual = 'Terlambat';
-            $peminjaman->hari_terlambat = $sekarang->diffInDays($jatuhTempo);
-
-            // FITUR DINAMIS: Denda
-            $peminjaman->denda = $peminjaman->hari_terlambat * $pengaturan->denda_per_hari;
-        } else {
-            $peminjaman->status_aktual = $peminjaman->status;
-            $peminjaman->hari_terlambat = 0;
-            $peminjaman->denda = 0;
-        }
+        // ❌ LOGIKA DENDA DIHAPUS DARI SINI
 
         return view('admin.peminjaman.show', compact('peminjaman'));
     }
@@ -196,39 +164,19 @@ class PeminjamanController extends Controller
     public function formKembali($id)
     {
         $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
-        $pengaturan = Pengaturan::first() ?? new Pengaturan(['denda_per_hari' => 1000]);
 
-        $jatuhTempo = \Carbon\Carbon::parse($peminjaman->tanggal_jatuh_tempo)->endOfDay();
-        $sekarang = \Carbon\Carbon::now();
-        $dendaTerlambat = 0;
+        // ❌ LOGIKA DENDA DIHAPUS DARI SINI
 
-        if (strtolower(trim($peminjaman->status)) == 'dipinjam' && $sekarang->gt($jatuhTempo)) {
-            $hariTerlambat = $sekarang->diffInDays($jatuhTempo);
-
-            // FITUR DINAMIS: Denda
-            $dendaTerlambat = $hariTerlambat * $pengaturan->denda_per_hari;
-        }
-
-        return view('admin.peminjaman.kembali', compact('peminjaman', 'dendaTerlambat'));
+        return view('admin.peminjaman.kembali', compact('peminjaman'));
     }
 
     public function formValidasi($id)
     {
         $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
-        $pengaturan = Pengaturan::first() ?? new Pengaturan(['denda_per_hari' => 1000]);
 
-        $jatuhTempo = \Carbon\Carbon::parse($peminjaman->tanggal_jatuh_tempo)->endOfDay();
-        $sekarang = \Carbon\Carbon::now();
-        $dendaTerlambat = 0;
+        // ❌ LOGIKA DENDA DIHAPUS DARI SINI
 
-        if (strtolower(trim($peminjaman->status)) == 'dipinjam' && $sekarang->gt($jatuhTempo)) {
-            $hariTerlambat = $sekarang->diffInDays($jatuhTempo);
-
-            // FITUR DINAMIS: Denda
-            $dendaTerlambat = $hariTerlambat * $pengaturan->denda_per_hari;
-        }
-
-        return view('admin.peminjaman.validasi', compact('peminjaman', 'dendaTerlambat'));
+        return view('admin.peminjaman.validasi', compact('peminjaman'));
     }
 
     public function prosesValidasi(Request $request, $id)

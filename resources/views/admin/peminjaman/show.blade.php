@@ -70,7 +70,7 @@
                     <span class="inline-block px-4 py-1.5 bg-red-100 text-red-700 text-[12px] font-semibold rounded-full lowercase tracking-wide">
                         terlambat
                     </span>
-                    <span class="inline-block ml-3 text-red-600 text-sm font-bold">Denda: Rp {{ number_format($peminjaman->denda, 0, ',', '.') }}</span>
+                    <span class="inline-block ml-3 text-red-600 text-sm font-bold">Denda: Rp {{ number_format($peminjaman->denda_berjalan, 0, ',', '.') }}</span>
                 @elseif($statusAkurat == 'dikembalikan' || $statusAkurat == 'sudah kembali')
                     <span class="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-700 text-[12px] font-semibold rounded-full lowercase tracking-wide">
                         selesai

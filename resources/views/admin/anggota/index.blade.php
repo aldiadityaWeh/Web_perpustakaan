@@ -167,5 +167,5 @@
     </div>
 
     <!-- Memanggil Script Eksternal dari folder public/js -->
-    <script src="{{ asset('js/sching-anggota.js') }}"></script>
+    <script src="{{ asset('js/search-anggota.js') }}"></script>
 </x-admin-layout>

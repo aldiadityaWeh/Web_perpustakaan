@@ -35,11 +35,11 @@
                 <!-- Input Denda (Otomatis dari JS) -->
                 <div class="mb-6">
                     <label class="block text-sm text-gray-600 mb-2">Denda (Rp)</label>
-                    <input type="number" id="denda" name="denda" value="{{ $dendaTerlambat }}" readonly
+                    <input type="number" id="denda" name="denda" value="{{ $peminjaman->denda_berjalan }}" readonly
                         class="w-full border border-gray-300 bg-gray-50 rounded-lg px-4 py-3 outline-none text-gray-700">
                     <p id="info-denda" class="text-xs mt-2 text-gray-500">
-                        @if($dendaTerlambat > 0)
-                            <span class="text-red-500 font-medium">Terdapat denda keterlambatan Rp {{ number_format($dendaTerlambat, 0, ',', '.') }}</span>
+                        @if($peminjaman->denda_berjalan > 0)
+                            <span class="text-red-500 font-medium">Terdapat denda keterlambatan Rp {{ number_format($peminjaman->denda_berjalan, 0, ',', '.') }}</span>
                         @else
                             Tidak ada denda keterlambatan.
                         @endif
@@ -69,7 +69,7 @@
 
     <!-- Script Kalkulasi Denda -->
     <script>
-        const dendaTerlambatBase = {{ $dendaTerlambat }};
+        const dendaTerlambatBase = {{ $peminjaman->denda_berjalan }};
         const dendaRusak = 20000; // Tarif jika buku rusak (Bisa diedit)
         const dendaHilang = 50000; // Tarif jika buku hilang (Bisa diedit)
 
