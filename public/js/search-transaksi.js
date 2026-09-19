@@ -1,53 +1,53 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const searchForm = document.getElementById('searchForm');
-    const tableContainer = document.getElementById('table-container');
+    const kolomPencarian = document.getElementById('searchInput');
+    const formPencarian = kolomPencarian ? kolomPencarian.closest('form') : null;
+    const wadahTabel = document.getElementById('table-container');
 
-    if (searchInput && searchForm && tableContainer) {
-        let timeout = null;
+    // Otomatis membaca URL dari form action di Blade kas denda
+    const urlDasar = formPencarian ? formPencarian.getAttribute('action') : window.location.pathname;
+    let batasWaktu = null;
 
-        // Mendengarkan event saat user mengetik
-        searchInput.addEventListener('keyup', function() {
-            clearTimeout(timeout);
+    if (formPencarian) {
+        formPencarian.addEventListener('submit', function(e) {
+            e.preventDefault();
+        });
+    }
 
-            // Memberikan efek visual sedikit redup saat sedang memuat data
-            tableContainer.style.opacity = '0.5';
-            tableContainer.style.transition = 'opacity 0.3s ease';
+    if (kolomPencarian && wadahTabel) {
+        kolomPencarian.addEventListener('input', function() {
+            clearTimeout(batasWaktu);
 
-            // Menunggu 500ms setelah user berhenti mengetik (Debounce) agar tidak spam ke server
-            timeout = setTimeout(() => {
-                const url = new URL(searchForm.action);
-                url.searchParams.set('search', this.value);
+            // Efek buram saat memuat
+            wadahTabel.style.opacity = '0.5';
 
-                // Melakukan request AJAX ke server
-                fetch(url, {
+            batasWaktu = setTimeout(() => {
+                const kueri = this.value;
+                const urlTujuan = `${urlDasar}?search=${encodeURIComponent(kueri)}`;
+
+                fetch(urlTujuan, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-                .then(response => response.text())
+                .then(respon => respon.text())
                 .then(html => {
-                    // Mengubah text HTML menjadi elemen DOM
                     const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
+                    const dokumenBaru = parser.parseFromString(html, 'text/html');
 
-                    // Mengambil hanya bagian tabel dari halaman baru dan menimpanya ke tabel lama
-                    const newTableContent = doc.getElementById('table-container').innerHTML;
-                    tableContainer.innerHTML = newTableContent;
+                    const wadahTabelBaru = dokumenBaru.getElementById('table-container');
+                    if (wadahTabelBaru) {
+                        wadahTabel.innerHTML = wadahTabelBaru.innerHTML;
+                    }
 
-                    // Mengembalikan tampilan tabel menjadi terang normal
-                    tableContainer.style.opacity = '1';
+                    // Kembalikan opacity ke normal
+                    wadahTabel.style.opacity = '1';
+                    window.history.pushState(null, '', urlTujuan);
                 })
-                .catch(error => {
-                    console.error('Terjadi kesalahan saat mencari data:', error);
-                    tableContainer.style.opacity = '1';
+                .catch(err => {
+                    console.error('Terjadi kesalahan pencarian AJAX:', err);
+                    wadahTabel.style.opacity = '1';
                 });
-            }, 500);
-        });
-
-        // Mencegah halaman reload ketika menekan tombol "Enter" di keyboard
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+            }, 300);
         });
     }
 });

@@ -118,5 +118,5 @@
     </div>
 
     <!-- Panggil File JS Eksternal yang tadi dibuat di folder Public -->
-    <script src="{{ asset('search-transaksi.js') }}"></script>
+    <script src="{{ asset('js/search-transaksi.js') }}"></script>
 </x-admin-layout>

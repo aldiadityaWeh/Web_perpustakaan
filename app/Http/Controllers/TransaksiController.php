@@ -10,7 +10,7 @@ class TransaksiController extends Controller
     /**
      * Menampilkan riwayat pemasukan Kas Denda (Hanya yang memiliki denda)
      */
-    public function index(Request $request)
+   public function index(Request $request)
     {
         // 1. Ambil data HANYA yang sudah dikembalikan dan MEMILIKI DENDA (> 0)
         $query = Peminjaman::with(['buku', 'anggota'])
@@ -21,14 +21,15 @@ class TransaksiController extends Controller
         $totalKas = Peminjaman::where('status', 'Dikembalikan')->sum('denda');
 
         // 3. Logika Pencarian
-        if ($request->has('search') && $request->search != '') {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 // Cari berdasarkan ID Transaksi (Hanya angka)
                 $q->where('id', 'like', '%' . str_replace('TRX-', '', $search) . '%')
-                // Atau Nama Siswa
+                // Atau Nama Siswa & NIS (DIPERBAIKI: Tambahkan pencarian NIS)
                 ->orWhereHas('anggota', function($subQ) use ($search) {
-                    $subQ->where('nama_lengkap', 'like', '%' . $search . '%');
+                    $subQ->where('nama_lengkap', 'like', '%' . $search . '%')
+                         ->orWhere('nis', 'like', '%' . $search . '%');
                 })
                 // Atau Judul Buku
                 ->orWhereHas('buku', function($subQ) use ($search) {
