@@ -41,9 +41,10 @@
             <!-- Sidebar Header -->
             <div class="p-4 border-b border-gray-100 flex items-center justify-between gap-3 h-16">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="h-10 w-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-lg shrink-0">
-                        <i class="ph ph-books"></i>
+                    <div class="h-10 w-10 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-gray-100">
+                        <img src="{{ asset('images/sd.png') }}" alt="Logo Sekolah" class="w-full h-full object-contain p-0.5">
                     </div>
+
                     <div x-show="desktopOpen || mobileOpen" x-transition.opacity class="overflow-hidden whitespace-nowrap">
                         <p class="font-bold text-sm text-gray-800 leading-none">Perpustakaan</p>
                         <p class="text-xs text-gray-400 mt-1">SDN 6 Cisereuh</p>
@@ -131,21 +132,24 @@
                     </span>
                 </div>
 
-                <!-- Right Header -->
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <div class="items-center gap-2 text-sm hidden md:flex">
-                        <i class="ph ph-user-circle text-xl"></i>
-                        <!-- Mengambil nama user yang sedang login -->
-                        <span class="font-medium">{{ Auth::user()->name ?? 'Administrator' }}</span>
+                <!-- Right Header (Disesuaikan dengan Desain) -->
+                <div class="flex items-center gap-4 sm:gap-6">
+
+                    <!-- Info User (Ikon & Nama) -->
+                    <div class="flex items-center gap-2.5 text-white">
+                        <img src="{{ asset('images/profil.png') }}" alt="Profil" class="w-7 h-7 object-contain">
+                        <span class="font-semibold text-base hidden sm:block">{{ Auth::user()->name ?? 'Aldi Aditya' }}</span>
                     </div>
 
+                    <!-- Tombol Keluar -->
                     <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
                         @csrf
-                        <button type="submit" class="bg-purple-800 hover:bg-purple-900 text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-sm border border-purple-600 shrink-0 cursor-pointer">
-                            <i class="ph ph-sign-out text-base sm:text-lg"></i>
+                        <button type="submit" class="bg-purple-900/60 hover:bg-purple-900 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2.5 shadow-sm cursor-pointer border border-transparent hover:border-purple-700">
+                            <img src="{{ asset('images/fun.png') }}" alt="Keluar" class="w-6 h-6 object-contain">
                             <span>Keluar</span>
                         </button>
                     </form>
+
                 </div>
             </header>
 

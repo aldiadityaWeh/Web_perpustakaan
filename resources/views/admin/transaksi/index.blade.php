@@ -51,6 +51,7 @@
                 <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead class="bg-purple-50/50 border-b border-gray-200">
                         <tr class="text-gray-500 text-xs font-bold uppercase tracking-wider">
+                            <th class="py-4 px-6 text-center w-16">No</th>
                             <th class="py-4 px-6">Tanggal Pembayaran</th>
                             <th class="py-4 px-6">Nama Siswa</th>
                             <th class="py-4 px-6">Keterangan / Judul Buku</th>
@@ -60,6 +61,11 @@
                     <tbody class="bg-white">
                         @forelse($transaksis as $trx)
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm">
+
+                            <!-- Kolom Nomor Urut -->
+                            <td class="py-4 px-6 text-center font-medium text-gray-500">
+                            {{ $loop->iteration + ($transaksis->currentPage() - 1) * $transaksis->perPage() }}
+                            </td>
 
                             <!-- Kolom Tanggal -->
                             <td class="py-4 px-6 text-gray-600">

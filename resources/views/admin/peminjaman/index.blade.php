@@ -52,6 +52,7 @@
                 <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead class="bg-purple-50/50 border-b border-gray-200">
                         <tr class="text-gray-500 text-xs font-bold uppercase tracking-wider">
+                            <th class="py-4 px-6 text-center w-16">No</th>
                             <th class="py-4 px-6">Judul Buku</th>
                             <th class="py-4 px-6">Peminjam</th>
                             <th class="py-4 px-6 text-center">Tanggal Pinjam</th>
@@ -67,6 +68,12 @@
                         @endphp
 
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm">
+
+                            <!-- Kolom Nomor Urut -->
+                            <td class="py-4 px-6 text-center font-medium text-gray-500">
+                                {{ $loop->iteration + ($peminjamans->currentPage() - 1) * $peminjamans->perPage() }}
+                            </td>
+
                             <!-- Kolom Judul Buku -->
                             <td class="py-4 px-6">
                                 <span class="font-semibold text-gray-800 block">{{ $pinjam->buku->judul ?? 'Buku Dihapus' }}</span>

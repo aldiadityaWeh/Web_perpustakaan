@@ -40,6 +40,7 @@
                 <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead class="bg-purple-50/50 border-b border-gray-200">
                         <tr class="text-gray-500 text-xs font-bold uppercase tracking-wider">
+                            <th class="py-4 px-6 text-center w-16">No</th>
                             <th class="py-4 px-6">Buku & Peminjam</th>
                             <th class="py-4 px-6 text-center">Tgl Dikembalikan</th>
                             <th class="py-4 px-6 text-center">Denda (Rp)</th>
@@ -50,6 +51,11 @@
                     <tbody class="bg-white">
                         @forelse($pengembalians as $kembali)
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm">
+
+                            <!-- Kolom Nomor Urut -->
+                            <td class="py-4 px-6 text-center font-medium text-gray-500">
+                                {{ $loop->iteration + ($pengembalians->currentPage() - 1) * $pengembalians->perPage() }}
+                            </td>
 
                             <!-- Kolom Buku & Peminjam -->
                             <td class="py-4 px-6">
