@@ -12,13 +12,14 @@
 
     <div class="bg-white w-full max-w-md rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
         <div class="p-8 sm:p-10">
-            
-            <div class="text-center mb-8">
-                <div class="h-16 w-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4">
-                    <i class="ph ph-books"></i>
+
+           <div class="text-center mb-8">
+                <div class="h-20 w-20 mx-auto mb-4 bg-white rounded-2xl p-1 shadow-sm border border-gray-100 overflow-hidden flex items-center justify-center">
+                    <img src="{{ asset('images/sd.png') }}" alt="Logo Sekolah" class="w-full h-full object-contain">
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900">Selamat Datang Kembali</h1>
-                <p class="text-sm text-gray-500 mt-2">Silakan masuk ke akun perpustakaan Anda</p>
+
+                <h1 class="text-2xl font-bold text-gray-900">Portal Sistem Perpustakaan</h1>
+                <p class="text-sm text-gray-500 mt-2">Harap masukkan terlebih dahulu</p>
             </div>
 
             <!-- TAMBAHKAN BLOK INI UNTUK MENAMPILKAN PESAN SUKSES DARI REGISTER -->
@@ -58,8 +59,8 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="ph ph-lock-key text-gray-400 text-lg"></i>
                         </div>
-                        <input :type="show ? 'text' : 'password'" name="password" required placeholder="••••••••" class="pl-11 pr-12 w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm">
-                        
+                        <input :type="show ? 'text' : 'password'" name="password" class="pl-11 pr-12 w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm">
+
                         <!-- Tombol Mata (Fitur Alpine.js) -->
                         <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-purple-600 focus:outline-none transition-colors">
                             <i class="text-lg" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
@@ -73,7 +74,7 @@
             </form>
 
             <p class="text-center text-sm text-gray-500 mt-8">
-                Belum punya akun? <a href="{{ route('register') }}" class="font-bold text-purple-600 hover:text-purple-700">Daftar disini</a>
+                Belum punya akun? <a href="{{ route('register') }}" class="font-bold text-purple-600 hover:text-purple-700">Gas bikin</a>
             </p>
         </div>
     </div>
