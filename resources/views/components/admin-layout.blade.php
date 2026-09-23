@@ -142,11 +142,10 @@
                     </div>
 
                     <!-- Tombol Keluar -->
-                    <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
+                  <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
                         @csrf
-                        <button type="submit" class="bg-purple-900/60 hover:bg-purple-900 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2.5 shadow-sm cursor-pointer border border-transparent hover:border-purple-700">
-                            <img src="{{ asset('images/fun.png') }}" alt="Keluar" class="w-6 h-6 object-contain">
-                            <span>Keluar</span>
+                        <button type="submit" class="bg-red-800/90 hover:bg-red-900 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer border border-transparent hover:border-red-700">
+                            Keluar
                         </button>
                     </form>
 
