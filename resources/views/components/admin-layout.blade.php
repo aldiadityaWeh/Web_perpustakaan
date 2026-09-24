@@ -47,7 +47,7 @@
 
                     <div x-show="desktopOpen || mobileOpen" x-transition.opacity class="overflow-hidden whitespace-nowrap">
                         <p class="font-bold text-sm text-gray-800 leading-none">Perpustakaan</p>
-                        <p class="text-xs text-gray-400 mt-1">SDN 6 Cisereuh</p>
+                        <p class="text-xs text-gray-400 mt-1">SDN 6 Ciseureuh</p>
                     </div>
                 </div>
                 <button @click="mobileOpen = false" class="lg:hidden text-gray-400 hover:text-gray-600">
