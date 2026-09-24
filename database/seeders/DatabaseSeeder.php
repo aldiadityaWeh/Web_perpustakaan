@@ -15,11 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // 1. Buat akun Admin tetap agar Anda selalu bisa login
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Admin Perpustakaan',
+            'email' => 'admin@perpus.local',
+        ]);
+
+        // 2. Eksekusi factory User acak
+        User::factory(20)->create();
+
+        // 3. Panggil seeder terpisah untuk tabel-tabel lain secara berurutan
+        $this->call([
+            BukuSeeder::class,
+            AnggotaSeeder::class,
         ]);
     }
 }

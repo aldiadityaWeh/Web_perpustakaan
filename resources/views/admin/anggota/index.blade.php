@@ -153,7 +153,59 @@
         </div>
 
         <div class="p-4 border-t border-gray-100">
-            {{ $anggotas->links() }}
+            @if ($anggotas->hasPages())
+                <div class="flex items-center justify-between w-full">
+                    <div class="hidden sm:block text-sm text-gray-500">
+                        Menampilkan halaman <span class="font-bold text-gray-700">{{ $anggotas->currentPage() }}</span> dari <span class="font-bold text-gray-700">{{ $anggotas->lastPage() }}</span>
+                    </div>
+
+                    <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                        {{-- Tombol Panah Kiri --}}
+                        @if ($anggotas->onFirstPage())
+                            <span class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed">
+                                <i class="ph ph-caret-left text-sm"></i>
+                            </span>
+                        @else
+                            <a href="{{ $anggotas->previousPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-200 bg-white text-gray-600 hover:bg-purple-50 hover:text-purple-600 transition-colors">
+                                <i class="ph ph-caret-left text-sm"></i>
+                            </a>
+                        @endif
+
+                        {{-- Logika 3 Kotak Angka --}}
+                        @php
+                            $start = max($anggotas->currentPage() - 1, 1);
+                            $end = min($start + 2, $anggotas->lastPage());
+
+                            if ($end - $start < 2) {
+                                $start = max($end - 2, 1);
+                            }
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
+                            @if ($i == $anggotas->currentPage())
+                                <span class="relative inline-flex items-center px-4 py-2 border border-purple-500 bg-purple-50 text-sm font-bold text-purple-600 z-10">
+                                    {{ $i }}
+                                </span>
+                            @else
+                                <a href="{{ $anggotas->url($i) }}" class="relative inline-flex items-center px-4 py-2 border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                                    {{ $i }}
+                                </a>
+                            @endif
+                        @endfor
+
+                        {{-- Tombol Panah Kanan --}}
+                        @if ($anggotas->hasMorePages())
+                            <a href="{{ $anggotas->nextPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-200 bg-white text-gray-600 hover:bg-purple-50 hover:text-purple-600 transition-colors">
+                                <i class="ph ph-caret-right text-sm"></i>
+                            </a>
+                        @else
+                            <span class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed">
+                                <i class="ph ph-caret-right text-sm"></i>
+                            </span>
+                        @endif
+                    </nav>
+                </div>
+            @endif
         </div>
     </div>
 

@@ -18,7 +18,7 @@
                     <img src="{{ asset('images/sd.png') }}" alt="Logo Sekolah" class="w-full h-full object-contain">
                 </div>
 
-                <h1 class="text-2xl font-bold text-gray-900">Portal Sistem Perpustakaan</h1>
+                <h1 class="text-2xl font-bold text-gray-900">Sistem Perpustakaan </h1>
                 <p class="text-sm text-gray-500 mt-2">Harap masukkan terlebih dahulu</p>
             </div>
 
