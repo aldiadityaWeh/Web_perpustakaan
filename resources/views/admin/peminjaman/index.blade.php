@@ -6,17 +6,37 @@
     <!-- Wrapper utama dibuat flex-col agar footer (mt-auto) terdorong ke bawah -->
     <div class="flex flex-col flex-1 min-h-[85vh] w-full">
 
-        <!-- HEADER -->
+       <!-- HEADER -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Data Peminjaman</h1>
                 <p class="text-sm text-gray-500 mt-1">Kelola transaksi peminjaman buku</p>
             </div>
 
-             <a href="{{ route('peminjaman.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0">
-                <i class="ph ph-plus font-bold"></i>
-                Tambah Peminjaman
-            </a>
+            <div class="flex flex-wrap items-center gap-3">
+
+                <!-- TOMBOL BUKA KIOSK -->
+                <a href="{{ route('kiosk.index') }}" target="_blank"
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50/80 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-sm font-semibold transition-all shadow-sm">
+                    <i class="ph ph-desktop text-lg font-bold"></i>
+                    Buka Kiosk
+                </a>
+
+                <!-- TOMBOL MENUJU HALAMAN DENDA -->
+                <a href="{{ route('denda.index') }}"
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50/80 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-sm font-semibold transition-all shadow-sm">
+                    <i class="ph ph-receipt text-lg font-bold"></i>
+                    Tagihan Denda
+                </a>
+
+                <!-- TOMBOL TAMBAH PEMINJAMAN -->
+                <a href="{{ route('peminjaman.create') }}"
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white border border-purple-600 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md">
+                    <i class="ph ph-plus-circle text-lg font-bold"></i>
+                    Tambah Peminjaman
+                </a>
+
+            </div>
         </div>
 
         <!-- PENCARIAN (Desain Kartu Putih Sesuai Gambar) -->

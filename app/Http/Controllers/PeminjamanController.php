@@ -28,7 +28,7 @@ class PeminjamanController extends Controller
 
         if ($request->has('filter') && $request->filter != 'semua') {
             $filter = $request->filter;
-            $hariIni = \Carbon\Carbon::today();
+            $hariIni = Carbon::today(); 
 
             if ($filter == 'dipinjam') {
                 $query->where('status', 'Dipinjam')->whereDate('tanggal_jatuh_tempo', '>=', $hariIni);
@@ -194,9 +194,15 @@ class PeminjamanController extends Controller
             $catatanAkhir = "Kondisi Buku: " . $request->kondisi_buku . " | " . $request->catatan;
         }
 
+        $statusDenda = 'Bebas Denda';
+        if ($request->denda > 0) {
+            $statusDenda = 'Belum Lunas'; // Jika denda diisi lebih dari 0, otomatis statusnya berhutang
+        }
+
         $peminjaman->update([
             'status' => 'Dikembalikan',
             'denda' => $request->denda,
+            'status_denda' => $statusDenda, // Simpan status denda ke database
             'catatan' => $catatanAkhir,
         ]);
 
@@ -204,6 +210,33 @@ class PeminjamanController extends Controller
             $peminjaman->buku->increment('stok');
         }
 
+        if ($statusDenda == 'Belum Lunas') {
+            return redirect()->route('denda.index')->with('success', 'Buku dikembalikan ke rak, namun siswa memiliki tagihan denda yang harus dibayar.');
+        }
+
         return redirect()->route('peminjaman.index')->with('success', 'Pengembalian buku berhasil divalidasi dan disimpan!');
     }
+
+    public function daftarDenda(Request $request)
+    {
+        // Menampilkan peminjaman yang dendanya lebih dari 0
+        $peminjamans = Peminjaman::with(['anggota', 'buku'])
+                        ->where('denda', '>', 0)
+                        ->latest()
+                        ->paginate(10);
+
+        return view('admin.peminjaman.denda', compact('peminjamans'));
+    }
+
+    public function lunasiDenda($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        $peminjaman->update([
+            'status_denda' => 'Lunas'
+        ]);
+
+        return back()->with('success', 'Uang denda dari ' . $peminjaman->anggota->nama_lengkap . ' sebesar Rp' . number_format($peminjaman->denda, 0, ',', '.') . ' telah diterima (LUNAS).');
+    }
+
 }

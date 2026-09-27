@@ -1,17 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\BukuController;
-use App\Http\Controllers\AnggotaController;
-use App\Http\Controllers\PeminjamanController;
-use App\Http\Controllers\PengembalianController;
-use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\AnalisisController;
+use App\Http\Controllers\AnggotaController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BukuController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KioskController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PengaturanController;
+use App\Http\Controllers\PengembalianController;
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\TransaksiController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +68,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/peminjaman/{id}/validasi', [PeminjamanController::class, 'formValidasi'])->name('peminjaman.validasi');
     Route::post('/admin/peminjaman/{id}/validasi', [PeminjamanController::class, 'prosesValidasi'])->name('peminjaman.prosesValidasi');
 
+    // RUTE BARU: MANAJEMEN DENDA (ALUR 2 TAHAP)
+    Route::get('/admin/denda', [PeminjamanController::class, 'daftarDenda'])->name('denda.index');
+    Route::post('/admin/denda/{id}/lunas', [PeminjamanController::class, 'lunasiDenda'])->name('denda.lunas');
+
     // 2. Resource Utama
     Route::resource('/admin/peminjaman', PeminjamanController::class);
     Route::resource('/admin/pengembalian', PengembalianController::class); // Untuk Riwayat
@@ -86,7 +91,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
 
     // --- Profil  ---
-    Route::get('/admin/profil', [App\Http\Controllers\ProfilController::class, 'index'])->name('profil.index');
-    Route::put('/admin/profil', [App\Http\Controllers\ProfilController::class, 'update'])->name('profil.update');
+    Route::get('/admin/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::put('/admin/profil', [ProfilController::class, 'update'])->name('profil.update');
+
+
+    // --- Kiosk Peminjaman ---
+    Route::get('/admin/kiosk-peminjaman', [KioskController::class, 'index'])->name('kiosk.index');
+    Route::post('/admin/kiosk-peminjaman/auth', [KioskController::class, 'authenticate'])->name('kiosk.auth');
+    Route::get('/admin/kiosk-peminjaman/katalog', [KioskController::class, 'katalog'])->name('kiosk.katalog');
+    Route::post('/admin/kiosk-peminjaman/store', [KioskController::class, 'store'])->name('kiosk.store');
 
 });
