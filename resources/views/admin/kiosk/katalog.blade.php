@@ -25,15 +25,15 @@
     <header class="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+                <div class="w-10 h-10 bg-purple-50 text-purple-600 border border-purple-200 rounded-full flex items-center justify-center shadow-sm">
                     <i class="ph ph-user-circle text-2xl"></i>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 font-medium">Peminjam:</p>
-                    <h2 class="text-sm sm:text-base font-bold text-gray-900">{{ session('kiosk_anggota_nama') }}</h2>
+                    <h2 class="text-sm sm:text-base font-bold text-gray-800">{{ session('kiosk_anggota_nama') }}</h2>
                 </div>
             </div>
-            <a href="{{ route('kiosk.index') }}" class="text-sm font-medium text-red-500 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
+            <a href="{{ route('kiosk.index') }}" class="text-sm font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-xl transition-all shadow-sm">
                 Batal
             </a>
         </div>
@@ -56,7 +56,7 @@
             <!-- Kiri: Judul dan Info -->
             <div>
                 <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Katalog Buku</h1>
-                <p class="text-gray-500 mt-1">Pilih maksimal <span class="font-bold text-purple-600">{{ $pengaturan->maksimal_buku_pinjam }} buku</span> yang dapat di pinjam.</p>
+                <p class="text-gray-500 mt-1">Pilih maksimal <span class="font-bold text-purple-600">{{ $pengaturan->maksimal_buku_pinjam }} buku</span> yang ingin Anda pinjam hari ini.</p>
             </div>
 
             <!-- Kanan: Tombol Dropdown Berwarna -->
@@ -140,12 +140,25 @@
                                     <h4 class="font-bold text-gray-900 text-sm leading-snug line-clamp-2 mb-1">{{ $buku->judul }}</h4>
                                     <p class="text-xs text-gray-500 mb-3">{{ $buku->pengarang }}</p>
 
+                                    <!-- BAGIAN BARU: LABEL SISA STOK (Warna Diselaraskan) -->
+                                    <div class="flex items-center mb-4">
+                                        <span class="inline-flex items-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                                            <i class="ph ph-stack text-sm"></i> Sisa: {{ $buku->stok }} Buku
+                                        </span>
+                                    </div>
+                                    <!-- AKHIR BAGIAN BARU -->
+
                                     <div class="mt-auto">
-                                        <!-- Tombol Pilih AlpineJS -->
+                                        <!-- Tombol Pilih AlpineJS (Desain Baru dengan Border & Warna) -->
                                         <button @click="toggleBook({{ $buku->id }})"
-                                                class="w-full py-2 px-3 rounded-xl text-sm font-bold transition-colors border"
-                                                :class="isSelected({{ $buku->id }}) ? 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'">
-                                            <span x-text="isSelected({{ $buku->id }}) ? 'Batal Pilih' : 'Pilih Buku'"></span>
+                                                class="w-full py-2.5 px-3 rounded-xl text-sm font-bold transition-all duration-300 border-2"
+                                                :class="isSelected({{ $buku->id }})
+                                                    ? 'bg-red-50 text-red-500 border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-md'
+                                                    : 'bg-white text-purple-600 border-purple-300 shadow-sm hover:bg-purple-600 hover:text-white hover:border-purple-600 hover:shadow-md'">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <i class="text-lg" :class="isSelected({{ $buku->id }}) ? 'ph ph-x-circle' : 'ph ph-plus-circle'"></i>
+                                                <span x-text="isSelected({{ $buku->id }}) ? 'Batal Pilih' : 'Pilih Buku'"></span>
+                                            </div>
                                         </button>
                                     </div>
                                 </div>
@@ -178,7 +191,7 @@
                 </template>
 
                 <button type="submit" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-8 py-3.5 rounded-2xl font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-colors">
-                    Pinjam <i class="ph ph-check-circle text-xl"></i>
+                    Selesai & Pinjam <i class="ph ph-check-circle text-xl"></i>
                 </button>
             </form>
         </div>
