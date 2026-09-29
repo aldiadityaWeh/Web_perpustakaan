@@ -22,18 +22,18 @@
       x-data="keranjangBuku({{ $pengaturan->maksimal_buku_pinjam }})">
 
     <!-- Header / Navbar -->
-    <header class="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm">
+    <header class="bg-purple-600 sticky top-0 z-40 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-purple-50 text-purple-600 border border-purple-200 rounded-full flex items-center justify-center shadow-sm">
+                <div class="w-10 h-10 bg-white/20 text-white border border-white/30 rounded-full flex items-center justify-center shadow-inner">
                     <i class="ph ph-user-circle text-2xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 font-medium">Peminjam:</p>
-                    <h2 class="text-sm sm:text-base font-bold text-gray-800">{{ session('kiosk_anggota_nama') }}</h2>
+                    <p class="text-xs text-purple-200 font-medium">Peminjam:</p>
+                    <h2 class="text-sm sm:text-base font-bold text-white">{{ session('kiosk_anggota_nama') }}</h2>
                 </div>
             </div>
-            <a href="{{ route('kiosk.index') }}" class="text-sm font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-xl transition-all shadow-sm">
+            <a href="{{ route('kiosk.index') }}" class="text-sm font-bold text-white hover:text-red-50 bg-red-500 hover:bg-red-600 border border-red-600 px-4 py-2 rounded-xl transition-all shadow-sm">
                 Batal
             </a>
         </div>
@@ -191,7 +191,7 @@
                 </template>
 
                 <button type="submit" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-8 py-3.5 rounded-2xl font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-colors">
-                    Selesai & Pinjam <i class="ph ph-check-circle text-xl"></i>
+                    Pinjam <i class="ph ph-check-circle text-xl"></i>
                 </button>
             </form>
         </div>

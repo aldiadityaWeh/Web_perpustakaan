@@ -142,9 +142,9 @@
                     </div>
 
                     <!-- Tombol Keluar -->
-                  <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
+                    <form method="POST" action="{{ route('logout') }}" id="form-logout" class="inline-block m-0 p-0">
                         @csrf
-                        <button type="submit" class="bg-red-800/90 hover:bg-red-900 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer border border-transparent hover:border-red-700">
+                        <button type="button" onclick="konfirmasiKeluar()" class="bg-red-800 hover:bg-red-900 text-white font-bold py-2 px-5 rounded-lg transition-colors shadow-sm flex items-center gap-2 cursor-pointer">
                             Keluar
                         </button>
                     </form>
@@ -160,5 +160,31 @@
 
     </div>
 
+    <!-- SCRIPT SWEETALERT UNTUK LOGOUT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            function konfirmasiKeluar() {
+                Swal.fire({
+                    title: 'Keluar Aplikasi?',
+                    text: "Anda akan mengakhiri sesi dan harus login kembali nanti.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Ya, Keluar!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'rounded-2xl shadow-xl',
+                        confirmButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm',
+                        cancelButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('form-logout').submit();
+                    }
+                })
+            }
+        </script>
 </body>
 </html>
