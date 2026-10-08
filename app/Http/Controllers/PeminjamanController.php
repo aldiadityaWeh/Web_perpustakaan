@@ -28,7 +28,7 @@ class PeminjamanController extends Controller
 
         if ($request->has('filter') && $request->filter != 'semua') {
             $filter = $request->filter;
-            $hariIni = Carbon::today(); 
+            $hariIni = Carbon::today();
 
             if ($filter == 'dipinjam') {
                 $query->where('status', 'Dipinjam')->whereDate('tanggal_jatuh_tempo', '>=', $hariIni);
@@ -170,7 +170,7 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.kembali', compact('peminjaman'));
     }
 
-    public function formValidasi($id)
+   public function formValidasi($id)
     {
         $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
 
@@ -183,47 +183,69 @@ class PeminjamanController extends Controller
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        $request->validate([
-            'kondisi_buku' => 'required|in:Baik,Rusak,Hilang',
-            'denda' => 'required|numeric|min:0',
-            'catatan' => 'nullable|string'
-        ]);
+        // Mencegah validasi ganda jika buku ternyata sudah dikembalikan
+        if ($peminjaman->status == 'Dikembalikan') {
+            return back()->with('error', 'Buku ini sudah divalidasi sebelumnya.');
+        }
+
+        // 1. TANGKAP TOTAL DENDA DARI FORM
+        // Kita percayakan angka akhirnya pada apa yang ada di kotak input Form.
+        $totalDenda = $request->denda ?? 0;
+
+        // 2. LOGIKA PENGAMAN (BACKUP)
+        // Jika Admin mengosongkan denda (0) TAPI sistem mendeteksi anak ini terlambat,
+        // maka sistem akan otomatis menarik angka denda keterlambatan sebagai gantinya.
+        if ($totalDenda == 0 && $peminjaman->denda_berjalan > 0) {
+            $totalDenda = $peminjaman->denda_berjalan;
+        }
 
         $catatanAkhir = $request->catatan;
-        if ($request->kondisi_buku != 'Baik') {
-            $catatanAkhir = "Kondisi Buku: " . $request->kondisi_buku . " | " . $request->catatan;
+        if ($request->has('kondisi_buku') && $request->kondisi_buku != 'Baik') {
+            $catatanAkhir = "Kondisi: " . $request->kondisi_buku . " | " . $request->catatan;
         }
 
-        $statusDenda = 'Bebas Denda';
-        if ($request->denda > 0) {
-            $statusDenda = 'Belum Lunas'; // Jika denda diisi lebih dari 0, otomatis statusnya berhutang
-        }
+        $statusDenda = $totalDenda > 0 ? 'Belum Lunas' : 'Bebas Denda';
 
+        // 3. KUNCI DATA: Masukkan tanggal dikembalikan agar denda berhenti!
         $peminjaman->update([
+            'tanggal_dikembalikan' => \Carbon\Carbon::now(),
             'status' => 'Dikembalikan',
-            'denda' => $request->denda,
-            'status_denda' => $statusDenda, // Simpan status denda ke database
+            'denda' => $totalDenda,
+            'status_denda' => $statusDenda,
             'catatan' => $catatanAkhir,
         ]);
 
-        if ($request->kondisi_buku != 'Hilang') {
+        // 4. Kembalikan stok buku jika tidak hilang
+        if ($request->kondisi_buku != 'Hilang' && $peminjaman->buku) {
             $peminjaman->buku->increment('stok');
         }
 
+        // 5. Arahkan halaman
         if ($statusDenda == 'Belum Lunas') {
-            return redirect()->route('denda.index')->with('success', 'Buku dikembalikan ke rak, namun siswa memiliki tagihan denda yang harus dibayar.');
+            return redirect()->route('denda.index')->with('success', 'Buku telah dikembalikan, namun terdapat tagihan denda sebesar Rp ' . number_format($totalDenda, 0, ',', '.') . ' yang harus dibayar.');
         }
 
-        return redirect()->route('peminjaman.index')->with('success', 'Pengembalian buku berhasil divalidasi dan disimpan!');
+        return redirect()->route('peminjaman.index')->with('success', 'Pengembalian buku berhasil divalidasi tanpa denda!');
     }
 
     public function daftarDenda(Request $request)
     {
-        // Menampilkan peminjaman yang dendanya lebih dari 0
-        $peminjamans = Peminjaman::with(['anggota', 'buku'])
-                        ->where('denda', '>', 0)
-                        ->latest()
-                        ->paginate(10);
+        // Query dasar: Ambil peminjaman yang dendanya lebih dari 0
+        $query = Peminjaman::with(['anggota', 'buku'])->where('denda', '>', 0);
+
+        // Jika ada inputan pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->whereHas('anggota', function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', '%' . $search . '%')
+                  ->orWhere('nis', 'like', '%' . $search . '%');
+            })->orWhereHas('buku', function($q) use ($search) {
+                $q->where('judul', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Tampilkan data, urutkan dari yang terbaru, pagination 10 per halaman, dan bawa query pencariannya
+        $peminjamans = $query->latest()->paginate(10)->withQueryString();
 
         return view('admin.peminjaman.denda', compact('peminjamans'));
     }
