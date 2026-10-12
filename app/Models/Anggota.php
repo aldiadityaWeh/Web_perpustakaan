@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Anggota extends Model
 {
     use HasFactory;
+    use \App\Traits\ScopeSekolah;
 
     // Mendefinisikan nama tabel secara eksplisit
     protected $table = 'anggota';

@@ -3,17 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Sekolah;
+use App\Models\Pengaturan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
     // TAMPILAN HALAMAN (VIEW)
-   
 
     public function showLoginForm()
     {
@@ -32,43 +34,76 @@ class AuthController extends Controller
 
     public function showResetForm(Request $request, $token = null)
     {
-        // Menampilkan halaman buat sandi baru dengan membawa token rahasia
         return view('auth.reset-password')->with([
-            'token' => $token, 
+            'token' => $token,
             'email' => $request->email
         ]);
     }
 
-    // LOGIKA MANUAL (EMAIL & PASSWORD)
+    // ==========================================
+    // LOGIKA PENDAFTARAN SAAS (MULTI-SEKOLAH)
+    // ==========================================
 
     public function register(Request $request)
     {
+        // 1. Validasi Inputan
         $request->validate([
+            'nama_sekolah' => 'required|string|max:255',
             'name' => 'required|string|min:3|max:20',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:3|max:8',
         ], [
+            'nama_sekolah.required' => 'Nama Sekolah / Instansi wajib diisi.',
             'name.required' => 'Username wajib diisi.',
             'name.min' => 'Username terlalu pendek, minimal 3 karakter.',
             'name.max' => 'Username terlalu panjang, maksimal 20 karakter.',
-            
             'email.required' => 'Alamat email wajib diisi.',
             'email.email' => 'Format alamat email tidak valid.',
             'email.unique' => 'Email ini sudah terdaftar. Silakan gunakan email lain.',
-            
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi terlalu pendek, minimal 3 karakter.',
             'password.max' => 'Kata sandi terlalu panjang, maksimal 8 karakter.',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        try {
+            // 2. Gunakan DB Transaction agar jika salah satu gagal, semuanya dibatalkan
+            DB::transaction(function () use ($request) {
 
-        return redirect()->route('login')->with('success', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
+                // A. Buat Lemari Sekolah Baru
+                $sekolah = Sekolah::create([
+                    'nama_sekolah' => $request->nama_sekolah
+                ]);
+
+                // B. Buat Akun Admin untuk sekolah tersebut
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'sekolah_id' => $sekolah->id // <--- Kunci Multi-Tenancy!
+                ]);
+
+                // C. Buat Pengaturan Default untuk sekolah tersebut
+                Pengaturan::create([
+                    'maksimal_buku_pinjam' => 3,
+                    'maksimal_hari_pinjam' => 7,
+                    'denda_per_hari' => 1000,
+                    'sekolah_id' => $sekolah->id
+                ]);
+
+                // D. Langsung Loginkan usernya
+                Auth::login($user);
+            });
+
+            return redirect()->route('dashboard')->with('success', 'Pendaftaran Sekolah berhasil! Selamat datang di Dasbor Anda.');
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Pendaftaran gagal: ' . $e->getMessage()])->withInput();
+        }
     }
+
+    // ==========================================
+    // LOGIKA LOGIN, LOGOUT & RESET PASSWORD
+    // ==========================================
 
     public function login(Request $request)
     {
@@ -96,11 +131,9 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect('/');
     }
-
-    // LOGIKA LUPA & RESET PASSWORD
 
     public function sendResetLink(Request $request)
     {
@@ -142,7 +175,6 @@ class AuthController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            // Sukses ganti password, arahkan ke login
             return redirect()->route('login')->with('success', 'Kata sandi Anda berhasil diatur ulang! Silakan masuk menggunakan sandi baru Anda.');
         }
 

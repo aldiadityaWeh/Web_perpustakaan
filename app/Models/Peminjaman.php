@@ -10,6 +10,7 @@ use Carbon\Carbon;
 class Peminjaman extends Model
 {
     use HasFactory;
+    use \App\Traits\ScopeSekolah;
 
     protected $table = 'peminjaman';
     protected $guarded = ['id'];

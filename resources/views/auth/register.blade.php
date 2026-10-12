@@ -3,68 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - Sistem Perpustakaan</title>
+    <title>Daftar Sekolah - Sistem Perpustakaan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 font-sans text-gray-800">
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-white w-full max-w-md rounded-3xl shadow-xl border border-gray-100 overflow-hidden my-8">
-        <div class="p-8 sm:p-10">
-            
-            <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">Buat Akun Baru</h1>
-                <p class="text-sm text-gray-500 mt-2">Daftar secara manual untuk mengelola perpustakaan</p>
+    <div class="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 my-8">
+        <!-- Header -->
+        <div class="bg-purple-600 p-8 text-center">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                <i class="ph ph-buildings text-3xl text-white"></i>
             </div>
+            <h1 class="text-2xl font-bold text-white mb-1">Daftarkan Sekolah</h1>
+            <p class="text-purple-100 text-sm">Buat akun untuk mengelola perpustakaan Anda sendiri</p>
+        </div>
 
-            <!-- TAMPILAN ERROR VALIDASI -->
-            @if ($errors->any())
-                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex gap-3">
-                    <i class="ph ph-warning-circle text-xl shrink-0"></i>
+        <div class="p-8">
+            <!-- Alert Error -->
+            @if($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3">
+                    <i class="ph ph-warning-circle text-2xl"></i>
                     <div>
-                        <ul class="list-disc pl-4">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                        <h4 class="font-bold text-sm">Pendaftaran Gagal</h4>
+                        <p class="text-sm mt-0.5">{{ $errors->first() }}</p>
                     </div>
                 </div>
             @endif
 
-            <!-- Form Daftar Manual Murni -->
-            <form action="{{ route('register.process') }}" method="POST" class="flex flex-col gap-4">
+            <form action="{{ route('register.process') }}" method="POST" class="space-y-5">
                 @csrf
                 
+                <!-- Input Nama Sekolah -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama / Username</label>
-                    <input type="text" name="name" value="{{ old('name') }}" required placeholder="Username" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="Email.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm">
-                </div>
-
-                <div x-data="{ show: false }">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Kata Sandi</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Nama Sekolah / Instansi</label>
                     <div class="relative">
-                        <input :type="show ? 'text' : 'password'" name="password" required placeholder="Minimal 3 - 8 karakter" class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm">
-                        <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-purple-600 focus:outline-none transition-colors">
-                            <i class="text-lg" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
-                        </button>
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph ph-graduation-cap text-gray-400 text-lg"></i>
+                        </div>
+                        <input type="text" name="nama_sekolah" value="{{ old('nama_sekolah') }}" required autofocus placeholder="Contoh: SDN 6 Ciseureuh"
+                            class="pl-11 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full mt-4 bg-gray-900 hover:bg-black text-white font-semibold py-3 rounded-xl transition-colors shadow-md">
-                    Buat Akun
+                <hr class="border-gray-100 my-2">
+
+                <!-- Input Nama Admin -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Nama Admin / Pustakawan</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph ph-user text-gray-400 text-lg"></i>
+                        </div>
+                        <input type="text" name="name" value="{{ old('name') }}" required placeholder="Nama Lengkap Anda"
+                            class="pl-11 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition">
+                    </div>
+                </div>
+
+                <!-- Input Email -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Alamat Email</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph ph-envelope-simple text-gray-400 text-lg"></i>
+                        </div>
+                        <input type="email" name="email" value="{{ old('email') }}" required placeholder="admin@sekolah.com"
+                            class="pl-11 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <!-- Input Password -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Kata Sandi</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="ph ph-lock-key text-gray-400 text-lg"></i>
+                            </div>
+                            <input type="password" name="password" required placeholder="Minimal 6 Karakter"
+                                class="pl-11 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Ulangi Password -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Ulangi Sandi</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="ph ph-lock-key-fill text-gray-400 text-lg"></i>
+                            </div>
+                            <input type="password" name="password_confirmation" required placeholder="Ketik ulang sandi"
+                                class="pl-11 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Daftar -->
+                <button type="submit" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-lg">
+                    Buat Akun Sekolah <i class="ph ph-arrow-right font-bold"></i>
                 </button>
             </form>
-
-            <p class="text-center text-sm text-gray-500 mt-8">
-                Sudah punya akun? <a href="{{ route('login') }}" class="font-bold text-purple-600 hover:text-purple-700">Masuk disini</a>
+            
+            <p class="text-center text-sm mt-6 text-gray-500">
+                Sudah mendaftarkan sekolah Anda? <br class="sm:hidden">
+                <a href="{{ route('login') }}" class="font-bold text-purple-600 hover:text-purple-700">Masuk di sini</a>
             </p>
         </div>
+        
     </div>
 
 </body>

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Pengaturan extends Model
 {
     use HasFactory;
+    use \App\Traits\ScopeSekolah;
 
     protected $fillable = [
         'nama_sekolah',
