@@ -170,7 +170,7 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.kembali', compact('peminjaman'));
     }
 
-   public function formValidasi($id)
+     public function formValidasi($id)
     {
         $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
 
@@ -179,7 +179,7 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.validasi', compact('peminjaman'));
     }
 
-    public function prosesValidasi(Request $request, $id)
+public function prosesValidasi(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
@@ -215,8 +215,10 @@ class PeminjamanController extends Controller
             'catatan' => $catatanAkhir,
         ]);
 
-        // 4. Kembalikan stok buku jika tidak hilang
-        if ($request->kondisi_buku != 'Hilang' && $peminjaman->buku) {
+        // 4. LOGIKA ATURAN MUTLAK: BUKU HILANG ATAU RUSAK WAJIB GANTI BARU FISIK
+        // Stok HANYA dikembalikan ke rak jika bukunya Baik, atau "Hilang (Sudah Diganti)"
+        // Jika Rusak atau Hilang (Belum Diganti), stok DIBEKUKAN.
+        if (!in_array($request->kondisi_buku, ['Hilang (Belum Diganti)', 'Rusak']) && $peminjaman->buku) {
             $peminjaman->buku->increment('stok');
         }
 
@@ -228,7 +230,7 @@ class PeminjamanController extends Controller
         return redirect()->route('peminjaman.index')->with('success', 'Pengembalian buku berhasil divalidasi tanpa denda!');
     }
 
-    public function daftarDenda(Request $request)
+   public function daftarDenda(Request $request)
     {
         // Query dasar: Ambil peminjaman yang dendanya lebih dari 0
         $query = Peminjaman::with(['anggota', 'buku'])->where('denda', '>', 0);
@@ -249,7 +251,7 @@ class PeminjamanController extends Controller
 
         return view('admin.peminjaman.denda', compact('peminjamans'));
     }
-
+    
     public function lunasiDenda($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);

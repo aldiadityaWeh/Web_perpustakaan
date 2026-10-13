@@ -3,103 +3,140 @@
         Validasi Pengembalian - Sistem Perpustakaan
     </x-slot:title>
 
-    <div class="max-w-3xl mx-auto w-full pt-6 pb-12">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+    <div class="flex flex-col flex-1 w-full max-w-3xl mx-auto min-h-[85vh]">
+        <!-- Header -->
+        <div class="flex items-center gap-4 mb-6">
+            <a href="{{ route('peminjaman.index') }}" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+                <i class="ph ph-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Validasi Pengembalian</h1>
+                <p class="text-sm text-gray-500 mt-1">Periksa kondisi buku dan pastikan aturan dipatuhi.</p>
+            </div>
+        </div>
 
-            <!-- Header Info Buku -->
-            <div class="bg-[#f8f9fa] rounded-xl p-5 mb-8">
-                <h2 class="text-lg font-semibold text-gray-800 mb-1">{{ $peminjaman->buku->judul }}</h2>
-                <p class="text-sm text-gray-500 mb-0.5">Dipinjam oleh: <span class="text-gray-700">{{ $peminjaman->anggota->nama_lengkap }}</span></p>
-                <p class="text-sm text-gray-500">Tanggal Pinjam: <span class="text-gray-700">{{ \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->format('d/m/Y') }}</span></p>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <!-- Info Peminjaman -->
+            <div class="p-6 bg-gray-50/50 border-b border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Data Siswa</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                            <i class="ph ph-user"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900">{{ $peminjaman->anggota->nama_lengkap }}</p>
+                            <p class="text-xs text-gray-500">NIS: {{ $peminjaman->anggota->nis }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Data Buku</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                            <i class="ph ph-book-open"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900 line-clamp-1">{{ $peminjaman->buku->judul }}</p>
+                            <p class="text-xs text-gray-500">Kode/ISBN: {{ $peminjaman->buku->isbn }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- FORM ACTION MENGARAH KE PROSES VALIDASI -->
-            <form action="{{ route('peminjaman.prosesValidasi', $peminjaman->id) }}" method="POST">
+            <!-- Form Validasi -->
+            <!-- Menambahkan x-data AlpineJS untuk melacak Pilihan Kondisi Buku secara real-time -->
+            <form action="{{ route('peminjaman.prosesValidasi', $peminjaman->id) }}" method="POST" class="p-6 space-y-6" x-data="{ kondisi: 'Baik' }">
                 @csrf
 
-                <!-- Dropdown Kondisi Buku -->
-                <div class="mb-6">
-                    <label class="block text-sm text-gray-600 mb-2">Kondisi Buku <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <select id="kondisi_buku" name="kondisi_buku" class="w-full appearance-none border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-200 focus:border-purple-600 outline-none transition text-gray-700 bg-white" required>
-                            <option value="Baik">Baik</option>
-                            <option value="Rusak">Rusak / Sobek</option>
-                            <option value="Hilang">Hilang</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                            <i class="ph ph-caret-down"></i>
+                <!-- Alert Keterlambatan -->
+                @if($peminjaman->hari_terlambat > 0)
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-xl flex items-start gap-3">
+                        <i class="ph ph-warning-circle text-red-600 text-2xl"></i>
+                        <div>
+                            <h4 class="font-bold text-red-800 text-sm">Terlambat {{ $peminjaman->hari_terlambat }} Hari!</h4>
+                            <p class="text-sm text-red-700 mt-0.5">Siswa ini telah melewati batas waktu pengembalian. Sistem telah menghitung otomatis denda keterlambatan.</p>
+                        </div>
+                    </div>
+                @else
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex items-start gap-3">
+                        <i class="ph ph-check-circle text-emerald-600 text-2xl"></i>
+                        <div>
+                            <h4 class="font-bold text-emerald-800 text-sm">Tepat Waktu</h4>
+                            <p class="text-sm text-emerald-700 mt-0.5">Siswa mengembalikan buku sesuai jadwal. Tidak ada denda keterlambatan.</p>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Input Total Denda -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Total Tagihan (Rp)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <span class="text-gray-500 font-bold">Rp</span>
+                            </div>
+                            <input type="number" name="denda" value="{{ $peminjaman->denda_berjalan }}" required min="0"
+                                class="pl-12 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition font-bold text-gray-900 text-lg">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1.5">*Isi angka denda kerterlambatan / denda khusus di sini.</p>
+                    </div>
+
+                    <!-- Kondisi Buku -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Kondisi Saat Dikembalikan</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="ph ph-exam text-gray-400 text-lg"></i>
+                            </div>
+                            <!-- x-model="kondisi" akan terhubung dengan Pop-up Peringatan di bawah -->
+                            <select name="kondisi_buku" x-model="kondisi" required
+                                class="pl-11 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition appearance-none cursor-pointer font-bold text-gray-700">
+                                <option value="Baik">Bagus / Normal</option>
+                                <option value="Rusak">Rusak (Halaman Robek/Kotor)</option>
+                                <option value="Hilang (Belum Diganti)">Hilang (Siswa Belum Membawa Ganti)</option>
+                                <option value="Hilang (Sudah Diganti)">Hilang (Sudah Diganti Buku Fisik Sama)</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="ph ph-caret-down text-gray-400"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Input Denda (Otomatis dari JS) -->
-                <div class="mb-6">
-                    <label class="block text-sm text-gray-600 mb-2">Denda (Rp)</label>
-                    <input type="number" id="denda" name="denda" value="{{ $peminjaman->denda_berjalan }}" readonly
-                        class="w-full border border-gray-300 bg-gray-50 rounded-lg px-4 py-3 outline-none text-gray-700">
-                    <p id="info-denda" class="text-xs mt-2 text-gray-500">
-                        @if($peminjaman->denda_berjalan > 0)
-                            <span class="text-red-500 font-medium">Terdapat denda keterlambatan Rp {{ number_format($peminjaman->denda_berjalan, 0, ',', '.') }}</span>
-                        @else
-                            Tidak ada denda keterlambatan.
-                        @endif
-                    </p>
+                <!-- ATURAN MUTLAK WARNING (Muncul Jika Hilang Belum Diganti ATAU Rusak) -->
+                <div x-show="kondisi === 'Hilang (Belum Diganti)' || kondisi === 'Rusak'" x-transition x-cloak
+                     class="bg-red-50 border-l-4 border-red-600 p-5 rounded-r-xl shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <i class="ph ph-prohibit text-red-600 text-3xl animate-pulse"></i>
+                        <div>
+                            <h4 class="font-black text-red-800 text-sm uppercase tracking-widest mb-1">ATURAN MUTLAK: WAJIB GANTI BUKU!</h4>
+                            <p class="text-sm text-red-700 leading-relaxed">
+                                Buku yang hilang atau rusak parah <strong>tidak boleh diganti dengan uang tunai</strong>. Siswa diwajibkan mencari dan menyerahkan buku fisik dengan judul yang sama persis.
+                            </p>
+                            <p class="text-xs font-bold text-red-800 mt-2 bg-red-100 py-1.5 px-3 rounded-lg inline-block">
+                                <i class="ph ph-info"></i> Stok buku ini tidak akan dikembalikan ke sistem sebelum siswa menyerahkan buku barunya.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Textarea Catatan -->
-                <div class="mb-8">
-                    <label class="block text-sm text-gray-600 mb-2">Catatan</label>
-                    <textarea name="catatan" rows="4"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-200 focus:border-purple-600 outline-none transition text-gray-700 resize-none" placeholder="Opsional..."></textarea>
+                <!-- Catatan Tambahan -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Catatan Kepala Perpus (Opsional)</label>
+                    <textarea name="catatan" rows="3" placeholder="Tuliskan catatan kondisi buku, janji ganti buku, atau rincian kerusakan di sini..."
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm"></textarea>
                 </div>
 
-                <!-- Tombol Aksi -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <a href="{{ route('peminjaman.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <a href="{{ route('peminjaman.index') }}" class="px-6 py-3 text-sm font-bold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                         Batal
                     </a>
-                    <button type="submit" class="px-6 py-2.5 bg-[#9333ea] hover:bg-purple-700 text-white rounded-lg font-medium transition-colors shadow-sm">
-                        Simpan Pengembalian
+                    <button type="submit" class="px-8 py-3 text-sm font-bold text-white bg-purple-600 rounded-xl hover:bg-purple-700 shadow-md transition-all flex items-center gap-2">
+                        Validasi & Kunci <i class="ph ph-lock-key text-lg"></i>
                     </button>
                 </div>
             </form>
-
         </div>
     </div>
-
-    <!-- Script Kalkulasi Denda -->
-    <script>
-        const dendaTerlambatBase = {{ $peminjaman->denda_berjalan }};
-        const dendaRusak = 20000; // Tarif jika buku rusak (Bisa diedit)
-        const dendaHilang = 50000; // Tarif jika buku hilang (Bisa diedit)
-
-        const selectKondisi = document.getElementById('kondisi_buku');
-        const inputDenda = document.getElementById('denda');
-        const infoDenda = document.getElementById('info-denda');
-
-        selectKondisi.addEventListener('change', function() {
-            let total = dendaTerlambatBase;
-            let info = "";
-
-            if (dendaTerlambatBase > 0) {
-                info += `Telat: Rp ${dendaTerlambatBase.toLocaleString('id-ID')}. `;
-            }
-
-            if (this.value === 'Rusak') {
-                total += dendaRusak;
-                info += `Denda Rusak: Rp ${dendaRusak.toLocaleString('id-ID')}.`;
-            } else if (this.value === 'Hilang') {
-                total += dendaHilang;
-                info += `Denda Hilang: Rp ${dendaHilang.toLocaleString('id-ID')}.`;
-            }
-
-            inputDenda.value = total;
-
-            if(total === 0) {
-                infoDenda.innerHTML = `<span class="text-gray-500">Kondisi aman, tidak ada denda.</span>`;
-            } else {
-                infoDenda.innerHTML = `<span class="text-red-500 font-medium">Rincian: ${info}</span>`;
-            }
-        });
-    </script>
 </x-admin-layout>
