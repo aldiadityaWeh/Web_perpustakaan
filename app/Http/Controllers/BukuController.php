@@ -131,4 +131,12 @@ class BukuController extends Controller
 
         return redirect()->route('buku.index')->with('success', 'Data buku berhasil dihapus!');
     }
+
+    public function cetakLabel($id)
+    {
+        // Ubah \App\Models\Buku menjadi Buku saja
+        $buku = Buku::findOrFail($id);
+
+        return view('admin.buku.cetak-label', compact('buku'));
+    }
 }

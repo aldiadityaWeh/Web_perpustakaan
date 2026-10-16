@@ -92,4 +92,11 @@ class AnggotaController extends Controller
 
         return redirect()->route('anggota.index')->with('success', 'Data anggota berhasil dihapus!');
     }
+
+    public function cetakKartu($id)
+    {
+        $anggota = Anggota::findOrFail($id);
+
+        return view('admin.anggota.cetak-kartu', compact('anggota'));
+    }
 }

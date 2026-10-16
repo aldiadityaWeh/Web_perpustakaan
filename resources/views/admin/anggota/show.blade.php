@@ -4,15 +4,22 @@
     </x-slot:title>
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+       <div>
             <h1 class="text-2xl font-bold text-gray-800">Informasi Detail Anggota</h1>
             <p class="text-sm text-gray-500 mt-1">Melihat kelengkapan data siswa</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
             <a href="{{ route('anggota.index') }}" class="inline-flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
                 <i class="ph ph-arrow-left text-lg"></i>
                 Kembali
             </a>
+
+            <!-- TOMBOL DOWNLOAD KARTU DIPERBARUI (MENGIRIMKAN NAMA FILE KE JS) -->
+            <button type="button" onclick="downloadAsImage('kartu-anggota-design', 'Kartu_Anggota_{{ $anggota->nis }}.png')" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 cursor-pointer">
+                <i class="ph ph-download-simple text-lg"></i>
+                Download Kartu
+            </button>
+
             <a href="{{ route('anggota.edit', $anggota->id) }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                 <i class="ph ph-pencil-simple text-lg"></i>
                 Edit Anggota
@@ -174,4 +181,50 @@
             </table>
         </div>
     </div>
+
+     <!-- ========================================== -->
+    <!-- AREA TERSEMBUNYI UNTUK RENDER DOWNLOAD PNG -->
+    <!-- ========================================== -->
+     <div style="position: absolute; left: -9999px; top: 0; z-index: -10;">
+        <div id="kartu-anggota-design" class="w-[340px] bg-white rounded-xl overflow-hidden border border-gray-200">
+            <!-- Header Kartu -->
+            <div class="bg-gradient-to-r from-purple-700 to-purple-500 p-4 text-center border-b-4 border-yellow-400">
+                <h1 class="text-white font-black text-lg uppercase tracking-wider leading-none">Kartu Anggota</h1>
+                <p class="text-purple-100 text-[10px] uppercase font-bold mt-1 tracking-widest">Perpustakaan Sekolah</p>
+            </div>
+
+            <!-- Body Kartu -->
+            <div class="p-5 relative bg-white">
+                <div class="space-y-3 z-10 relative">
+                    <div>
+                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Nama Lengkap</p>
+                        <p class="text-sm font-black text-gray-800 leading-tight uppercase">{{ $anggota->nama_lengkap }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">NIS / NIP</p>
+                            <p class="text-xs font-bold text-gray-800">{{ $anggota->nis }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Kelas/Status</p>
+                            <p class="text-xs font-bold text-gray-800">{{ $anggota->kelas ?? 'Guru/Staf' }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-col items-center justify-center bg-purple-50 p-3 rounded-lg border border-purple-100 shadow-inner">
+                    <p class="text-[10px] text-purple-400 font-bold uppercase tracking-widest mb-0.5">ID / Sandi Kiosk</p>
+                    <p class="text-2xl font-black text-purple-700 tracking-widest">{{ $anggota->nis }}</p>
+                </div>
+            </div>
+
+            <!-- Footer Kartu -->
+            <div class="bg-gray-800 text-center py-1.5">
+                <p class="text-[8px] text-gray-300">Harap bawa kartu ini setiap kali meminjam buku di Kiosk.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT UNTUK DOWNLOAD MENJADI GAMBAR PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ asset('js/cetak-gambar.js') }}"></script>
 </x-admin-layout>

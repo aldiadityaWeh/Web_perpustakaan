@@ -4,15 +4,22 @@
     </x-slot:title>
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+          <div>
             <h1 class="text-2xl font-bold text-gray-800">Informasi Detail Buku</h1>
             <p class="text-sm text-gray-500 mt-1">Melihat kelengkapan data inventaris buku</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
             <a href="{{ route('buku.index') }}" class="inline-flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
                 <i class="ph ph-arrow-left text-lg"></i>
                 Kembali
             </a>
+
+            <!-- TOMBOL DOWNLOAD DIPERBARUI (MENGIRIMKAN NAMA FILE KE JS) -->
+            <button type="button" onclick="downloadAsImage('label-buku-design', 'Label_Buku_{{ $buku->isbn ?? $buku->id }}.png')" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm focus:outline-none cursor-pointer">
+                <i class="ph ph-download-simple text-lg"></i>
+                Download Label
+            </button>
+
             <a href="{{ route('buku.edit', $buku->id) }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                 <i class="ph ph-pencil-simple text-lg"></i>
                 Edit Buku
@@ -92,4 +99,40 @@
             </div>
         </div>
     </div>
+    <!-- ========================================== -->
+    <!-- AREA TERSEMBUNYI UNTUK RENDER DOWNLOAD PNG -->
+    <!-- ========================================== -->
+    <div style="position: absolute; left: -9999px; top: 0; z-index: -10;">
+        <div id="label-buku-design" class="w-[250px] bg-white rounded-sm overflow-hidden border border-gray-300 flex flex-col">
+            <!-- Header Warna Visual -->
+            <div class="bg-purple-600 h-2 w-full"></div>
+
+            <div class="p-3 pb-1 text-center bg-white">
+                <p class="text-xs font-black text-gray-900 leading-tight line-clamp-2">{{ $buku->judul }}</p>
+            </div>
+
+            <div class="flex-1 px-3 py-2 flex flex-col items-center justify-center bg-white">
+                <!-- Informasi Rak (Pengganti Barcode) -->
+                <div class="w-full bg-purple-50 border-2 border-dashed border-purple-200 rounded-lg p-3 text-center flex flex-col items-center justify-center">
+                    <p class="text-[10px] text-purple-500 font-bold uppercase tracking-widest mb-1">Posisi Rak</p>
+                    <p class="text-4xl font-black text-purple-700 leading-none">{{ $buku->rak ?? 'A' }}</p>
+                </div>
+            </div>
+
+            <!-- Footer Label: DDC & Nama Sekolah -->
+            <div class="bg-gray-50 border-t border-gray-200 p-2 flex justify-between items-center">
+                <div class="text-[9px] text-gray-500 uppercase font-bold tracking-widest">
+                    PERPUS SEKOLAH
+                </div>
+                <!-- Label DDC -->
+                <div class="bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-black shadow-sm">
+                    DDC: {{ $buku->kategori }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT UNTUK DOWNLOAD MENJADI GAMBAR PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ asset('js/cetak-gambar.js') }}"></script>
 </x-admin-layout>

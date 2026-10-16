@@ -208,7 +208,7 @@ public function prosesValidasi(Request $request, $id)
 
         // 3. KUNCI DATA: Masukkan tanggal dikembalikan agar denda berhenti!
         $peminjaman->update([
-            'tanggal_dikembalikan' => \Carbon\Carbon::now(),
+            'tanggal_dikembalikan' => now(),
             'status' => 'Dikembalikan',
             'denda' => $totalDenda,
             'status_denda' => $statusDenda,
@@ -251,7 +251,7 @@ public function prosesValidasi(Request $request, $id)
 
         return view('admin.peminjaman.denda', compact('peminjamans'));
     }
-    
+
     public function lunasiDenda($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);

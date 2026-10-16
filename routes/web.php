@@ -63,6 +63,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('/admin/buku', BukuController::class);
     Route::resource('/admin/anggota', AnggotaController::class);
 
+    // -- Mencetak Label Buku & Kartu Siswa/Anggota
+    Route::get('/admin/anggota/{id}/cetak-kartu', [AnggotaController::class, 'cetakKartu'])->name('anggota.cetak_kartu');
+    Route::get('/admin/buku/{id}/cetak-label', [BukuController::class, 'cetakLabel'])->name('buku.cetak_label');
+
     // --- Transaksi Perpustakaan (Sirkulasi & Kas) ---
     // 1. Rute Khusus Validasi (Harus di atas resource agar tidak bentrok)
     Route::get('/admin/peminjaman/{id}/validasi', [PeminjamanController::class, 'formValidasi'])->name('peminjaman.validasi');
