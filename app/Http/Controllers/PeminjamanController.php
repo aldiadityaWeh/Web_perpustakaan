@@ -1,18 +1,16 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Peminjaman;
 use App\Models\Anggota;
 use App\Models\Buku;
-use App\Models\Pengaturan; // <-- Model Pengaturan dipanggil
+use App\Models\Pengaturan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
-   public function index(Request $request)
+    public function index(Request $request)
     {
         $query = Peminjaman::with(['anggota', 'buku']);
 
@@ -41,12 +39,6 @@ class PeminjamanController extends Controller
 
         $peminjamans = $query->latest()->paginate(6)->withQueryString();
 
-        // ❌ HAPUS SEMUA FOREACH DAN LOGIKA CARBON DI SINI! Model sudah otomatis menghitungnya.
-
-        if ($request->ajax()) {
-            return view('admin.peminjaman.index', compact('peminjamans'));
-        }
-
         return view('admin.peminjaman.index', compact('peminjamans'));
     }
 
@@ -55,7 +47,7 @@ class PeminjamanController extends Controller
         $anggotas = Anggota::where('status', 'Aktif')->orderBy('nama_lengkap', 'asc')->get();
         $bukus = Buku::where('stok', '>', 0)->orderBy('judul', 'asc')->get();
 
-        // Bawa data pengaturan agar bisa dibaca di halaman Create (jika nanti butuh untuk JavaScript)
+        // Bawa data pengaturan agar bisa dibaca di halaman Create
         $pengaturan = Pengaturan::first() ?? new Pengaturan(['maksimal_hari_pinjam' => 7]);
 
         return view('admin.peminjaman.create', compact('anggotas', 'bukus', 'pengaturan'));
@@ -98,6 +90,8 @@ class PeminjamanController extends Controller
         $akanDipinjam = count($request->buku_id);
 
         if (($sedangDipinjam + $akanDipinjam) > $pengaturan->maksimal_buku_pinjam) {
+
+            // PERBAIKAN: Typo operasi matematika pengurangan stok diperbaiki
             $sisaKuota = $pengaturan->maksimal_buku_pinjam - $sedangDipinjam;
 
             if ($sedangDipinjam == 0) {
@@ -111,7 +105,7 @@ class PeminjamanController extends Controller
             return back()->withErrors(['error_sistem' => $pesanError])->withInput();
         }
 
-        // PROSES SIMPAN KE DATABASE
+        // PROSES SIMPAN KE DATABASE DENGAN TRANSACTION
         try {
             DB::transaction(function () use ($request) {
                 foreach ($request->buku_id as $buku_id) {
@@ -140,11 +134,9 @@ class PeminjamanController extends Controller
         }
     }
 
-   public function show($id)
+    public function show($id)
     {
         $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
-
-        // ❌ LOGIKA DENDA DIHAPUS DARI SINI
 
         return view('admin.peminjaman.show', compact('peminjaman'));
     }
@@ -161,25 +153,14 @@ class PeminjamanController extends Controller
         return redirect()->route('peminjaman.index')->with('success', 'Riwayat peminjaman berhasil dibatalkan dan stok dikembalikan.');
     }
 
-    public function formKembali($id)
+    public function formValidasi($id)
     {
         $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
-
-        // ❌ LOGIKA DENDA DIHAPUS DARI SINI
-
-        return view('admin.peminjaman.kembali', compact('peminjaman'));
-    }
-
-     public function formValidasi($id)
-    {
-        $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
-
-        // ❌ LOGIKA DENDA DIHAPUS DARI SINI
 
         return view('admin.peminjaman.validasi', compact('peminjaman'));
     }
 
-public function prosesValidasi(Request $request, $id)
+    public function prosesValidasi(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
@@ -189,12 +170,9 @@ public function prosesValidasi(Request $request, $id)
         }
 
         // 1. TANGKAP TOTAL DENDA DARI FORM
-        // Kita percayakan angka akhirnya pada apa yang ada di kotak input Form.
         $totalDenda = $request->denda ?? 0;
 
         // 2. LOGIKA PENGAMAN (BACKUP)
-        // Jika Admin mengosongkan denda (0) TAPI sistem mendeteksi anak ini terlambat,
-        // maka sistem akan otomatis menarik angka denda keterlambatan sebagai gantinya.
         if ($totalDenda == 0 && $peminjaman->denda_berjalan > 0) {
             $totalDenda = $peminjaman->denda_berjalan;
         }
@@ -216,8 +194,6 @@ public function prosesValidasi(Request $request, $id)
         ]);
 
         // 4. LOGIKA ATURAN MUTLAK: BUKU HILANG ATAU RUSAK WAJIB GANTI BARU FISIK
-        // Stok HANYA dikembalikan ke rak jika bukunya Baik, atau "Hilang (Sudah Diganti)"
-        // Jika Rusak atau Hilang (Belum Diganti), stok DIBEKUKAN.
         if (!in_array($request->kondisi_buku, ['Hilang (Belum Diganti)', 'Rusak']) && $peminjaman->buku) {
             $peminjaman->buku->increment('stok');
         }
@@ -230,23 +206,28 @@ public function prosesValidasi(Request $request, $id)
         return redirect()->route('peminjaman.index')->with('success', 'Pengembalian buku berhasil divalidasi tanpa denda!');
     }
 
-   public function daftarDenda(Request $request)
+    public function daftarDenda(Request $request)
     {
-        // Query dasar: Ambil peminjaman yang dendanya lebih dari 0
-        $query = Peminjaman::with(['anggota', 'buku'])->where('denda', '>', 0);
+        // PERBAIKAN: Hanya mengambil yang Belum Lunas
+        $query = Peminjaman::with(['anggota', 'buku'])
+                           ->where('denda', '>', 0)
+                           ->where('status_denda', 'Belum Lunas');
 
         // Jika ada inputan pencarian
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->whereHas('anggota', function($q) use ($search) {
-                $q->where('nama_lengkap', 'like', '%' . $search . '%')
-                  ->orWhere('nis', 'like', '%' . $search . '%');
-            })->orWhereHas('buku', function($q) use ($search) {
-                $q->where('judul', 'like', '%' . $search . '%');
+            // PERBAIKAN: Dibungkus closure function($q) agar filter denda tidak bocor
+            $query->where(function($q) use ($search) {
+                $q->whereHas('anggota', function($subQ) use ($search) {
+                    $subQ->where('nama_lengkap', 'like', '%' . $search . '%')
+                         ->orWhere('nis', 'like', '%' . $search . '%');
+                })->orWhereHas('buku', function($subQ) use ($search) {
+                    $subQ->where('judul', 'like', '%' . $search . '%');
+                });
             });
         }
 
-        // Tampilkan data, urutkan dari yang terbaru, pagination 10 per halaman, dan bawa query pencariannya
+        // Tampilkan data, urutkan dari yang terbaru
         $peminjamans = $query->latest()->paginate(10)->withQueryString();
 
         return view('admin.peminjaman.denda', compact('peminjamans'));
@@ -256,11 +237,12 @@ public function prosesValidasi(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
+        // PERBAIKAN: Sinkronisasi waktu updated_at agar masuk ke laporan kas denda dengan waktu yang tepat
         $peminjaman->update([
-            'status_denda' => 'Lunas'
+            'status_denda' => 'Lunas',
+            'updated_at' => now(),
         ]);
 
         return back()->with('success', 'Uang denda dari ' . $peminjaman->anggota->nama_lengkap . ' sebesar Rp' . number_format($peminjaman->denda, 0, ',', '.') . ' telah diterima (LUNAS).');
     }
-
 }

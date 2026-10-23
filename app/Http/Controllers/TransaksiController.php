@@ -8,17 +8,23 @@ use Illuminate\Http\Request;
 class TransaksiController extends Controller
 {
     /**
-     * Menampilkan riwayat pemasukan Kas Denda (Hanya yang memiliki denda)
+     * Menampilkan riwayat pemasukan Kas Denda (Hanya yang LUNAS)
      */
-   public function index(Request $request)
+    public function index(Request $request)
     {
-        // 1. Ambil data HANYA yang sudah dikembalikan dan MEMILIKI DENDA (> 0)
+        // 1. KUNCI LOGIKA DIPERBAIKI:
+        // Ambil data HANYA yang sudah dikembalikan, memiliki denda, DAN SUDAH LUNAS.
         $query = Peminjaman::with(['buku', 'anggota'])
                     ->where('status', 'Dikembalikan')
-                    ->where('denda', '>', 0);
+                    ->where('denda', '>', 0)
+                    ->where('status_denda', 'Lunas'); // <-- PERBAIKAN DI SINI
 
-        // 2. Hitung total uang kas denda keseluruhan
-        $totalKas = Peminjaman::where('status', 'Dikembalikan')->sum('denda');
+        // 2. KUNCI LOGIKA DIPERBAIKI:
+        // Hitung total uang kas denda HANYA dari denda yang sudah diserahkan (Lunas)
+        $totalKas = Peminjaman::where('status', 'Dikembalikan')
+                    ->where('denda', '>', 0)
+                    ->where('status_denda', 'Lunas') // <-- PERBAIKAN DI SINI
+                    ->sum('denda');
 
         // 3. Logika Pencarian
         if ($request->filled('search')) {
@@ -26,7 +32,7 @@ class TransaksiController extends Controller
             $query->where(function($q) use ($search) {
                 // Cari berdasarkan ID Transaksi (Hanya angka)
                 $q->where('id', 'like', '%' . str_replace('TRX-', '', $search) . '%')
-                // Atau Nama Siswa & NIS (DIPERBAIKI: Tambahkan pencarian NIS)
+                // Atau Nama Siswa & NIS
                 ->orWhereHas('anggota', function($subQ) use ($search) {
                     $subQ->where('nama_lengkap', 'like', '%' . $search . '%')
                          ->orWhere('nis', 'like', '%' . $search . '%');
@@ -38,7 +44,7 @@ class TransaksiController extends Controller
             });
         }
 
-        // 4. Urutkan dari transaksi denda terbaru
+        // 4. Urutkan dari transaksi denda terbaru yang baru dilunasi
         $transaksis = $query->latest('updated_at')->paginate(10)->withQueryString();
 
         return view('admin.transaksi.index', compact('transaksis', 'totalKas'));
@@ -52,7 +58,7 @@ class TransaksiController extends Controller
         // Ambil data transaksi beserta data relasi buku dan anggotanya
         $transaksi = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
 
-        // Arahkan ke file resources/views/admin/transaksi/show.blade.php (Jika Anda membuatnya)
+        // Arahkan ke file resources/views/admin/transaksi/show.blade.php
         return view('admin.transaksi.show', compact('transaksi'));
     }
 
