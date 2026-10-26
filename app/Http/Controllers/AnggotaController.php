@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anggota;
+use App\Models\Pengaturan;
 use Illuminate\Http\Request;
 
 class AnggotaController extends Controller
@@ -22,7 +23,14 @@ class AnggotaController extends Controller
         // Batasi 5 data per halaman sesuai permintaan
         $anggotas = $query->latest()->paginate(5)->withQueryString();
 
-        return view('admin.anggota.index', compact('anggotas'));
+        // Ambil daftar kelas yang unik dari database untuk Dropdown Cetak Massal
+        $kelasTersedia = Anggota::select('kelas')
+            ->whereNotNull('kelas')
+            ->distinct()
+            ->orderBy('kelas')
+            ->pluck('kelas');
+
+        return view('admin.anggota.index', compact('anggotas', 'kelasTersedia'));
     }
 
     public function create()
@@ -33,10 +41,8 @@ class AnggotaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // NIS dibatasi maksimal 10 karakter
             'nis' => 'required|string|unique:anggota,nis|max:10',
             'nama_lengkap' => 'required|string|max:255',
-            // Kelas menerima input 1A hingga 6C
             'kelas' => 'required|string|in:1A,1B,1C,2A,2B,2C,3A,3B,3C,4A,4B,4C,5A,5B,5C,6A,6B,6C',
             'jenis_kelamin' => 'required|in:L,P',
             'alamat' => 'nullable|string',
@@ -70,7 +76,6 @@ class AnggotaController extends Controller
         $validated = $request->validate([
             'nis' => 'required|string|max:10|unique:anggota,nis,' . $anggota->id,
             'nama_lengkap' => 'required|string|max:255',
-            // Kelas menerima input 1A hingga 6C
             'kelas' => 'required|string|in:1A,1B,1C,2A,2B,2C,3A,3B,3C,4A,4B,4C,5A,5B,5C,6A,6B,6C',
             'jenis_kelamin' => 'required|in:L,P',
             'alamat' => 'nullable|string',
@@ -93,10 +98,31 @@ class AnggotaController extends Controller
         return redirect()->route('anggota.index')->with('success', 'Data anggota berhasil dihapus!');
     }
 
+    // Fungsi untuk Cetak 1 Kartu
     public function cetakKartu($id)
     {
-        $anggota = Anggota::findOrFail($id);
+        // Ubah menjadi collection (menggunakan where dan get) agar foreach di cetak-kartu.blade.php tidak error
+        $anggota = Anggota::where('id', $id)->get();
+        $pengaturan = Pengaturan::first() ?? new Pengaturan();
 
-        return view('admin.anggota.cetak-kartu', compact('anggota'));
+        return view('admin.anggota.cetak-kartu', compact('anggota', 'pengaturan'));
+    }
+
+    // Fungsi Baru untuk Cetak Massal Per Kelas
+    public function cetakMassal(Request $request)
+    {
+        $request->validate([
+            'kelas' => 'required|string'
+        ]);
+
+        // Tarik semua anggota yang kelasnya sesuai, diurutkan berdasarkan nama
+        $anggota = Anggota::where('kelas', $request->kelas)->orderBy('nama_lengkap')->get();
+        $pengaturan = Pengaturan::first() ?? new Pengaturan();
+
+        if ($anggota->isEmpty()) {
+            return back()->with('error', 'Tidak ada siswa di kelas tersebut.');
+        }
+
+        return view('admin.anggota.cetak-kartu', compact('anggota', 'pengaturan'));
     }
 }

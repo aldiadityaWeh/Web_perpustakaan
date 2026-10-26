@@ -95,9 +95,9 @@
                         </div>
                     </div>
 
-                    <!-- Kategori (DDC) -->
+                    <!-- Kategori Utama (Dropdown) -->
                     <div>
-                        <label for="kategori" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Kategori (Standar DDC) <span class="text-red-500">*</span></label>
+                        <label for="kategori" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Kategori Utama <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <select id="kategori" name="kategori" class="appearance-none w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer" required>
                                 <option value="" disabled class="bg-gray-200 dark:bg-slate-700 text-gray-500">Pilih Klasifikasi Buku</option>
@@ -125,6 +125,14 @@
                                 <i class="ph ph-caret-down text-gray-500 dark:text-slate-400"></i>
                             </div>
                         </div>
+                        <p class="text-[11px] text-gray-500 mt-1">Menentukan warna latar pada label buku.</p>
+                    </div>
+
+                    <!-- DDC Spesifik (Input Teks) -->
+                    <div>
+                        <label for="ddc" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">No. DDC Spesifik (Opsional)</label>
+                        <input type="text" id="ddc" name="ddc" value="{{ old('ddc', $buku->ddc) }}" placeholder="Contoh: 030.959" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500">
+                        <p class="text-[11px] text-gray-500 mt-1">Kosongkan jika ingin mencetak angka Kategori Utama saja.</p>
                     </div>
 
                     <!-- Jumlah Buku -->

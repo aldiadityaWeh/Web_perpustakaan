@@ -16,11 +16,82 @@
                 </div>
             </div>
 
-            <a href="{{ route('buku.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md focus:outline-none shrink-0">
-                <i class="ph ph-plus text-lg"></i>
-                Tambah Buku
-            </a>
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- FITUR CETAK MASSAL LABEL BUKU (DENGAN MODAL ALPINE JS) -->
+                <div x-data="{ showPrintModal: false }">
+                    <button @click="showPrintModal = true" type="button" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md focus:outline-none shrink-0">
+                        <i class="ph ph-printer text-lg"></i>
+                        Cetak Label Massal
+                    </button>
+
+                    <!-- Modal Pilih Kategori DDC -->
+                    <div x-show="showPrintModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 text-left">
+                        <div @click.away="showPrintModal = false"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+                             class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all border border-transparent dark:border-slate-700">
+
+                            <div class="flex items-center gap-3 mb-4 border-b border-gray-100 dark:border-slate-700 pb-4">
+                                <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl shrink-0">
+                                    <i class="ph ph-printer"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 dark:text-slate-100 text-base">Cetak Label Buku</h3>
+                                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Pilih kategori DDC yang akan dicetak massal.</p>
+                                </div>
+                            </div>
+
+                            <!-- Form Cetak Mengarah ke Tab Baru -->
+                            <form action="{{ route('buku.cetakMassal') }}" method="GET" target="_blank">
+                                <div class="mb-6">
+                                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Kategori (DDC)</label>
+                                    <select name="kategori" required class="w-full text-sm text-gray-700 dark:text-slate-200 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-colors cursor-pointer">
+                                        <option value="" disabled selected>-- Pilih Kategori --</option>
+                                        @forelse($kategoriTersedia ?? [] as $kategori)
+                                            @php
+                                                $kategoriLabel = [
+                                                    '000' => '000 - Komputer & Info', '100' => '100 - Filsafat & Psikologi',
+                                                    '200' => '200 - Agama', '300' => '300 - Ilmu Sosial',
+                                                    '400' => '400 - Bahasa', '500' => '500 - Sains & Mat',
+                                                    '600' => '600 - Teknologi', '700' => '700 - Seni & Olahraga',
+                                                    '800' => '800 - Kesusastraan', '900' => '900 - Sejarah & Geo',
+                                                ];
+                                            @endphp
+                                            <option value="{{ $kategori }}">{{ $kategoriLabel[$kategori] ?? 'Kategori '.$kategori }}</option>
+                                        @empty
+                                            <option value="" disabled>Belum ada buku di database</option>
+                                        @endforelse
+                                    </select>
+                                </div>
+
+                                <div class="flex justify-end gap-3">
+                                    <button @click="showPrintModal = false" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Batal</button>
+                                    <button type="submit" @click="showPrintModal = false" class="px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-xl hover:bg-amber-600 transition-colors flex items-center gap-2">
+                                        <i class="ph ph-printer"></i> Cetak Label
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ route('buku.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md focus:outline-none shrink-0">
+                    <i class="ph ph-plus text-lg"></i>
+                    Tambah Buku
+                </a>
+            </div>
         </div>
+
+        @if(session('error'))
+            <div class="bg-red-50 dark:bg-red-500/10 border-l-4 border-red-500 p-4 flex items-center gap-3 text-red-700 dark:text-red-400 text-sm font-medium transition-colors rounded-r-xl shadow-sm">
+                <i class="ph ph-warning-circle text-xl"></i>
+                {{ session('error') }}
+            </div>
+        @endif
 
         <!-- Target JS Table Container Buku (Pencarian Sudah Masuk ke Sini) -->
         <div id="table-container-buku" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors flex-1 flex flex-col">
@@ -62,7 +133,7 @@
                             <th class="py-4 px-6 text-center">Aksi</th>
                         </tr>
                     </thead>
-                  <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-50 dark:divide-slate-700/50 transition-colors">
+                    <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-50 dark:divide-slate-700/50 transition-colors">
                         @forelse($bukus as $buku)
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors text-sm group">
                             <td class="py-4 px-6 text-gray-500 dark:text-slate-400 font-medium text-center">{{ $bukus->firstItem() + $loop->index }}</td>
@@ -180,7 +251,7 @@
                                     {{ $namaKategori }}
                                 </span>
                             </td>
-                           <td class="py-4 px-6 font-bold text-gray-800 dark:text-slate-200">
+                            <td class="py-4 px-6 font-bold text-gray-800 dark:text-slate-200">
                                 {{ $buku->stok }} <span class="text-xs font-normal text-gray-400 dark:text-slate-500">Pcs</span>
                             </td>
                             <td class="py-4 px-6 text-center">
@@ -190,14 +261,12 @@
                                         <i class="ph ph-eye text-lg"></i>
                                     </a>
 
-                                    <!-- Garis Pemisah Tipis -->
                                     <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
 
                                     <a href="{{ route('buku.edit', $buku->id) }}" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
                                         <i class="ph ph-pencil-simple text-lg"></i>
                                     </a>
 
-                                    <!-- Garis Pemisah Tipis -->
                                     <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
 
                                     <div x-data="{ showDeleteModal: false }" class="inline-block relative">
@@ -256,7 +325,6 @@
                         </div>
 
                         <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
-                            {{-- Tombol Panah Kiri --}}
                             @if ($bukus->onFirstPage())
                                 <span class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-not-allowed transition-colors">
                                     <i class="ph ph-caret-left text-sm"></i>
@@ -267,10 +335,10 @@
                                 </a>
                             @endif
 
-                            {{-- Logika 3 Kotak Angka yang Sudah Diperbaiki --}}
                             @php
                                 $start = max($bukus->currentPage() - 1, 1);
                                 $end = min($start + 2, $bukus->lastPage());
+
                                 if ($end - $start < 2) {
                                     $start = max($end - 2, 1);
                                 }
@@ -288,7 +356,6 @@
                                 @endif
                             @endfor
 
-                            {{-- Tombol Panah Kanan --}}
                             @if ($bukus->hasMorePages())
                                 <a href="{{ $bukus->nextPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-700 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
                                     <i class="ph ph-caret-right text-sm"></i>
@@ -305,6 +372,5 @@
         </div>
     </div>
 
-    <!-- Memanggil Script Eksternal Live Search Buku -->
     <script src="{{ asset('js/search-buku.js') }}"></script>
 </x-admin-layout>

@@ -14,11 +14,11 @@
                 Kembali
             </a>
 
-            <!-- TOMBOL DOWNLOAD -->
-            <button type="button" onclick="downloadAsImage('label-buku-design', 'Label_Buku_{{ $buku->isbn ?? $buku->id }}.png')" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer">
-                <i class="ph ph-download-simple text-lg"></i>
-                Download Label
-            </button>
+            <!-- TOMBOL CETAK LABEL PDF (Membuka Tab Baru) -->
+            <a href="{{ route('buku.cetak_label', $buku->id) }}" target="_blank" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer">
+                <i class="ph ph-printer text-lg"></i>
+                Cetak Label (PDF)
+            </a>
 
             <a href="{{ route('buku.edit', $buku->id) }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
                 <i class="ph ph-pencil-simple text-lg"></i>
@@ -54,8 +54,8 @@
             <div class="w-full md:w-2/3 flex flex-col gap-6">
 
                 <div class="border-b border-gray-100 dark:border-slate-700 pb-4 transition-colors">
-                    <div class="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-[11px] font-bold rounded-lg uppercase tracking-wider mb-3 transition-colors">
-                        {{ ucfirst($buku->kategori) }}
+                    <div class="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-[11px] font-bold rounded-lg uppercase tracking-wider mb-3 transition-colors border border-purple-200 dark:border-purple-500/30">
+                        Kategori Utama: {{ $buku->kategori }}
                     </div>
                     <h2 class="text-3xl font-extrabold text-gray-800 dark:text-slate-100 leading-tight mb-2 transition-colors">{{ $buku->judul }}</h2>
                     <p class="text-lg text-gray-600 dark:text-slate-400 flex items-center gap-2 transition-colors">
@@ -67,6 +67,14 @@
                     <div>
                         <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Nomor ISBN</p>
                         <p class="font-medium text-gray-800 dark:text-slate-200">{{ $buku->isbn ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Klasifikasi DDC</p>
+                        <p class="font-medium text-gray-800 dark:text-slate-200">
+                            <span class="bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded border border-gray-200 dark:border-slate-600 font-mono text-sm shadow-sm transition-colors">
+                                {{ $buku->ddc ?? $buku->kategori }}
+                            </span>
+                        </p>
                     </div>
                     <div>
                         <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Penerbit</p>
@@ -99,39 +107,4 @@
             </div>
         </div>
     </div>
-
-    <!-- Area ini sengaja TIDAK diberi class dark: karena hasil unduhan/print harus berlatar putih -->
-    <div style="position: absolute; left: -9999px; top: 0; z-index: -10;">
-        <div id="label-buku-design" class="w-[250px] bg-white rounded-sm overflow-hidden border border-gray-300 flex flex-col">
-            <!-- Header Warna Visual -->
-            <div class="bg-purple-600 h-2 w-full"></div>
-
-            <div class="p-3 pb-1 text-center bg-white">
-                <p class="text-xs font-black text-gray-900 leading-tight line-clamp-2">{{ $buku->judul }}</p>
-            </div>
-
-            <div class="flex-1 px-3 py-2 flex flex-col items-center justify-center bg-white">
-                <!-- Informasi Rak (Pengganti Barcode) -->
-                <div class="w-full bg-purple-50 border-2 border-dashed border-purple-200 rounded-lg p-3 text-center flex flex-col items-center justify-center">
-                    <p class="text-[10px] text-purple-500 font-bold uppercase tracking-widest mb-1">Posisi Rak</p>
-                    <p class="text-4xl font-black text-purple-700 leading-none">{{ $buku->rak ?? 'A' }}</p>
-                </div>
-            </div>
-
-            <!-- Footer Label: DDC & Nama Sekolah -->
-            <div class="bg-gray-50 border-t border-gray-200 p-2 flex justify-between items-center">
-                <div class="text-[9px] text-gray-500 uppercase font-bold tracking-widest">
-                    PERPUS SEKOLAH
-                </div>
-                <!-- Label DDC -->
-                <div class="bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-black shadow-sm">
-                    DDC: {{ $buku->kategori }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRIPT UNTUK DOWNLOAD MENJADI GAMBAR PNG -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="{{ asset('js/cetak-gambar.js') }}"></script>
 </x-admin-layout>

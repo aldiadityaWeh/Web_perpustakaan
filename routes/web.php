@@ -63,7 +63,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('/admin/buku', BukuController::class);
     Route::resource('/admin/anggota', AnggotaController::class);
 
-    // -- Mencetak Label Buku & Kartu Siswa/Anggota
+    // -- Mencetak Label Buku & Kartu Anggota
+    Route::get('/admin/cetak-massal-anggota', [AnggotaController::class, 'cetakMassal'])->name('anggota.cetakMassal');
+    Route::get('/admin/cetak-massal-label', [BukuController::class, 'cetakMassal'])->name('buku.cetakMassal'); // <- Tambahkan baris ini
+
     Route::get('/admin/anggota/{id}/cetak-kartu', [AnggotaController::class, 'cetakKartu'])->name('anggota.cetak_kartu');
     Route::get('/admin/buku/{id}/cetak-label', [BukuController::class, 'cetakLabel'])->name('buku.cetak_label');
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Buku;
+use App\Models\Pengaturan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,26 +13,34 @@ class BukuController extends Controller
     {
         $query = Buku::query();
 
-        // Logika Live Search AJAX & Pencarian Buku (Judul, Pengarang, ISBN, Kategori)
+        // Logika Live Search AJAX & Pencarian Buku (Judul, Pengarang, ISBN, Kategori, DDC)
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('judul', 'like', '%' . $search . '%')
                   ->orWhere('pengarang', 'like', '%' . $search . '%')
                   ->orWhere('isbn', 'like', '%' . $search . '%')
-                  ->orWhere('kategori', 'like', '%' . $search . '%');
+                  ->orWhere('kategori', 'like', '%' . $search . '%')
+                  ->orWhere('ddc', 'like', '%' . $search . '%');
             });
         }
 
         // Batasi 5 data per halaman dengan pagination
         $bukus = $query->latest()->paginate(5)->withQueryString();
 
+        // Ambil daftar kategori (DDC Utama) yang unik dari database untuk Dropdown Cetak Massal
+        $kategoriTersedia = Buku::select('kategori')
+            ->whereNotNull('kategori')
+            ->distinct()
+            ->orderBy('kategori')
+            ->pluck('kategori');
+
         // Jika request datang dari AJAX (Live Search), kembalikan hanya bagian view-nya saja
         if ($request->ajax()) {
-            return view('admin.buku.index', compact('bukus'));
+            return view('admin.buku.index', compact('bukus', 'kategoriTersedia'));
         }
 
-        return view('admin.buku.index', compact('bukus'));
+        return view('admin.buku.index', compact('bukus', 'kategoriTersedia'));
     }
 
     public function create()
@@ -49,15 +58,17 @@ class BukuController extends Controller
             'penerbit' => 'required|string|max:255',
             // Tahun Terbit minimal 1980 hingga tahun berjalan saat ini
             'tahun_terbit' => 'required|digits:4|integer|min:1980|max:' . date('Y'),
-            // Kategori dibatasi hanya untuk kode DDC
+            // Kategori dibatasi hanya untuk kode DDC Utama
             'kategori' => 'required|string|in:000,100,200,300,400,500,600,700,800,900',
+            // DDC Spesifik (Boleh kosong/nullable, maksimal 50 karakter)
+            'ddc' => 'nullable|string|max:50',
             'stok' => 'required|integer|min:0',
             'rak' => 'required|string|max:50',
             'gambar_sampul' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             // Pesan error kustom
             'isbn.digits' => 'ISBN harus terdiri dari tepat 13 digit angka.',
-            'kategori.in' => 'Kategori tidak valid. Silakan pilih dari standar DDC.'
+            'kategori.in' => 'Kategori utama tidak valid. Silakan pilih dari standar DDC.'
         ]);
 
         // Tangani proses upload gambar sampul jika ada
@@ -94,15 +105,17 @@ class BukuController extends Controller
             'penerbit' => 'required|string|max:255',
             // Tahun Terbit minimal 1980 hingga tahun berjalan saat ini
             'tahun_terbit' => 'required|digits:4|integer|min:1980|max:' . date('Y'),
-            // Kategori dibatasi hanya untuk kode DDC
+            // Kategori dibatasi hanya untuk kode DDC Utama
             'kategori' => 'required|string|in:000,100,200,300,400,500,600,700,800,900',
+            // DDC Spesifik (Boleh kosong/nullable, maksimal 50 karakter)
+            'ddc' => 'nullable|string|max:50',
             'stok' => 'required|integer|min:0',
             'rak' => 'required|string|max:50',
             'gambar_sampul' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             // Pesan error kustom
             'isbn.digits' => 'ISBN harus terdiri dari tepat 13 digit angka.',
-            'kategori.in' => 'Kategori tidak valid. Silakan pilih dari standar DDC.'
+            'kategori.in' => 'Kategori utama tidak valid. Silakan pilih dari standar DDC.'
         ]);
 
         // Jika ada upload gambar baru, hapus gambar lama lalu simpan yang baru
@@ -132,11 +145,31 @@ class BukuController extends Controller
         return redirect()->route('buku.index')->with('success', 'Data buku berhasil dihapus!');
     }
 
+    // Fungsi untuk Cetak 1 Label Buku
     public function cetakLabel($id)
     {
-        // Ubah \App\Models\Buku menjadi Buku saja
-        $buku = Buku::findOrFail($id);
+        // Ubah menjadi collection agar loop di view tetap aman
+        $buku = Buku::where('id', $id)->get();
+        $pengaturan = Pengaturan::first() ?? new Pengaturan();
 
-        return view('admin.buku.cetak-label', compact('buku'));
+        return view('admin.buku.cetak-label', compact('buku', 'pengaturan'));
+    }
+
+    // Fungsi Baru untuk Cetak Massal Per Kategori DDC Utama
+    public function cetakMassal(Request $request)
+    {
+        $request->validate([
+            'kategori' => 'required|string'
+        ]);
+
+        // Tarik semua buku yang kategorinya sesuai
+        $buku = Buku::where('kategori', $request->kategori)->orderBy('judul')->get();
+        $pengaturan = Pengaturan::first() ?? new Pengaturan();
+
+        if ($buku->isEmpty()) {
+            return back()->with('error', 'Tidak ada buku dalam kategori tersebut.');
+        }
+
+        return view('admin.buku.cetak-label', compact('buku', 'pengaturan'));
     }
 }

@@ -16,11 +16,73 @@
                 </div>
             </div>
 
-            <a href="{{ route('anggota.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md focus:outline-none shrink-0">
-                <i class="ph ph-user-plus text-lg"></i>
-                Tambah Anggota
-            </a>
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- FITUR CETAK MASSAL (DENGAN MODAL ALPINE JS) -->
+                <div x-data="{ showPrintModal: false }">
+                    <button @click="showPrintModal = true" type="button" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md focus:outline-none shrink-0">
+                        <i class="ph ph-printer text-lg"></i>
+                        Cetak Massal
+                    </button>
+
+                    <!-- Modal Pilih Kelas untuk Cetak -->
+                    <div x-show="showPrintModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 text-left">
+                        <div @click.away="showPrintModal = false"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+                             class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all border border-transparent dark:border-slate-700">
+
+                            <div class="flex items-center gap-3 mb-4 border-b border-gray-100 dark:border-slate-700 pb-4">
+                                <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl shrink-0">
+                                    <i class="ph ph-printer"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 dark:text-slate-100 text-base">Cetak Kartu Per Kelas</h3>
+                                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Pilih kelas yang akan dicetak massal.</p>
+                                </div>
+                            </div>
+
+                            <!-- Form Cetak Mengarah ke Tab Baru -->
+                            <form action="{{ route('anggota.cetakMassal') }}" method="GET" target="_blank">
+                                <div class="mb-6">
+                                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Pilih Kelas</label>
+                                    <select name="kelas" required class="w-full text-sm text-gray-700 dark:text-slate-200 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-colors cursor-pointer">
+                                        <option value="" disabled selected>-- Pilih Kelas --</option>
+                                        @forelse($kelasTersedia as $kelas)
+                                            <option value="{{ $kelas }}">Kelas {{ $kelas }}</option>
+                                        @empty
+                                            <option value="" disabled>Belum ada data kelas di database</option>
+                                        @endforelse
+                                    </select>
+                                </div>
+
+                                <div class="flex justify-end gap-3">
+                                    <button @click="showPrintModal = false" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Batal</button>
+                                    <button type="submit" @click="showPrintModal = false" class="px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-xl hover:bg-amber-600 transition-colors flex items-center gap-2">
+                                        <i class="ph ph-printer"></i> Cetak Sekarang
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ route('anggota.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md focus:outline-none shrink-0">
+                    <i class="ph ph-user-plus text-lg"></i>
+                    Tambah Anggota
+                </a>
+            </div>
         </div>
+
+        @if(session('error'))
+            <div class="bg-red-50 dark:bg-red-500/10 border-l-4 border-red-500 p-4 flex items-center gap-3 text-red-700 dark:text-red-400 text-sm font-medium transition-colors rounded-r-xl shadow-sm">
+                <i class="ph ph-warning-circle text-xl"></i>
+                {{ session('error') }}
+            </div>
+        @endif
 
         <!-- Target JS Table Container (Pencarian Menyatu) -->
         <div id="table-container" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors flex-1 flex flex-col">
@@ -34,7 +96,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="ph ph-magnifying-glass text-gray-400 dark:text-slate-500 text-lg"></i>
                         </div>
-                        <input type="text" id="searchInput" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik Nama, NIS, atau Kelas..."
+                        <input type="text" id="searchInput" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik pencarian..."
                             class="pl-10 pr-3 w-full py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 border-r-0 rounded-l-lg focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500">
                     </div>
                     <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-r-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0 flex items-center justify-center gap-2 text-sm border border-purple-600 hover:border-purple-700">
@@ -72,7 +134,7 @@
                                 <div class="flex items-center gap-3">
                                     <!-- Foto Profil -->
                                     @if($anggota->foto)
-                                        <img @click="showQuickView = true" src="{{ asset('storage/' . $anggota->foto) }}" alt="Foto" class="w-10 h-10 object-cover rounded-full shadow-sm border border-gray-200 dark:border-slate-600 shrink-0 cursor-pointer hover:opacity-80 transition-opacity" title="Lihat Profxil Cepat">
+                                        <img @click="showQuickView = true" src="{{ asset('storage/' . $anggota->foto) }}" alt="Foto" class="w-10 h-10 object-cover rounded-full shadow-sm border border-gray-200 dark:border-slate-600 shrink-0 cursor-pointer hover:opacity-80 transition-opacity" title="Lihat Profil Cepat">
                                     @else
                                         <div @click="showQuickView = true" class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold border border-purple-200 dark:border-purple-500/30 shrink-0 cursor-pointer hover:opacity-80 transition-opacity" title="Lihat Profil Cepat">
                                             {{ strtoupper(substr($anggota->nama_lengkap, 0, 1)) }}
@@ -240,7 +302,7 @@
                 </table>
             </div>
 
-            <!-- FITUR PAGINATION -->
+            <!-- FITUR PAGINATION (TYPO SUDAH DIPERBAIKI) -->
             <div class="p-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 mt-auto transition-colors">
                 @if ($anggotas->hasPages())
                     <div class="flex items-center justify-between w-full">
@@ -260,7 +322,7 @@
                                 </a>
                             @endif
 
-                            {{-- Logika 3 Kotak Angka --}}
+                            {{-- Logika 3 Kotak Angka (DIREVISI) --}}
                             @php
                                 $start = max($anggotas->currentPage() - 1, 1);
                                 $end = min($start + 2, $anggotas->lastPage());
@@ -299,6 +361,5 @@
         </div>
     </div>
 
-    <!-- Memanggil Script Eksternal dari folder public/js -->
     <script src="{{ asset('js/search-anggota.js') }}"></script>
 </x-admin-layout>

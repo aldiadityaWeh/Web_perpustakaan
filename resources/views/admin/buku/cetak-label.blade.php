@@ -3,67 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Label Buku - {{ $buku->judul }}</title>
+    <title>Cetak Label Buku</title>
+
+    <!-- Menggunakan Tailwind CDN agar tidak error Vite -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
     <style>
-        /* CSS Print untuk ukuran Stiker Label (Misal Tom & Jerry 121: 38x75mm) */
         @media print {
-            @page { size: portrait; margin: 0; }
-            body { margin: 5mm; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;}
-            .no-print { display: none !important; }
-            .label-stiker { border: 1px dashed #ccc !important; box-shadow: none !important;}
+            @page {
+                margin: 1cm;
+            }
+            body {
+                /* Memaksa browser mencetak warna background */
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        .label-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: flex-start;
+        }
+        .label-box {
+            width: 4cm;
+            height: 5cm;
+            border: 1px dashed #4b5563; /* Garis potong */
+            display: flex;
+            flex-direction: column;
+            page-break-inside: avoid;
+            break-inside: avoid; /* Mencegah label terpotong di halaman baru */
+            background-color: white;
+        }
+        .label-header {
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+        .label-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.6;
+            color: #000;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center py-10 min-h-screen">
-
-    <!-- Tombol Aksi -->
-    <div class="no-print mb-8 flex gap-4">
-        <!-- TOMBOL KEMBALI DIPERBAIKI DI SINI -->
-        <a href="{{ route('buku.show', $buku->id) }}" class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl shadow-sm hover:bg-gray-50 flex items-center">
-            &larr; Kembali
-        </a>
-
-        <button onclick="window.print()" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M224,96V200a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V96A16,16,0,0,1,48,80H72V40A16,16,0,0,1,88,24h80a16,16,0,0,1,16,16V80h24A16,16,0,0,1,224,96ZM88,40V80h80V40Zm120,56H48v96H64V168a16,16,0,0,1,16-16h96a16,16,0,0,1,16,16v24h16Zm-32,96V168H80v24ZM188,116a12,12,0,1,0-12-12A12,12,0,0,0,188,116Z"></path></svg>
-            Print Stiker
-        </button>
+<body class="bg-gray-100 p-8">
+    <!-- Header Tombol Print (Sembunyi saat dicetak) -->
+    <div class="max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Preview Label Punggung Buku</h2>
+            <p class="text-gray-500 text-sm">Menampilkan <b>{{ count($buku) }}</b> label. Warna otomatis menyesuaikan kategori DDC (000-900).</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="window.close()" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-lg font-bold transition-all shadow-sm">
+                Batal
+            </button>
+            <button onclick="window.print()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-md transition-all">
+                <i class="ph ph-printer text-xl"></i> Print Stiker
+            </button>
+        </div>
     </div>
 
-    <p class="no-print text-sm text-gray-500 mb-4">Potongan garis putus-putus menggambarkan batas stiker label.</p>
+    <!-- Kertas Print -->
+    <div class="max-w-6xl mx-auto label-container">
+        @foreach($buku as $b)
+            @php
+                // MENAMPILKAN ANGKA DDC SPESIFIK JIKA ADA, JIKA KOSONG GUNAKAN KATEGORI UTAMA
+                $kodeDdcPrint = $b->ddc ?: ($b->kategori ?? '000');
 
-    <!-- Label Stiker -->
-    <div class="label-stiker w-[250px] bg-white rounded-sm shadow-md overflow-hidden border border-gray-300 flex flex-col">
+                // WARNA BACKGROUND SELALU DIAMBIL DARI KATEGORI UTAMA (Bukan DDC Spesifik)
+                $kategoriUtama = $b->kategori ?? '000';
+                $awalan = substr($kategoriUtama, 0, 1);
 
-        <!-- Header Warna Visual -->
-        <div class="bg-blue-600 h-2 w-full"></div>
+                // Warna diekstrak persis dari file "WARNA LABEL PERKELAS.xlsx"
+                $warnaBg = match($awalan) {
+                    '0' => '#FFFF00', // Kuning
+                    '1' => '#0000FF', // Biru Tua
+                    '2' => '#76E3FF', // Biru Muda
+                    '3' => '#FFFFFF', // Putih
+                    '4' => '#FF0000', // Merah
+                    '5' => '#D490BD', // Pink
+                    '6' => '#975CCB', // Ungu
+                    '7' => '#7CEB99', // Hijau Muda
+                    '8' => '#E50000', // Merah Gelap
+                    '9' => '#00BFBF', // Tosca / Cyan
+                    default => '#FFFFFF'
+                };
 
-        <div class="p-3 pb-1 text-center">
-            <!-- Judul Buku Pendek -->
-            <p class="text-xs font-black text-gray-900 leading-tight line-clamp-2">{{ $buku->judul }}</p>
-        </div>
+                // Teks kontras: Background gelap teks putih, background terang teks hitam
+                $warnaTeks = in_array($awalan, ['1', '4', '6', '8', '9']) ? '#FFFFFF' : '#000000';
 
-        <div class="flex-1 px-3 py-2 flex flex-col items-center justify-center">
-            <!-- Informasi Rak (Pengganti Barcode) -->
-            <div class="w-full bg-blue-50 border-2 border-dashed border-blue-200 rounded-lg p-3 text-center flex flex-col items-center justify-center">
-                <p class="text-[10px] text-blue-500 font-bold uppercase tracking-widest mb-1">Posisi Rak</p>
-                <p class="text-4xl font-black text-blue-700 leading-none">{{ $buku->rak ?? 'A' }}</p>
+                // Jika kelas 300 (Putih), tambahkan garis bawah agar tidak menyatu dengan warna kertas
+                $borderBottom = $awalan == '3' ? 'border-bottom: 2px solid #000;' : '';
+
+                // Logika Kode Buku (Call Number)
+                $kodePenulis = strtoupper(substr($b->pengarang ?? 'NN', 0, 3));
+                $kodeJudul = strtolower(substr($b->judul ?? 'b', 0, 1));
+
+                // Ambil Nama Sekolah dari database Pengaturan
+                $namaSekolah = $pengaturan->nama_sekolah ?? 'UPTD SDN 6 CISEUREUH';
+            @endphp
+
+            <div class="label-box">
+                <!-- Header Kotak Warna -->
+                <div class="label-header" style="background-color: {{ $warnaBg }}; color: {{ $warnaTeks }}; {{ $borderBottom }}">
+                    <div>PERPUSTAKAAN</div>
+                    <div>{{ strtoupper($namaSekolah) }}</div>
+                </div>
+
+                <!-- Body Label Nomor Klasifikasi -->
+                <div class="label-body">
+                    <div>{{ $kodeDdcPrint }}</div>
+                    <div>{{ $kodePenulis }}</div>
+                    <div>{{ $kodeJudul }}</div>
+                </div>
             </div>
-        </div>
-
-        <!-- Footer Label: DDC & Nama Sekolah -->
-        <div class="bg-gray-50 border-t border-gray-200 p-2 flex justify-between items-center">
-            <div class="text-[9px] text-gray-500 uppercase font-bold tracking-widest">
-                PERPUS SD
-            </div>
-
-            <!-- Label DDC -->
-            <div class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-black shadow-sm">
-                DDC: {{ $buku->kategori }}
-            </div>
-        </div>
-
+        @endforeach
     </div>
-
 </body>
 </html>
