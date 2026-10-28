@@ -32,7 +32,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-slate-100 transition-colors">Identitas Sekolah</h3>
-                        <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 transition-colors">Atur nama instansi dan data kepala perpustakaan untuk cetak laporan.</p>
+                        <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 transition-colors">Atur nama instansi, kepala sekolah, dan kepala perpustakaan untuk cetak kartu & laporan.</p>
                     </div>
                 </div>
 
@@ -45,19 +45,34 @@
 
                     <div>
                         <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Alamat Lengkap <span class="text-red-500">*</span></label>
-                        <textarea name="alamat_sekolah" rows="3"
+                        <textarea name="alamat_sekolah" rows="3" required
                             class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-500 outline-none text-sm transition shadow-sm resize-none">{{ old('alamat_sekolah', $pengaturan->alamat_sekolah) }}</textarea>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- DATA KEPALA SEKOLAH (BARU) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-gray-100 dark:border-slate-700/60">
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Nama Kepala Perpus <span class="text-red-500">*</span></label>
-                            <input type="text" name="kepala_perpustakaan" value="{{ old('kepala_perpustakaan', $pengaturan->kepala_perpustakaan) }}"
+                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Nama Kepala Sekolah <span class="text-red-500">*</span></label>
+                            <input type="text" name="kepala_sekolah" value="{{ old('kepala_sekolah', $pengaturan->kepala_sekolah) }}" placeholder="Contoh: Drs. H. Ahmad, M.Pd." required
                                 class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-500 outline-none text-sm transition shadow-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">NIP Kepala <span class="text-red-500">*</span></label>
-                            <input type="text" name="nip_kepala" value="{{ old('nip_kepala', $pengaturan->nip_kepala) }}"
+                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">NIP Kepala Sekolah <span class="text-red-500">*</span></label>
+                            <input type="text" name="nip_kepala_sekolah" value="{{ old('nip_kepala_sekolah', $pengaturan->nip_kepala_sekolah) }}" placeholder="Ketik NIP Kepala Sekolah" required
+                                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-500 outline-none text-sm transition shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- DATA KEPALA PERPUSTAKAAN -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Nama Kepala Perpus <span class="text-red-500">*</span></label>
+                            <input type="text" name="kepala_perpustakaan" value="{{ old('kepala_perpustakaan', $pengaturan->kepala_perpustakaan) }}" required
+                                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-500 outline-none text-sm transition shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">NIP Kepala Perpus <span class="text-red-500">*</span></label>
+                            <input type="text" name="nip_kepala" value="{{ old('nip_kepala', $pengaturan->nip_kepala) }}" required
                                 class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-500 outline-none text-sm transition shadow-sm">
                         </div>
                     </div>

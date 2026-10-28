@@ -88,22 +88,22 @@
         }
 
         .ttd-section {
-            width: 32%;
+            width: 35%;
             font-size: 8px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            margin-top: 12px;
+            margin-top: 4px;
         }
 
-        .ttd-space { height: 35px; }
-        .data-section { width: 68%; font-size: 9px; color: #111; }
+        .ttd-space { height: 28px; }
+        .data-section { width: 65%; font-size: 8.5px; color: #111; }
         .data-table { width: 100%; border-collapse: collapse; }
-        .data-table td { vertical-align: top; padding: 1.5px 0; font-weight: 600; }
-        .col-label { width: 38%; }
+        .data-table td { vertical-align: top; padding: 1.2px 0; font-weight: 600; }
+        .col-label { width: 42%; }
         .col-titik { width: 4%; text-align: center; }
-        .col-value { width: 58%; }
+        .col-value { width: 54%; }
     </style>
 </head>
 <body class="bg-gray-100 p-8">
@@ -128,15 +128,18 @@
     <div class="print-container">
         @foreach($anggota as $a)
             @php
-                $namaSekolah = $pengaturan->nama_sekolah ?? 'SD NEGERI 6 CISEUREUH';
-                $alamatSekolah = $pengaturan->alamat ?? 'Jl.Ipik Gandamanah no.63 Purwakarta';
-                $kepalaSekolah = $pengaturan->kepala_sekolah ?? 'HJ.Aan.R.Rakhmawati,S.Pd';
-                $nipKepala = $pengaturan->nip_kepala_sekolah ?? '196407221984102004';
+                // MENGAMBIL DATA DARI TABEL PENGATURAN SECARA DINAMIS
+                $pengaturanData = \App\Models\Pengaturan::first();
+
+                $namaSekolah   = $pengaturanData->nama_sekolah ?? 'SD NEGERI 6 CISEUREUH';
+                $alamatSekolah = $pengaturanData->alamat_sekolah ?? 'Jl. Ipik Gandamanah No.63 Purwakarta';
+                $kepalaSekolah = $pengaturanData->kepala_sekolah ?? 'Nama Kepala Sekolah';
+                $nipKepala     = $pengaturanData->nip_kepala_sekolah ?? '-';
             @endphp
 
             <div class="kartu">
                 <div class="kop">
-                    <img src="{{ asset('images/sd.png') }}" class="kop-logo" alt="Logo">
+                    <img src="{{ asset('images/sd.png') }}" class="kop-logo" alt="Logo" onerror="this.style.display='none'">
                     <div class="kop-text">
                         <div class="baris-1">PERPUSTAKAAN SEKOLAH</div>
                         <div class="baris-2">{{ strtoupper($namaSekolah) }}</div>
@@ -147,15 +150,18 @@
                 <div class="judul-kartu">KARTU PERPUSTAKAAN</div>
 
                 <div class="body-kartu">
+                    <!-- TANDA TANGAN KEPALA SEKOLAH (TERHUBUNG KE PENGATURAN) -->
                     <div class="ttd-section">
+                        <div>Purwakarta, {{ date('d-m-Y') }}</div>
                         <div>Kepala Sekolah</div>
                         <div class="ttd-space"></div>
                         <div>
-                            <div>{{ $kepalaSekolah }}</div>
-                            <div>NIP.{{ $nipKepala }}</div>
+                            <div class="font-bold underline">{{ $kepalaSekolah }}</div>
+                            <div>NIP. {{ $nipKepala }}</div>
                         </div>
                     </div>
 
+                    <!-- DATA ANGGOTA SISWA -->
                     <div class="data-section">
                         <table class="data-table">
                             <tr>
@@ -171,22 +177,28 @@
                             <tr>
                                 <td class="col-label">Tempat Lahir</td>
                                 <td class="col-titik">:</td>
-                                <td class="col-value">{{ $a->tempat_lahir ?? 'Subang' }}</td>
+                                <td class="col-value">{{ $a->tempat_lahir ?? '-' }}</td>
                             </tr>
                             <tr>
                                 <td class="col-label">Tgl Lahir</td>
                                 <td class="col-titik">:</td>
-                                <td class="col-value">{{ $a->tanggal_lahir ?? '2012-06-13' }}</td>
+                                <td class="col-value">
+                                    @if(isset($a->tanggal_lahir) && $a->tanggal_lahir)
+                                        {{ \Carbon\Carbon::parse($a->tanggal_lahir)->format('d-m-Y') }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td class="col-label">Jenis Kelamin</td>
                                 <td class="col-titik">:</td>
-                                <td class="col-value">{{ strtoupper($a->jenis_kelamin ?? 'PEREMPUAN') }}</td>
+                                <td class="col-value">{{ strtoupper($a->jenis_kelamin ?? '-') }}</td>
                             </tr>
                             <tr>
                                 <td class="col-label">Alamat</td>
                                 <td class="col-titik">:</td>
-                                <td class="col-value" style="line-height: 1.1;">{{ $a->alamat }}</td>
+                                <td class="col-value" style="line-height: 1.1;">{{ $a->alamat ?? '-' }}</td>
                             </tr>
                         </table>
                     </div>

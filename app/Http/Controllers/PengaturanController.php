@@ -18,10 +18,12 @@ class PengaturanController extends Controller
 
     public function update(Request $request)
     {
-        // Validasi input
-        $request->validate([
+        // Validasi input (termasuk data Kepala Sekolah yang baru)
+        $validated = $request->validate([
             'nama_sekolah' => 'required|string|max:255',
             'alamat_sekolah' => 'nullable|string',
+            'kepala_sekolah' => 'nullable|string|max:255',     // <-- Ditambahkan
+            'nip_kepala_sekolah' => 'nullable|string|max:50',  // <-- Ditambahkan
             'kepala_perpustakaan' => 'nullable|string|max:255',
             'nip_kepala' => 'nullable|string|max:255',
             'denda_per_hari' => 'required|numeric|min:0',
@@ -33,10 +35,10 @@ class PengaturanController extends Controller
 
         if ($pengaturan) {
             // Update jika data ada
-            $pengaturan->update($request->all());
+            $pengaturan->update($validated);
         } else {
             // Fallback jika tidak ada data sama sekali, maka create baru
-            Pengaturan::create($request->all());
+            Pengaturan::create($validated);
         }
 
         return redirect()->route('pengaturan.index')->with('success', 'Pengaturan sistem berhasil diperbarui!');

@@ -107,9 +107,9 @@ class LaporanController extends Controller
             echo "</tr>";
         }
 
-        // --- TAMBAHKAN BARIS TOTAL KESELURUHAN DI BAWAH ---
+        // --- DIPERBAIKI: Penambahan tag td pada baris total ---
         echo "<tr style='background-color:#e6e6e6; font-weight:bold;'>";
-        echo "<colspan='6' style='text-align:right;'>TOTAL KESELURUHAN DENDA:</td>";
+        echo "<td colspan='6' style='text-align:right;'>TOTAL KESELURUHAN DENDA:</td>";
         echo "<td>Rp " . number_format($totalDendaKeseluruhan, 0, ',', '.') . "</td>";
         echo "</tr>";
 
@@ -175,4 +175,3 @@ class LaporanController extends Controller
         exit;
     }
 }
-

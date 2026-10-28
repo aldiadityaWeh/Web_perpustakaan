@@ -88,10 +88,15 @@
                             @endif
                         </p>
                     </div>
-                    <div class="sm:col-span-2">
-                        <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Alamat Tempat Tinggal</p>
-                        <p class="font-medium text-gray-800 dark:text-slate-300 leading-relaxed">
-                            {{ $anggota->alamat ?: 'Tidak ada informasi alamat yang dicantumkan.' }}
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Tempat, Tgl Lahir</p>
+                        <p class="font-medium text-gray-800 dark:text-slate-200">
+                            {{ $anggota->tempat_lahir ?? '-' }},
+                            @if($anggota->tanggal_lahir)
+                                {{ \Carbon\Carbon::parse($anggota->tanggal_lahir)->format('d-m-Y') }}
+                            @else
+                                -
+                            @endif
                         </p>
                     </div>
                     <div>
@@ -101,6 +106,12 @@
                         @else
                             <span class="px-3 py-1 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 text-[10px] font-bold rounded-lg uppercase tracking-wider inline-block mt-1 transition-colors">Sudah Lulus / Pindah</span>
                         @endif
+                    </div>
+                    <div class="sm:col-span-2">
+                        <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Alamat Tempat Tinggal</p>
+                        <p class="font-medium text-gray-800 dark:text-slate-300 leading-relaxed">
+                            {{ $anggota->alamat ?: 'Tidak ada informasi alamat yang dicantumkan.' }}
+                        </p>
                     </div>
                     <div>
                         <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Terdaftar Sejak</p>

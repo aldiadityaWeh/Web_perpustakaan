@@ -43,6 +43,18 @@
                         <input type="text" id="nama_lengkap" name="nama_lengkap" value="{{ old('nama_lengkap') }}" placeholder="Contoh: Budi Santoso" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500" required>
                     </div>
 
+                    <!-- Tempat Lahir (BARU) -->
+                    <div>
+                        <label for="tempat_lahir" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Tempat Lahir <span class="text-red-500">*</span></label>
+                        <input type="text" id="tempat_lahir" name="tempat_lahir" value="{{ old('tempat_lahir') }}" placeholder="Contoh: Purwakarta" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500" required>
+                    </div>
+
+                    <!-- Tanggal Lahir (BARU) -->
+                    <div>
+                        <label for="tanggal_lahir" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Tanggal Lahir <span class="text-red-500">*</span></label>
+                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 cursor-pointer" required>
+                    </div>
+
                     <!-- Kelas (Dropdown) -->
                     <div>
                         <label for="kelas" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Kelas <span class="text-red-500">*</span></label>

@@ -7,14 +7,18 @@
     <style>
         body { font-family: 'Times New Roman', Times, serif; color: #000; margin: 0; padding: 20px; font-size: 12px; }
         .kop-surat { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
-        .kop-surat h1 { margin: 0; font-size: 22px; text-transform: uppercase; }
-        .kop-surat p { margin: 5px 0 0 0; font-size: 14px; }
-        .judul-laporan { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 16px; text-transform: uppercase; }
+        .kop-surat h1 { margin: 0; font-size: 20px; text-transform: uppercase; }
+        .kop-surat p { margin: 5px 0 0 0; font-size: 13px; }
+        .judul-laporan { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 15px; text-transform: uppercase; }
         table { border-collapse: collapse; margin-bottom: 30px; width: 100%; }
         table th, table td { border: 1px solid #000; padding: 8px 10px; text-align: left; }
         table th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
         .text-center { text-align: center; }
-        .ttd-area { float: right; width: 250px; text-align: center; margin-top: 30px; }
+
+        /* Area Tanda Tangan Dua Kolom (Kepala Perpustakaan & Kepala Sekolah) */
+        .ttd-container { width: 100%; margin-top: 40px; display: table; page-break-inside: avoid; }
+        .ttd-column { display: table-cell; width: 50%; text-align: center; vertical-align: top; }
+        .ttd-space { height: 60px; }
 
         @media print {
             @page { margin: 1cm; }
@@ -24,9 +28,10 @@
 </head>
 <body onload="window.print()">
 
-    <!-- KOP SURAT -->
-   <div class="kop-surat">
-        <h1>PERPUSTAKAAN {{ strtoupper($pengaturan->nama_sekolah ?? 'SEKOLAH') }}</h1>
+    <!-- KOP SURAT DINAMIS -->
+    <div class="kop-surat">
+        <h1>{{ strtoupper($pengaturan->nama_sekolah ?? 'SEKOLAH') }}</h1>
+        <p>PERPUSTAKAAN SEKOLAH</p>
         <p>{{ $pengaturan->alamat_sekolah ?? 'Alamat Belum Diatur' }}</p>
     </div>
 
@@ -68,8 +73,6 @@
 
             @forelse($buku as $index => $item)
                 @php
-                    // Cek apakah data kategori di database cocok dengan kode DDC
-                    // Jika cocok, pakai nama DDC lengkap. Jika tidak, tampilkan apa adanya dari database.
                     $kategoriBuku = $item->kategori;
                     $tampilKategori = $kamusDDC[$kategoriBuku] ?? ucfirst($kategoriBuku);
                 @endphp
@@ -101,13 +104,25 @@
         @endif
     </table>
 
-    <!-- Tanda Tangan -->
-    <div class="ttd-area">
-        <p>Purwakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-        <p>Kepala Perpustakaan,</p>
-        <br><br><br><br>
-        <p style="font-weight: bold; text-decoration: underline;">{{ $pengaturan->kepala_perpustakaan ?? 'Admin' }}</p>
-        <p>NIP. {{ $pengaturan->nip_kepala ?? '-' }}</p>
+    <!-- TANDA TANGAN DINAMIS (KEPALA PERPUSTAKAAN & KEPALA SEKOLAH) -->
+    <div class="ttd-container">
+        <!-- Kolom Kiri: Kepala Perpustakaan -->
+        <div class="ttd-column">
+            <p>Mengetahui,</p>
+            <p>Kepala Perpustakaan</p>
+            <div class="ttd-space"></div>
+            <p style="font-weight: bold; text-decoration: underline;">{{ $pengaturan->kepala_perpustakaan ?? 'Nama Kepala Perpus' }}</p>
+            <p>NIP. {{ $pengaturan->nip_kepala ?? '-' }}</p>
+        </div>
+
+        <!-- Kolom Kanan: Kepala Sekolah -->
+        <div class="ttd-column">
+            <p>Purwakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+            <p>Kepala Sekolah</p>
+            <div class="ttd-space"></div>
+            <p style="font-weight: bold; text-decoration: underline;">{{ $pengaturan->kepala_sekolah ?? 'Nama Kepala Sekolah' }}</p>
+            <p>NIP. {{ $pengaturan->nip_kepala_sekolah ?? '-' }}</p>
+        </div>
     </div>
 
 </body>

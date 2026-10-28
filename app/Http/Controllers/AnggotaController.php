@@ -43,6 +43,8 @@ class AnggotaController extends Controller
         $validated = $request->validate([
             'nis' => 'required|string|unique:anggota,nis|max:10',
             'nama_lengkap' => 'required|string|max:255',
+            'tempat_lahir' => 'required|string|max:100', // <-- Ditambahkan
+            'tanggal_lahir' => 'required|date',          // <-- Ditambahkan
             'kelas' => 'required|string|in:1A,1B,1C,2A,2B,2C,3A,3B,3C,4A,4B,4C,5A,5B,5C,6A,6B,6C',
             'jenis_kelamin' => 'required|in:L,P',
             'alamat' => 'nullable|string',
@@ -76,6 +78,8 @@ class AnggotaController extends Controller
         $validated = $request->validate([
             'nis' => 'required|string|max:10|unique:anggota,nis,' . $anggota->id,
             'nama_lengkap' => 'required|string|max:255',
+            'tempat_lahir' => 'required|string|max:100', // <-- Ditambahkan
+            'tanggal_lahir' => 'required|date',          // <-- Ditambahkan
             'kelas' => 'required|string|in:1A,1B,1C,2A,2B,2C,3A,3B,3C,4A,4B,4C,5A,5B,5C,6A,6B,6C',
             'jenis_kelamin' => 'required|in:L,P',
             'alamat' => 'nullable|string',

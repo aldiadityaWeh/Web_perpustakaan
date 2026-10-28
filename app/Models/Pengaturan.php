@@ -13,6 +13,8 @@ class Pengaturan extends Model
     protected $fillable = [
         'nama_sekolah',
         'alamat_sekolah',
+        'kepala_sekolah',     
+        'nip_kepala_sekolah',
         'kepala_perpustakaan',
         'nip_kepala',
         'denda_per_hari',
