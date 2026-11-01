@@ -38,27 +38,48 @@ class AnggotaController extends Controller
         return view('admin.anggota.create');
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $validated = $request->validate([
-            'nis' => 'required|string|unique:anggota,nis|max:10',
+            // Validasi nis dihapus dari request karena dibuat otomatis
             'nama_lengkap' => 'required|string|max:255',
-            'tempat_lahir' => 'required|string|max:100', // <-- Ditambahkan
-            'tanggal_lahir' => 'required|date',          // <-- Ditambahkan
+            'tempat_lahir' => 'required|string|max:100',
+            'tanggal_lahir' => 'required|date',
             'kelas' => 'required|string|in:1A,1B,1C,2A,2B,2C,3A,3B,3C,4A,4B,4C,5A,5B,5C,6A,6B,6C',
             'jenis_kelamin' => 'required|in:L,P',
             'alamat' => 'nullable|string',
             'status' => 'required|in:Aktif,Tidak Aktif',
         ], [
-            'nis.max' => 'NISN/NIS maksimal 10 digit angka.',
             'kelas.in' => 'Pilihan kelas tidak valid.',
         ]);
 
+        // LOGIKA AUTO INCREMENT NIS FULL ANGKA
+        // 1. Ambil 3 digit terakhir dari tahun saat ini (Misal: 2026 -> 026)
+        $tahun = date('Y');
+        $prefix = substr($tahun, 1, 3);
+
+        // 2. Cari anggota terakhir yang NIS-nya berawalan tahun tersebut (Misal awalan 026)
+        $lastAnggota = Anggota::where('nis', 'like', $prefix . '%')
+                              ->orderBy('nis', 'desc')
+                              ->first();
+
+        if ($lastAnggota) {
+            // 3. Ambil 7 angka terakhirnya saja (mulai dari karakter ke-3) lalu tambah 1
+            $lastNumber = (int) substr($lastAnggota->nis, 3);
+            $newNumber = $lastNumber + 1;
+        } else {
+            // Jika belum ada data siswa di tahun tersebut, mulai dari 1
+            $newNumber = 1;
+        }
+
+        // 4. Gabungkan prefix (3 digit) dengan nomor urut (7 digit angka yang ditambahkan '0' di depannya)
+        $validated['nis'] = $prefix . str_pad($newNumber, 7, '0', STR_PAD_LEFT);
+
         Anggota::create($validated);
 
-        return redirect()->route('anggota.index')->with('success', 'Data anggota baru berhasil disimpan!');
+        return redirect()->route('anggota.index')->with('success', 'Data anggota baru berhasil disimpan dengan NIS ' . $validated['nis'] . '!');
     }
-
+    
     public function show(string $id)
     {
         $anggota = Anggota::with(['peminjamans.buku'])->findOrFail($id);
@@ -71,21 +92,20 @@ class AnggotaController extends Controller
         return view('admin.anggota.edit', compact('anggota'));
     }
 
-    public function update(Request $request, string $id)
+   public function update(Request $request, string $id)
     {
         $anggota = Anggota::findOrFail($id);
 
         $validated = $request->validate([
-            'nis' => 'required|string|max:10|unique:anggota,nis,' . $anggota->id,
+            // Validasi nis dihapus agar tidak ikut di-update
             'nama_lengkap' => 'required|string|max:255',
-            'tempat_lahir' => 'required|string|max:100', // <-- Ditambahkan
-            'tanggal_lahir' => 'required|date',          // <-- Ditambahkan
+            'tempat_lahir' => 'required|string|max:100',
+            'tanggal_lahir' => 'required|date',
             'kelas' => 'required|string|in:1A,1B,1C,2A,2B,2C,3A,3B,3C,4A,4B,4C,5A,5B,5C,6A,6B,6C',
             'jenis_kelamin' => 'required|in:L,P',
             'alamat' => 'nullable|string',
             'status' => 'required|in:Aktif,Tidak Aktif',
         ], [
-            'nis.max' => 'NISN/NIS maksimal 10 digit angka.',
             'kelas.in' => 'Pilihan kelas tidak valid.',
         ]);
 

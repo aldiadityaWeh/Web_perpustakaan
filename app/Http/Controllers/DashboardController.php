@@ -6,40 +6,36 @@ use App\Models\Buku;
 use App\Models\Anggota;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. Ambil waktu hari ini untuk patokan
-        $hariIni = Carbon::now()->startOfDay();
+        $hariIni = Carbon::today();
 
-        // 2. Hitung Total Stok Buku (Menjumlahkan angka di kolom 'stok')
-        $totalBuku = Buku::sum('stok');
+        // 1. Menghitung Total Buku (Bisa diganti sum('stok') jika menghitung eksemplar)
+        $totalBuku = Buku::count();
 
-        // 3. Hitung Anggota Aktif
-        $anggotaAktif = Anggota::where('status', 'Aktif')->count();
+        // 2. Menghitung Total Anggota Aktif
+        $anggotaAktif = Anggota::count();
 
-        // 4. Hitung Buku yang Sedang Dipinjam
+        // 3. Menghitung Buku yang Sedang Dipinjam (Status belum kembali)
         $sedangDipinjam = Peminjaman::where('status', 'dipinjam')->count();
 
-        // 5. Hitung Transaksi Jatuh Tempo (Status terlambat, atau status dipinjam tapi tanggalnya sudah lewat)
-        $jatuhTempo = Peminjaman::where('status', 'terlambat')
-            ->orWhere(function($query) use ($hariIni) {
-                $query->where('status', 'dipinjam')
-                      ->whereDate('tanggal_jatuh_tempo', '<', $hariIni);
-            })->count();
+        // 4. Menghitung Transaksi Jatuh Tempo / Terlambat
+        $jatuhTempo = Peminjaman::where('status', 'dipinjam')
+                                ->whereDate('tanggal_jatuh_tempo', '<=', $hariIni)
+                                ->count();
 
-        // 6. Ambil Data "Perlu Perhatian" (Buku yang harus dikembalikan hari ini atau sudah lewat)
-        $perluPerhatian = Peminjaman::with(['buku', 'anggota'])
-            ->where('status', 'dipinjam')
-            ->whereDate('tanggal_jatuh_tempo', '<=', $hariIni)
-            ->orderBy('tanggal_jatuh_tempo', 'asc') // Urutkan dari yang paling terlambat
-            ->take(5) // Ambil 5 teratas agar tabel tidak terlalu panjang
-            ->get();
+        // 5. Mengambil 5 Data Transaksi Teratas untuk Tabel "Perlu Perhatian"
+        // Menggunakan with() untuk meminimalisir N+1 Query Problem pada relasi anggota & buku
+        $perluPerhatian = Peminjaman::with(['anggota', 'buku'])
+                                    ->where('status', 'dipinjam')
+                                    ->whereDate('tanggal_jatuh_tempo', '<=', $hariIni)
+                                    ->orderBy('tanggal_jatuh_tempo', 'asc') // Urutkan dari yang paling telat
+                                    ->take(5)
+                                    ->get();
 
-        // 7. Kirim semua data yang sudah dihitung ke halaman View (Blade)
         return view('admin.dashboard.index', compact(
             'totalBuku',
             'anggotaAktif',

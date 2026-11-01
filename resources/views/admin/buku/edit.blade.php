@@ -21,16 +21,6 @@
                 @csrf
                 @method('PUT') <!-- Wajib ada untuk proses Edit di Laravel -->
 
-                @if ($errors->any())
-                    <div class="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-sm transition-colors">
-                        <ul class="list-disc pl-5">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
                 <div class="mb-6 p-5 border border-dashed border-gray-300 dark:border-slate-600 rounded-xl bg-gray-50/50 dark:bg-slate-900/50 transition-colors flex flex-col sm:flex-row gap-6 items-center">
 
                     <!-- Preview Foto Lama -->
@@ -61,8 +51,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <!-- ISBN -->
                     <div>
-                        <label for="isbn" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">ISBN (13 Digit) <span class="text-red-500">*</span></label>
-                        <input type="text" id="isbn" name="isbn" value="{{ old('isbn', $buku->isbn) }}" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ketik 13 digit angka ISBN" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 font-mono" required>
+                        <label for="isbn" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">ISBN <span class="text-red-500">*</span></label>
+                        <input type="text" id="isbn" name="isbn" value="{{ old('isbn', $buku->isbn ?? '') }}" minlength="5" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ketik 5-15 angka ISBN" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 font-mono" required>
                     </div>
 
                     <!-- Pengarang -->

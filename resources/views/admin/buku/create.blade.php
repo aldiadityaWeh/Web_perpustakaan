@@ -47,9 +47,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <!-- ISBN -->
                     <div>
-                        <label for="isbn" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">ISBN (13 Digit) <span class="text-red-500">*</span></label>
-                        <!-- oninput memaksa pengguna hanya bisa mengetikkan angka -->
-                        <input type="text" id="isbn" name="isbn" value="{{ old('isbn') }}" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ketik 13 digit angka ISBN" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 font-mono" required>
+                        <label for="isbn" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">ISBN <span class="text-red-500">*</span></label>
+                        <input type="text" id="isbn" name="isbn" value="{{ old('isbn', $buku->isbn ?? '') }}" minlength="5" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ketik 5-15 angka ISBN" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 font-mono" required>
                     </div>
 
                     <!-- Pengarang -->

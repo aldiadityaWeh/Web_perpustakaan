@@ -51,23 +51,19 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // ISBN wajib 13 digit angka eksak
-            'isbn' => 'required|digits:13|unique:buku,isbn',
+            'isbn' => 'required|digits_between:5,15|unique:buku,isbn',
             'judul' => 'required|string|max:255',
             'pengarang' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
-            // Tahun Terbit minimal 1980 hingga tahun berjalan saat ini
             'tahun_terbit' => 'required|digits:4|integer|min:1980|max:' . date('Y'),
-            // Kategori dibatasi hanya untuk kode DDC Utama
             'kategori' => 'required|string|in:000,100,200,300,400,500,600,700,800,900',
-            // DDC Spesifik (Boleh kosong/nullable, maksimal 50 karakter)
             'ddc' => 'nullable|string|max:50',
             'stok' => 'required|integer|min:0',
             'rak' => 'required|string|max:50',
             'gambar_sampul' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             // Pesan error kustom
-            'isbn.digits' => 'ISBN harus terdiri dari tepat 13 digit angka.',
+            'isbn.digits_between' => 'ISBN harus terdiri dari 5 hingga 15 angka.',
             'kategori.in' => 'Kategori utama tidak valid. Silakan pilih dari standar DDC.'
         ]);
 
@@ -98,8 +94,7 @@ class BukuController extends Controller
         $buku = Buku::findOrFail($id);
 
         $validated = $request->validate([
-            // ISBN wajib 13 digit angka eksak, abaikan validasi unik untuk ID buku ini
-            'isbn' => 'required|digits:13|unique:buku,isbn,' . $buku->id,
+            'isbn' => 'required|digits_between:5,15|unique:buku,isbn,' . $buku->id,
             'judul' => 'required|string|max:255',
             'pengarang' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
@@ -114,7 +109,7 @@ class BukuController extends Controller
             'gambar_sampul' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             // Pesan error kustom
-            'isbn.digits' => 'ISBN harus terdiri dari tepat 13 digit angka.',
+            'isbn.digits_between' => 'ISBN harus terdiri dari 5 hingga 15 angka.',
             'kategori.in' => 'Kategori utama tidak valid. Silakan pilih dari standar DDC.'
         ]);
 

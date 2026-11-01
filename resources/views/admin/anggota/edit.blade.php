@@ -32,9 +32,9 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <!-- NIS -->
-                    <div>
-                        <label for="nis" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Nomor Induk Siswa (NIS/NISN) <span class="text-red-500">*</span></label>
-                        <input type="text" id="nis" name="nis" value="{{ old('nis', $anggota->nis) }}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 font-mono" required>
+                     <div>
+                        <label for="nis" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">NISN / NIS</label>
+                        <input type="text" id="nis" value="{{ $anggota->nis }}" disabled readonly class="w-full px-4 py-3 border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 rounded-xl text-sm text-gray-600 dark:text-slate-400 cursor-not-allowed font-bold"> <p class="text-[10px] text-gray-400 dark:text-slate-500 mt-1">NIS bersifat permanen dan tidak dapat diubah.</p>
                     </div>
 
                     <!-- Nama Lengkap -->
