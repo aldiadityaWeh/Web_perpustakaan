@@ -29,10 +29,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 
-    // Form dan Proses Pendaftaran
-    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.process');
-
     // Lupa & Reset Kata Sandi
     Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email'); // Proses kirim link
@@ -65,7 +61,7 @@ Route::middleware('auth')->group(function () {
 
     // -- Mencetak Label Buku & Kartu Anggota
     Route::get('/admin/cetak-massal-anggota', [AnggotaController::class, 'cetakMassal'])->name('anggota.cetakMassal');
-    Route::get('/admin/cetak-massal-label', [BukuController::class, 'cetakMassal'])->name('buku.cetakMassal'); // <- Tambahkan baris ini
+    Route::get('/admin/cetak-massal-label', [BukuController::class, 'cetakMassal'])->name('buku.cetakMassal');
 
     Route::get('/admin/anggota/{id}/cetak-kartu', [AnggotaController::class, 'cetakKartu'])->name('anggota.cetak_kartu');
     Route::get('/admin/buku/{id}/cetak-label', [BukuController::class, 'cetakLabel'])->name('buku.cetak_label');
@@ -93,11 +89,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/laporan/buku', [LaporanController::class, 'buku'])->name('laporan.buku');
     Route::get('/admin/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
 
-    // --- Pengaturan Sistem ---
+    // --- Pengaturan Sistem & Manajemen Petugas ---
     Route::get('/admin/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::put('/admin/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
+    Route::post('/admin/pengaturan/petugas', [PengaturanController::class, 'storePetugas'])->name('pengaturan.petugas.store');
+    Route::put('/admin/pengaturan/petugas/{id}', [PengaturanController::class, 'updatePetugas'])->name('pengaturan.petugas.update'); // <-- Tambahkan baris ini
+    Route::delete('/admin/pengaturan/petugas/{id}', [PengaturanController::class, 'destroyPetugas'])->name('pengaturan.petugas.destroy');
 
-    // --- Profil  ---
+    // --- Profil ---
     Route::get('/admin/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/admin/profil', [ProfilController::class, 'update'])->name('profil.update');
 

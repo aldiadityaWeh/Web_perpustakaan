@@ -55,12 +55,6 @@
                 </form>
             </div>
 
-            @if(session('success'))
-                <div class="bg-emerald-50 dark:bg-emerald-500/10 p-4 flex items-center gap-3 text-emerald-700 dark:text-emerald-400 text-sm font-medium border-b border-emerald-100 dark:border-emerald-500/20 transition-colors">
-                    <i class="ph ph-check-circle text-xl"></i> {{ session('success') }}
-                </div>
-            @endif
-
             <div class="overflow-x-auto w-full">
                 <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead class="bg-purple-50/50 dark:bg-slate-900/50 sticky top-0 z-10 border-b border-gray-200 dark:border-slate-700 transition-colors">

@@ -85,14 +85,7 @@
                 </a>
             </div>
         </div>
-
-        @if(session('error'))
-            <div class="bg-red-50 dark:bg-red-500/10 border-l-4 border-red-500 p-4 flex items-center gap-3 text-red-700 dark:text-red-400 text-sm font-medium transition-colors rounded-r-xl shadow-sm">
-                <i class="ph ph-warning-circle text-xl"></i>
-                {{ session('error') }}
-            </div>
-        @endif
-
+        
         <!-- Target JS Table Container Buku (Pencarian Sudah Masuk ke Sini) -->
         <div id="table-container-buku" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors flex-1 flex flex-col">
 
@@ -114,13 +107,6 @@
                     </button>
                 </form>
             </div>
-
-            @if(session('success'))
-                <div class="bg-emerald-50 dark:bg-emerald-500/10 border-b border-emerald-100 dark:border-emerald-500/20 p-4 flex items-center gap-3 text-emerald-700 dark:text-emerald-400 text-sm font-medium transition-colors">
-                    <i class="ph ph-check-circle text-xl"></i>
-                    {{ session('success') }}
-                </div>
-            @endif
 
             <div class="overflow-x-auto w-full">
                 <table class="w-full text-left border-collapse min-w-[800px]">

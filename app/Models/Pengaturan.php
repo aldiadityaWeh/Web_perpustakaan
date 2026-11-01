@@ -8,12 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Pengaturan extends Model
 {
     use HasFactory;
-    use \App\Traits\ScopeSekolah;
 
     protected $fillable = [
         'nama_sekolah',
         'alamat_sekolah',
-        'kepala_sekolah',     
+        'kepala_sekolah',
         'nip_kepala_sekolah',
         'kepala_perpustakaan',
         'nip_kepala',

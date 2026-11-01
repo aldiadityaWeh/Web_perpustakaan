@@ -28,6 +28,9 @@
 
 <body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-slate-200 font-sans antialiased overflow-hidden">
 
+    <!-- PANGGIL TOAST DI SINI (Tepat di bawah body) -->
+    <x-toast />
+
     <!-- Alpine x-data -->
     <div x-data="{ desktopOpen: true, mobileOpen: false }" class="flex h-screen w-full relative">
 
@@ -119,10 +122,13 @@
                 <!-- Manajemen Sistem -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mt-4 mb-1 px-3">Manajemen Sistem</div>
 
-                <a href="{{ route('pengaturan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('pengaturan.*') ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-semibold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-slate-200' }}">
-                    <i class="ph ph-gear text-2xl shrink-0"></i>
-                    <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Pengaturan</span>
-                </a>
+                @if(auth()->id() == 1)
+                    <a href="{{ route('pengaturan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('pengaturan.*') ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-semibold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-slate-200' }}">
+                        <i class="ph ph-gear text-2xl shrink-0"></i>
+                        <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Pengaturan</span>
+                    </a>
+                @endif
+
                 <a href="{{ route('profil.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('profil.*') ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-semibold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-slate-200' }}">
                     <i class="ph ph-user-circle text-2xl shrink-0"></i>
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Profil Saya</span>
@@ -152,7 +158,6 @@
 
                     <!-- TOMBOL DARK MODE -->
                     <button @click="darkMode = !darkMode" class="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800 transition-colors focus:outline-none flex items-center justify-center transform hover:scale-110" title="Ganti Mode Tema">
-                        <!-- Animasi dan pergantian ikon Matahari / Bulan -->
                         <i class="ph text-2xl transition-all" :class="darkMode ? 'ph-sun-dim text-amber-400' : 'ph-moon-stars'"></i>
                     </button>
 
@@ -179,7 +184,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function konfirmasiKeluar() {
-            // Cek apakah class 'dark' sedang aktif di halaman html
             const isDark = document.documentElement.classList.contains('dark');
 
             Swal.fire({
@@ -188,14 +192,11 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
-                // Warna tombol batal menyesuaikan mode
                 cancelButtonColor: isDark ? '#334155' : '#6b7280',
                 confirmButtonText: 'Ya, Keluar!',
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
-                // Warna Background Modal menyesuaikan mode
                 background: isDark ? '#1e293b' : '#ffffff',
-                // Warna Teks menyesuaikan mode
                 color: isDark ? '#f8fafc' : '#1e293b',
                 customClass: {
                     popup: 'rounded-2xl shadow-xl border ' + (isDark ? 'border-slate-700' : 'border-transparent'),

@@ -3,124 +3,151 @@
         Profil Saya - Sistem Perpustakaan
     </x-slot:title>
 
-    <div class="flex flex-col flex-1 min-h-[85vh] w-full max-w-5xl mx-auto transition-colors">
+    <div class="flex flex-col w-full transition-colors">
 
-        <!-- HEADER -->
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-slate-100 transition-colors">Profil Saya</h1>
-            <p class="text-sm text-gray-500 dark:text-slate-400 mt-1 transition-colors">Kelola informasi data diri dan keamanan akun Anda.</p>
+        <!-- HEADER COMPACT (Senada dengan Pengaturan) -->
+        <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-slate-100 transition-colors">Profil Saya</h1>
+                <p class="text-xs text-gray-500 dark:text-slate-400 transition-colors">Kelola informasi data diri dan keamanan kata sandi akun Anda.</p>
+            </div>
         </div>
 
-        <!-- NOTIFIKASI SUKSES -->
-        @if(session('success'))
-            <div class="mb-6 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 p-4 rounded-xl flex items-center gap-3 border border-emerald-100 dark:border-emerald-500/20 shadow-sm transition-colors">
-                <i class="ph ph-check-circle text-xl"></i>
-                <p class="text-sm font-semibold">{{ session('success') }}</p>
-            </div>
-        @endif
-
-        <form action="{{ route('profil.update') }}" method="POST">
+        <form action="{{ route('profil.update') }}" method="POST" class="space-y-5">
             @csrf
             @method('PUT')
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+            <!-- GRID 2 KOLOM SEIMBANG (6 KIRI : 6 KANAN) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
 
-                <!-- BAGIAN 1: DATA DIRI (Lebar 7 kolom) -->
-                <div class="md:col-span-7 bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 h-fit transition-colors">
+                <!-- ==========================================
+                     KOLOM KIRI (6/12): INFORMASI AKUN
+                     ========================================== -->
+                <div class="lg:col-span-6 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-between transition-colors">
 
-                    <!-- Header Kotak Data Diri -->
-                    <div class="flex items-center gap-3.5 mb-6 pb-4 border-b border-gray-100 dark:border-slate-700 transition-colors">
-                        <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-sm shrink-0 transition-colors">
-                            <i class="ph ph-user-circle text-2xl"></i>
+                    <div>
+                        <!-- Header Kotak Data Diri -->
+                        <div class="flex items-center gap-2.5 mb-4 pb-2.5 border-b border-gray-100 dark:border-slate-700 transition-colors">
+                            <div class="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                                <i class="ph ph-user-circle text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-slate-100">Informasi Akun</h3>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-base font-bold text-gray-900 dark:text-slate-100 transition-colors">Informasi Akun</h3>
-                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 transition-colors">Ubah nama lengkap dan alamat email login.</p>
+
+                        <!-- Kartu Mini Ringkasan Akun (Agar tinggi kolom kiri & kanan seimbang) -->
+                        <div class="mb-4 p-3 rounded-xl bg-gray-50 dark:bg-slate-900/60 border border-gray-100 dark:border-slate-700/60 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-xs font-bold text-gray-900 dark:text-slate-100 truncate">{{ $user->name }}</p>
+                                    @if($user->id == 1)
+                                        <span class="text-[9px] bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold shrink-0">Admin Utama</span>
+                                    @else
+                                        <span class="text-[9px] bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full font-bold shrink-0">Petugas</span>
+                                    @endif
+                                </div>
+                                <p class="text-[11px] text-gray-400 dark:text-slate-500 truncate mt-0.5">Terdaftar sejak {{ $user->created_at ? $user->created_at->format('d M Y') : '-' }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Input Data Diri -->
+                        <div class="space-y-3.5">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-slate-400 uppercase mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                                <input type="text" name="name" value="{{ old('name', $user->name) }}" required
+                                    class="w-full px-3.5 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 outline-none text-xs transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-slate-400 uppercase mb-1">Alamat Email Login <span class="text-red-500">*</span></label>
+                                <input type="email" name="email" value="{{ old('email', $user->email) }}" required
+                                    class="w-full px-3.5 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 outline-none text-xs transition">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Nama Lengkap Admin <span class="text-red-500">*</span></label>
-                            <input type="text" name="name" value="{{ old('name', $user->name) }}" required
-                                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-500 outline-none text-sm transition shadow-sm">
-                            @error('name') <span class="text-xs text-red-500 dark:text-red-400 mt-1 block transition-colors">Nama lengkap wajib diisi.</span> @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Alamat Email <span class="text-red-500">*</span></label>
-                            <input type="email" name="email" value="{{ old('email', $user->email) }}" required
-                                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-500 outline-none text-sm transition shadow-sm">
-                            @error('email') <span class="text-xs text-red-500 dark:text-red-400 mt-1 block transition-colors">Format email tidak valid atau email sudah digunakan.</span> @enderror
-                        </div>
-                    </div>
+                    <p class="text-[10px] text-gray-400 dark:text-slate-500 mt-4 pt-3 border-t border-gray-100 dark:border-slate-700/60">
+                        <i class="ph ph-info align-middle mr-1"></i>Pastikan alamat email tetap aktif untuk keperluan masuk ke dalam sistem.
+                    </p>
                 </div>
 
-                <!-- BAGIAN 2: KEAMANAN (Lebar 5 kolom) -->
-                <div class="md:col-span-5 bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 h-fit transition-colors">
+                <!-- ==========================================
+                     KOLOM KANAN (6/12): GANTI PASSWORD
+                     ========================================== -->
+                <div class="lg:col-span-6 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-between transition-colors">
 
-                    <!-- Header Kotak Keamanan -->
-                    <div class="flex items-center gap-3.5 mb-6 pb-4 border-b border-gray-100 dark:border-slate-700 transition-colors">
-                        <div class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center shadow-sm shrink-0 transition-colors">
-                            <i class="ph ph-lock-key text-2xl"></i>
+                    <div>
+                        <!-- Header Kotak Keamanan -->
+                        <div class="flex items-center justify-between gap-2 mb-4 pb-2.5 border-b border-gray-100 dark:border-slate-700 transition-colors">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+                                    <i class="ph ph-lock-key text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-slate-100">Ganti Kata Sandi</h3>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-semibold text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-700/60 px-2 py-0.5 rounded-md">Opsional</span>
                         </div>
-                        <div>
-                            <h3 class="text-base font-bold text-gray-900 dark:text-slate-100 transition-colors">Ganti Password</h3>
-                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 transition-colors">Kosongkan jika tidak diubah.</p>
+
+                        <div class="space-y-3.5">
+
+                            <!-- Password Lama (Dilengkapi readonly onfocus agar tidak terkena autofill browser) -->
+                            <div x-data="{ show: false }">
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-slate-400 uppercase mb-1">Kata Sandi Lama</label>
+                                <div class="relative">
+                                    <input :type="show ? 'text' : 'password'" name="current_password" placeholder="Isi jika ingin mengganti sandi"
+                                        readonly onfocus="this.removeAttribute('readonly');"
+                                        class="w-full px-3.5 py-2 pr-10 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-red-500 outline-none text-xs transition placeholder-gray-400 dark:placeholder-slate-500">
+                                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-red-500 transition-colors">
+                                        <i class="text-base" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Password Baru -->
+                            <div x-data="{ show: false }">
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-slate-400 uppercase mb-1">Kata Sandi Baru</label>
+                                <div class="relative">
+                                    <input :type="show ? 'text' : 'password'" name="new_password" placeholder="Minimal 4 karakter"
+                                        readonly onfocus="this.removeAttribute('readonly');"
+                                        class="w-full px-3.5 py-2 pr-10 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-red-500 outline-none text-xs transition placeholder-gray-400 dark:placeholder-slate-500">
+                                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-red-500 transition-colors">
+                                        <i class="text-base" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Konfirmasi Password Baru -->
+                            <div x-data="{ show: false }">
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-slate-400 uppercase mb-1">Konfirmasi Sandi Baru</label>
+                                <div class="relative">
+                                    <input :type="show ? 'text' : 'password'" name="new_password_confirmation" placeholder="Ulangi kata sandi baru"
+                                        readonly onfocus="this.removeAttribute('readonly');"
+                                        class="w-full px-3.5 py-2 pr-10 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-red-500 outline-none text-xs transition placeholder-gray-400 dark:placeholder-slate-500">
+                                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-red-500 transition-colors">
+                                        <i class="text-base" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
-                    <div class="space-y-5">
-
-                        <!-- Form Password Lama dengan Ikon Mata -->
-                        <div x-data="{ show: false }">
-                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Password Lama</label>
-                            <div class="relative">
-                                <input :type="show ? 'text' : 'password'" name="current_password" placeholder="••••••••"
-                                    class="w-full px-4 py-2.5 pr-12 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-red-600 dark:focus:ring-red-500 outline-none text-sm transition shadow-sm placeholder-gray-400 dark:placeholder-slate-500">
-                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors">
-                                    <i class="text-lg" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
-                                </button>
-                            </div>
-                            @error('current_password') <span class="text-xs text-red-500 dark:text-red-400 mt-1 block transition-colors">Password lama yang Anda masukkan salah.</span> @enderror
-                        </div>
-
-                        <!-- Form Password Baru dengan Ikon Mata -->
-                        <div x-data="{ show: false }">
-                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Password Baru</label>
-                            <div class="relative">
-                                <input :type="show ? 'text' : 'password'" name="new_password" placeholder="Minimal 8 karakter"
-                                    class="w-full px-4 py-2.5 pr-12 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-red-600 dark:focus:ring-red-500 outline-none text-sm transition shadow-sm placeholder-gray-400 dark:placeholder-slate-500">
-                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors">
-                                    <i class="text-lg" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
-                                </button>
-                            </div>
-                            @error('new_password') <span class="text-xs text-red-500 dark:text-red-400 mt-1 block transition-colors">Password baru minimal 8 karakter atau konfirmasi tidak cocok.</span> @enderror
-                        </div>
-
-                        <!-- Form Konfirmasi Password Baru dengan Ikon Mata -->
-                        <div x-data="{ show: false }">
-                            <label class="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase mb-1.5 transition-colors">Konfirmasi Password Baru</label>
-                            <div class="relative">
-                                <input :type="show ? 'text' : 'password'" name="new_password_confirmation" placeholder="Ulangi password baru"
-                                    class="w-full px-4 py-2.5 pr-12 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-red-600 dark:focus:ring-red-500 outline-none text-sm transition shadow-sm placeholder-gray-400 dark:placeholder-slate-500">
-                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors">
-                                    <i class="text-lg" :class="show ? 'ph ph-eye-slash' : 'ph ph-eye'"></i>
-                                </button>
-                            </div>
-                        </div>
-
+                    <!-- TOMBOL SIMPAN (Diletakkan di kanan bawah kartu agar hemat ruang vertikal) -->
+                    <div class="flex justify-end mt-4 pt-3 border-t border-gray-100 dark:border-slate-700/60">
+                        <button type="submit" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="ph ph-floppy-disk text-base"></i>
+                            <span>Simpan Perubahan</span>
+                        </button>
                     </div>
+
                 </div>
 
-            </div>
-
-            <!-- TOMBOL SIMPAN -->
-            <div class="flex justify-end mb-8">
-                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm">
-                    <i class="ph ph-floppy-disk text-lg"></i>
-                    <span>Simpan Perubahan</span>
-                </button>
             </div>
         </form>
 
