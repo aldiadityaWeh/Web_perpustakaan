@@ -76,9 +76,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/denda/{id}/lunas', [PeminjamanController::class, 'lunasiDenda'])->name('denda.lunas');
 
     // 2. Resource Utama
+    Route::post('/admin/peminjaman/{id}/terima-ganti', [\App\Http\Controllers\PeminjamanController::class, 'terimaBukuGanti'])->name('peminjaman.terimaGanti');
+
     Route::resource('/admin/peminjaman', PeminjamanController::class);
     Route::resource('/admin/pengembalian', PengembalianController::class); // Untuk Riwayat
-    Route::resource('/admin/transaksi', TransaksiController::class); // Untuk Kas Denda
+    Route::resource('/admin/transaksi', TransaksiController::class);
 
     // --- Analisis Perpustakaan ---
     Route::get('/admin/analisis', [AnalisisController::class, 'index'])->name('analisis.index');

@@ -160,7 +160,7 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.validasi', compact('peminjaman'));
     }
 
-    public function prosesValidasi(Request $request, $id)
+  public function prosesValidasi(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
@@ -178,7 +178,9 @@ class PeminjamanController extends Controller
         }
 
         $catatanAkhir = $request->catatan;
-        if ($request->has('kondisi_buku') && $request->kondisi_buku != 'Baik') {
+
+        // SESUAIKAN DENGAN VALUE DARI FORM BARU
+        if ($request->has('kondisi_buku') && $request->kondisi_buku != 'Normal') {
             $catatanAkhir = "Kondisi: " . $request->kondisi_buku . " | " . $request->catatan;
         }
 
@@ -193,8 +195,10 @@ class PeminjamanController extends Controller
             'catatan' => $catatanAkhir,
         ]);
 
-        // 4. LOGIKA ATURAN MUTLAK: BUKU HILANG ATAU RUSAK WAJIB GANTI BARU FISIK
-        if (!in_array($request->kondisi_buku, ['Hilang (Belum Diganti)', 'Rusak']) && $peminjaman->buku) {
+        // 4. LOGIKA ATURAN MUTLAK (DISESUAIKAN DENGAN FORM BARU)
+        // Jika buku dalam keadaan Normal, kembalikan stoknya.
+        // Jika Rusak / Hilang, stok TIDAK dikembalikan (tertahan hingga siswa mengganti fisik bukunya).
+        if ($request->kondisi_buku === 'Normal' && $peminjaman->buku) {
             $peminjaman->buku->increment('stok');
         }
 
@@ -244,5 +248,25 @@ class PeminjamanController extends Controller
         ]);
 
         return back()->with('success', 'Uang denda dari ' . $peminjaman->anggota->nama_lengkap . ' sebesar Rp' . number_format($peminjaman->denda, 0, ',', '.') . ' telah diterima (LUNAS).');
+    }
+
+    public function terimaBukuGanti($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        // 1. Tambahkan kembali stok buku karena siswa sudah membawa gantinya
+        if ($peminjaman->buku) {
+            $peminjaman->buku->increment('stok');
+        }
+
+        // 2. Ubah teks catatan agar sistem tahu buku sudah diganti
+        // Ini juga akan membuat tombol "Terima Buku Ganti" hilang otomatis dari UI
+        $catatanBaru = str_replace('Kondisi: Rusak / Hilang', 'Kondisi: SUDAH DIGANTI', $peminjaman->catatan);
+
+        $peminjaman->update([
+            'catatan' => $catatanBaru
+        ]);
+
+        return back()->with('success', 'Buku fisik pengganti telah diterima dan stok perpustakaan berhasil ditambahkan kembali.');
     }
 }

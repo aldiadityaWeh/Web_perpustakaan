@@ -45,8 +45,8 @@
                 </div>
             </div>
 
-            <!-- Form Validasi -->
-            <form action="{{ route('peminjaman.prosesValidasi', $peminjaman->id) }}" method="POST" class="p-6 space-y-6" x-data="{ kondisi: 'Baik' }">
+           <!-- Form Validasi (Ubah x-data kondisi default menjadi 'Normal') -->
+            <form action="{{ route('peminjaman.prosesValidasi', $peminjaman->id) }}" method="POST" class="p-6 space-y-6" x-data="{ kondisi: 'Normal' }">
                 @csrf
 
                 <!-- Alert Keterlambatan -->
@@ -82,7 +82,7 @@
                         <p class="text-xs text-gray-500 dark:text-slate-400 mt-1.5">*Isi angka denda kerterlambatan / denda khusus di sini.</p>
                     </div>
 
-                    <!-- Kondisi Buku -->
+                    <!-- Kondisi Buku (Disederhanakan jadi 2 pilihan) -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Kondisi Saat Dikembalikan</label>
                         <div class="relative">
@@ -91,10 +91,10 @@
                             </div>
                             <select name="kondisi_buku" x-model="kondisi" required
                                 class="pl-11 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 outline-none transition-colors appearance-none cursor-pointer font-bold text-gray-700 dark:text-slate-200">
-                                <option value="Baik" class="dark:bg-slate-800">Bagus / Normal</option>
-                                <option value="Rusak" class="dark:bg-slate-800">Rusak (Halaman Robek/Kotor)</option>
-                                <option value="Hilang (Belum Diganti)" class="dark:bg-slate-800">Hilang (Siswa Belum Membawa Ganti)</option>
-                                <option value="Hilang (Sudah Diganti)" class="dark:bg-slate-800">Hilang (Sudah Diganti Buku Fisik Sama)</option>
+
+                                <option value="Normal" class="dark:bg-slate-800">Normal / Bagus</option>
+                                <option value="Rusak / Hilang" class="dark:bg-slate-800">Rusak / Hilang</option>
+
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <i class="ph ph-caret-down text-gray-400 dark:text-slate-500"></i>
@@ -103,8 +103,8 @@
                     </div>
                 </div>
 
-                <!-- ATURAN MUTLAK WARNING (Muncul Jika Hilang Belum Diganti ATAU Rusak) -->
-                <div x-show="kondisi === 'Hilang (Belum Diganti)' || kondisi === 'Rusak'" x-transition x-cloak
+                <!-- ATURAN MUTLAK WARNING (Logika x-show disesuaikan) -->
+                <div x-show="kondisi === 'Rusak / Hilang'" style="display: none;" x-transition
                      class="bg-red-50 dark:bg-red-500/10 border-l-4 border-red-600 dark:border-red-500 p-5 rounded-r-xl shadow-sm transition-colors">
                     <div class="flex items-start gap-3">
                         <i class="ph ph-prohibit text-red-600 dark:text-red-400 text-3xl animate-pulse shrink-0"></i>
@@ -119,7 +119,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Catatan Tambahan -->
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Catatan Kepala Perpus (Opsional)</label>

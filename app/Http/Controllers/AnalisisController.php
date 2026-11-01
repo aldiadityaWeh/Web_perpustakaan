@@ -23,7 +23,9 @@ class AnalisisController extends Controller
 
         // 2. SUMMARY CARDS BERDASARKAN RENTANG TANGGAL
         $totalTransaksi = Peminjaman::whereBetween('tanggal_pinjam', [$start, $end])->count();
-        $bukuTerlambat = Peminjaman::where('status', 'terlambat')->count(); // Absolut saat ini
+        $bukuTerlambat = Peminjaman::where('status', 'Dipinjam')
+                                   ->whereDate('tanggal_jatuh_tempo', '<', Carbon::today())
+                                   ->count();
 
         $totalAnggota = Anggota::count();
         $anggotaPernahPinjam = Peminjaman::distinct('anggota_id')->count('anggota_id');

@@ -114,10 +114,20 @@
                                             Denda: Rp {{ number_format($pinjam->denda_berjalan, 0, ',', '.') }}
                                         </span>
                                     @elseif($statusAkurat == 'dikembalikan' || $statusAkurat == 'sudah kembali')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Selesai
-                                        </span>
-                                    @else
+                                            @if($pinjam->status_denda == 'Belum Lunas')
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors" title="Denda belum dibayar">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400 animate-pulse"></span> Belum Lunas
+                                                </span>
+                                            @elseif(str_contains($pinjam->catatan, 'Kondisi: Rusak / Hilang'))
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors" title="Menunggu fisik buku pengganti">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse"></span> Tunggu Buku Ganti
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Selesai
+                                                </span>
+                                            @endif
+                                        @else
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors">
                                             {{ $pinjam->status_aktual }}
                                         </span>
@@ -128,11 +138,22 @@
                             <td class="py-4 px-6 text-center">
                                 <div class="inline-flex items-center justify-center p-1 bg-white dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm gap-1 transition-colors">
 
+                                   <!-- LOGIKA TERIMA BUKU GANTI -->
+                                    @if(str_contains($pinjam->catatan, 'Kondisi: Rusak / Hilang'))
+                                        <form action="{{ route('peminjaman.terimaGanti', $pinjam->id) }}" method="POST" class="m-0 p-0" onsubmit="event.preventDefault(); konfirmasiTerimaGanti(this);">
+                                            @csrf
+                                            <button type="submit" class="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center gap-1" title="Terima Buku Fisik Pengganti">
+                                                <i class="ph ph-arrows-clockwise text-lg animate-spin-slow"></i>
+                                            </button>
+                                        </form>
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700 mx-0.5"></div>
+                                    @endif
+
                                     @if($statusAkurat == 'dipinjam' || $statusAkurat == 'terlambat')
                                         <a href="{{ route('peminjaman.validasi', $pinjam->id) }}" class="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-colors flex items-center gap-1" title="Validasi Pengembalian">
                                             <i class="ph ph-check-square-offset text-lg"></i>
                                         </a>
-                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700 mx-0.5"></div>
                                     @endif
 
                                     <a href="{{ route('peminjaman.show', $pinjam->id) }}" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors flex items-center gap-1" title="Lihat Detail">
@@ -179,4 +200,43 @@
 
     <!-- Script Live Search Peminjaman -->
     <script src="{{ asset('js/search-peminjaman.js') }}"></script>
+
+    <script>
+        function konfirmasiTerimaGanti(form) {
+            const isDark = document.documentElement.classList.contains('dark');
+
+            Swal.fire({
+                title: 'Terima Buku Ganti?',
+                text: "Apakah siswa sudah menyerahkan buku fisik pengganti yang baru? Stok akan ditambahkan ke sistem.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b', // Warna Amber
+                cancelButtonColor: '#ef4444', // Warna Merah
+                confirmButtonText: 'Ya, Terima & Putar Stok',
+                cancelButtonText: 'Batal',
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#1e293b',
+                customClass: {
+                    popup: 'rounded-3xl shadow-2xl border ' + (isDark ? 'border-slate-700' : 'border-transparent'),
+                    confirmButton: 'px-6 py-2.5 rounded-full text-sm font-bold shadow-md',
+                    cancelButton: 'px-6 py-2.5 rounded-full text-sm font-bold shadow-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Animasi Loading agar tidak diklik berkali-kali
+                    Swal.fire({
+                        title: 'Memproses Stok...',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        background: isDark ? '#1e293b' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#1e293b',
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+
+                    // Lanjutkan submit form ke Laravel
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </x-admin-layout>

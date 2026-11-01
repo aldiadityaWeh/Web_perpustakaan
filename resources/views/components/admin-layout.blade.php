@@ -165,7 +165,7 @@
                     <form method="POST" action="{{ route('logout') }}" id="form-logout" class="inline-block m-0 p-0">
                         @csrf
                         <button type="button" onclick="konfirmasiKeluar()" class="bg-red-800 hover:bg-red-900 dark:bg-red-600/20 dark:hover:bg-red-600/40 dark:text-red-400 dark:border dark:border-red-500/50 text-white font-bold py-2 px-5 rounded-lg transition-colors shadow-sm flex items-center gap-2 cursor-pointer text-sm">
-                            Keluar
+                            log out
                         </button>
                     </form>
 
