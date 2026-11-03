@@ -79,13 +79,15 @@
                     </div>
                 </div>
 
-                <a href="{{ route('buku.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md focus:outline-none shrink-0">
-                    <i class="ph ph-plus text-lg"></i>
-                    Tambah Buku
-                </a>
+                @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('buku.create') }}" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md focus:outline-none shrink-0">
+                        <i class="ph ph-plus text-lg"></i>
+                        Tambah Buku
+                    </a>
+                @endif
             </div>
         </div>
-        
+
         <!-- Target JS Table Container Buku (Pencarian Sudah Masuk ke Sini) -->
         <div id="table-container-buku" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors flex-1 flex flex-col">
 
@@ -240,48 +242,54 @@
                             <td class="py-4 px-6 font-bold text-gray-800 dark:text-slate-200">
                                 {{ $buku->stok }} <span class="text-xs font-normal text-gray-400 dark:text-slate-500">Pcs</span>
                             </td>
-                            <td class="py-4 px-6 text-center">
+                           <td class="py-4 px-6 text-center">
                                 <!-- DESAIN BARU: Action Group dengan Border & Pemisah -->
                                 <div class="inline-flex items-center justify-center p-1 bg-white dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm gap-1">
+
+                                    <!-- TOMBOL DETAIL (Bisa diakses Admin & Petugas) -->
                                     <a href="{{ route('buku.show', $buku->id) }}" class="p-1.5 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 rounded-lg transition-colors" title="Lihat Detail">
                                         <i class="ph ph-eye text-lg"></i>
                                     </a>
 
-                                    <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
+                                    <!-- HANYA ADMIN YANG BISA MELIHAT TOMBOL DI BAWAH INI -->
+                                    @if(auth()->user()->role === 'admin')
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
 
-                                    <a href="{{ route('buku.edit', $buku->id) }}" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
-                                        <i class="ph ph-pencil-simple text-lg"></i>
-                                    </a>
+                                        <a href="{{ route('buku.edit', $buku->id) }}" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
+                                            <i class="ph ph-pencil-simple text-lg"></i>
+                                        </a>
 
-                                    <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
 
-                                    <div x-data="{ showDeleteModal: false }" class="inline-block relative">
-                                        <button @click="showDeleteModal = true" type="button" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Hapus">
-                                            <i class="ph ph-trash text-lg"></i>
-                                        </button>
+                                        <div x-data="{ showDeleteModal: false }" class="inline-block relative">
+                                            <button @click="showDeleteModal = true" type="button" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Hapus">
+                                                <i class="ph ph-trash text-lg"></i>
+                                            </button>
 
-                                        <!-- Modal Hapus -->
-                                        <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-[99] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 text-left">
-                                            <div @click.away="showDeleteModal = false" class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all border border-transparent dark:border-slate-700">
-                                                <div class="flex items-center gap-4 mb-4">
-                                                    <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center text-xl shrink-0">
-                                                        <i class="ph ph-warning-circle"></i>
+                                            <!-- Modal Hapus -->
+                                            <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-[99] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 text-left">
+                                                <div @click.away="showDeleteModal = false" class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all border border-transparent dark:border-slate-700">
+                                                    <div class="flex items-center gap-4 mb-4">
+                                                        <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center text-xl shrink-0">
+                                                            <i class="ph ph-warning-circle"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="font-bold text-gray-900 dark:text-slate-100 text-base">Hapus Buku?</h3>
+                                                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Data buku ini akan dihapus permanen.</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h3 class="font-bold text-gray-900 dark:text-slate-100 text-base">Hapus Buku?</h3>
-                                                        <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Data buku ini akan dihapus permanen.</p>
+                                                    <div class="flex justify-end gap-3 mt-6">
+                                                        <button @click="showDeleteModal = false" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Batal</button>
+                                                        <form action="{{ route('buku.destroy', $buku->id) }}" method="POST">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 dark:bg-red-500 rounded-xl hover:bg-red-700 dark:hover:bg-red-600 transition-colors">Ya, Hapus</button>
+                                                        </form>
                                                     </div>
-                                                </div>
-                                                <div class="flex justify-end gap-3 mt-6">
-                                                    <button @click="showDeleteModal = false" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Batal</button>
-                                                    <form action="{{ route('buku.destroy', $buku->id) }}" method="POST">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 dark:bg-red-500 rounded-xl hover:bg-red-700 dark:hover:bg-red-600 transition-colors">Ya, Hapus</button>
-                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
+                                    <!-- AKHIR BATAS HAK AKSES ADMIN -->
                                 </div>
                             </td>
                         </tr>

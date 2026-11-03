@@ -14,6 +14,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // PENAMBAHAN KOLOM ROLE
+            $table->enum('role', ['admin', 'petugas'])->default('petugas');
+
             $table->rememberToken();
             $table->timestamps();
         });
