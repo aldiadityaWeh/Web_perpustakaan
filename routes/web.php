@@ -48,8 +48,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/profil', [ProfilController::class, 'update'])->name('profil.update');
 
     // --- Akses Baca (Read-Only) Buku & Anggota ---
-    Route::resource('/admin/buku', BukuController::class)->only(['index', 'show']);
-    Route::resource('/admin/anggota', AnggotaController::class)->only(['index', 'show']);
+    Route::get('/admin/buku', [BukuController::class, 'index'])->name('buku.index');
+    Route::get('/admin/buku/{buku}', [BukuController::class, 'show'])->name('buku.show');
+
+    Route::get('/admin/anggota', [AnggotaController::class, 'index'])->name('anggota.index');
+    Route::get('/admin/anggota/{anggota}', [AnggotaController::class, 'show'])->name('anggota.show');
 
     // --- Mencetak Label Buku & Kartu Anggota ---
     Route::get('/admin/cetak-massal-anggota', [AnggotaController::class, 'cetakMassal'])->name('anggota.cetakMassal');
@@ -88,9 +91,21 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    // --- Akses Tulis (Create, Edit, Delete) Buku & Anggota ---
-    Route::resource('/admin/buku', BukuController::class)->except(['index', 'show']);
-    Route::resource('/admin/anggota', AnggotaController::class)->except(['index', 'show']);
+    // --- Akses Tulis (Create, Edit, Update, Destroy) Buku ---
+    // PERHATIKAN: Route 'create' diletakkan secara eksplisit
+    Route::get('/admin/buku/create/baru', [BukuController::class, 'create'])->name('buku.create');
+    Route::post('/admin/buku', [BukuController::class, 'store'])->name('buku.store');
+    Route::get('/admin/buku/{buku}/edit', [BukuController::class, 'edit'])->name('buku.edit');
+    Route::put('/admin/buku/{buku}', [BukuController::class, 'update'])->name('buku.update');
+    Route::delete('/admin/buku/{buku}', [BukuController::class, 'destroy'])->name('buku.destroy');
+
+    // --- Akses Tulis (Create, Edit, Update, Destroy) Anggota ---
+    // PERHATIKAN: Route 'create' diletakkan secara eksplisit
+    Route::get('/admin/anggota/create/baru', [AnggotaController::class, 'create'])->name('anggota.create');
+    Route::post('/admin/anggota', [AnggotaController::class, 'store'])->name('anggota.store');
+    Route::get('/admin/anggota/{anggota}/edit', [AnggotaController::class, 'edit'])->name('anggota.edit');
+    Route::put('/admin/anggota/{anggota}', [AnggotaController::class, 'update'])->name('anggota.update');
+    Route::delete('/admin/anggota/{anggota}', [AnggotaController::class, 'destroy'])->name('anggota.destroy');
 
     // --- Pengaturan Sistem & Manajemen Petugas ---
     Route::get('/admin/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');

@@ -20,10 +20,13 @@
                 Cetak Label (PDF)
             </a>
 
-            <a href="{{ route('buku.edit', $buku->id) }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
-                <i class="ph ph-pencil-simple text-lg"></i>
-                Edit Buku
-            </a>
+            <!-- HANYA ADMIN YANG BISA MELIHAT TOMBOL EDIT -->
+            @if(auth()->user()->role === 'admin')
+                <a href="{{ route('buku.edit', $buku->id) }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+                    <i class="ph ph-pencil-simple text-lg"></i>
+                    Edit Buku
+                </a>
+            @endif
         </div>
     </div>
 

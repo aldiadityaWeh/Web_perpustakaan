@@ -122,7 +122,7 @@
                 <!-- Manajemen Sistem -->
                 <div x-show="desktopOpen || mobileOpen" class="text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mt-4 mb-1 px-3">Manajemen Sistem</div>
 
-                @if(auth()->id() == 1)
+                @if(auth()->user()->role === 'admin')
                     <a href="{{ route('pengaturan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors {{ request()->routeIs('pengaturan.*') ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-semibold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-slate-200' }}">
                         <i class="ph ph-gear text-2xl shrink-0"></i>
                         <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Pengaturan</span>
@@ -144,8 +144,7 @@
                 <div class="flex items-center gap-3 sm:gap-4">
                     <button
                         @click="if (window.innerWidth >= 1024) { desktopOpen = !desktopOpen; } else { mobileOpen = !mobileOpen; }"
-                        class="text-white hover:bg-white/20 dark:hover:bg-slate-800 p-2 rounded-lg transition-colors focus:outline-none"
-                    >
+                        class="text-white hover:bg-white/20 dark:hover:bg-slate-800 p-2 rounded-lg transition-colors focus:outline-none">
                         <i class="ph ph-list text-2xl"></i>
                     </button>
                     <span class="font-bold text-base sm:text-lg tracking-wide flex items-center gap-2 truncate">
