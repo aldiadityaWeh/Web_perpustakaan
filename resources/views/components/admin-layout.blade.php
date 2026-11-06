@@ -54,7 +54,7 @@
             }"
         >
             <!-- Sidebar Header -->
-            <div class="p-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-3 h-16">
+            <div class="p-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-3 h-16 shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
                     <div class="h-10 w-10 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-gray-100 dark:border-slate-600">
                         <img src="{{ asset('images/sd.png') }}" alt="Logo Sekolah" class="w-full h-full object-contain p-0.5">
@@ -70,7 +70,7 @@
                 </button>
             </div>
 
-            <!-- Navigation Links -->
+            <!-- Navigation Links (Area yang bisa di-scroll) -->
             <nav class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1 no-scrollbar">
 
                 <!-- Dashboard -->
@@ -134,6 +134,18 @@
                     <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap">Profil Saya</span>
                 </a>
             </nav>
+
+            <!-- TOMBOL LOGOUT STATIS DI BAWAH (Di luar <nav>) -->
+            <div class="p-2 border-t border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800/80 shrink-0 transition-colors">
+                <form method="POST" action="{{ route('logout') }}" id="form-logout" class="m-0 p-0">
+                    @csrf
+                    <button type="button" onclick="konfirmasiKeluar()" class="group w-full flex items-center justify-center gap-2 px-2 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 hover:border-red-500 hover:bg-red-500 dark:hover:bg-red-600 hover:shadow-sm text-gray-700 dark:text-slate-200 hover:text-white font-bold transition-all duration-300 focus:outline-none">
+                        <i class="ph ph-sign-out text-xl text-red-500 dark:text-red-400 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0"></i>
+                        <span x-show="desktopOpen || mobileOpen" x-transition.opacity class="whitespace-nowrap tracking-wide text-sm">Log Out</span>
+                    </button>
+                </form>
+            </div>
+
         </aside>
 
         <!-- MAIN CONTENT AREA -->
@@ -154,20 +166,10 @@
 
                 <!-- Right Header -->
                 <div class="flex items-center gap-4 sm:gap-6">
-
                     <!-- TOMBOL DARK MODE -->
                     <button @click="darkMode = !darkMode" class="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800 transition-colors focus:outline-none flex items-center justify-center transform hover:scale-110" title="Ganti Mode Tema">
                         <i class="ph text-2xl transition-all" :class="darkMode ? 'ph-sun-dim text-amber-400' : 'ph-moon-stars'"></i>
                     </button>
-
-                    <!-- Tombol Keluar -->
-                    <form method="POST" action="{{ route('logout') }}" id="form-logout" class="inline-block m-0 p-0">
-                        @csrf
-                        <button type="button" onclick="konfirmasiKeluar()" class="bg-red-800 hover:bg-red-900 dark:bg-red-600/20 dark:hover:bg-red-600/40 dark:text-red-400 dark:border dark:border-red-500/50 text-white font-bold py-2 px-5 rounded-lg transition-colors shadow-sm flex items-center gap-2 cursor-pointer text-sm">
-                            log out
-                        </button>
-                    </form>
-
                 </div>
             </header>
 

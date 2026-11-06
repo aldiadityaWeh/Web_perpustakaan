@@ -80,7 +80,7 @@
                     Buka Kiosk
                 </a>
 
-                <!-- 4 Tombol Menu -->
+                <!-- Tombol Menu Dinamis -->
                 <div class="grid grid-cols-2 gap-3">
                     <a href="{{ route('peminjaman.create') }}" class="group flex flex-col items-center gap-2 p-3 bg-purple-50 dark:bg-purple-500/10 hover:bg-purple-100 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 rounded-xl border border-purple-100 dark:border-purple-500/20 transition-all text-center">
                         <img src="{{ asset('images/peminjaman.png') }}" alt="Pinjam" class="w-7 h-7 object-contain group-hover:scale-110 transition-transform dark:opacity-90">
@@ -92,15 +92,18 @@
                         <span class="text-xs font-semibold">Pengembalian</span>
                     </a>
 
-                    <a href="{{ route('buku.create') }}" class="group flex flex-col items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl border border-emerald-100 dark:border-emerald-500/20 transition-all text-center">
-                        <img src="{{ asset('images/buku.png') }}" alt="Buku" class="w-7 h-7 object-contain group-hover:scale-110 transition-transform dark:opacity-90">
-                        <span class="text-xs font-semibold">Tambah Buku</span>
-                    </a>
+                    <!-- HANYA ADMIN YANG BISA MELIHAT 2 TOMBOL INI -->
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('buku.create') }}" class="group flex flex-col items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl border border-emerald-100 dark:border-emerald-500/20 transition-all text-center">
+                            <img src="{{ asset('images/buku.png') }}" alt="Buku" class="w-7 h-7 object-contain group-hover:scale-110 transition-transform dark:opacity-90">
+                            <span class="text-xs font-semibold">Tambah Buku</span>
+                        </a>
 
-                    <a href="{{ route('anggota.create') }}" class="group flex flex-col items-center gap-2 p-3 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-xl border border-amber-100 dark:border-amber-500/20 transition-all text-center">
-                        <img src="{{ asset('images/anggota-plus.png') }}" alt="Anggota" class="w-7 h-7 object-contain group-hover:scale-110 transition-transform dark:opacity-90">
-                        <span class="text-xs font-semibold">Tambah Anggota</span>
-                    </a>
+                        <a href="{{ route('anggota.create') }}" class="group flex flex-col items-center gap-2 p-3 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-xl border border-amber-100 dark:border-amber-500/20 transition-all text-center">
+                            <img src="{{ asset('images/anggota-plus.png') }}" alt="Anggota" class="w-7 h-7 object-contain group-hover:scale-110 transition-transform dark:opacity-90">
+                            <span class="text-xs font-semibold">Tambah Anggota</span>
+                        </a>
+                    @endif
                 </div>
             </div>
 

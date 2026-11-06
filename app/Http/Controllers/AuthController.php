@@ -43,17 +43,22 @@ class AuthController extends Controller
     // LOGIKA LOGIN, LOGOUT & RESET PASSWORD
     // ==========================================
 
-    public function login(Request $request)
+   public function login(Request $request)
     {
+        // 1. Tambahkan 'role' ke dalam validasi
         $credentials = $request->validate([
+            'role' => 'required|in:admin,petugas',
             'email' => 'required|email',
             'password' => 'required',
         ], [
+            'role.required' => 'Silakan pilih Anda ingin masuk sebagai Admin atau Petugas.',
+            'role.in' => 'Pilihan peran tidak valid.',
             'email.required' => 'Alamat email wajib diisi.',
             'email.email' => 'Format alamat email tidak valid.',
             'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
+        // 2. Auth::attempt sekarang mencocokkan email, password, DAN role di database
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
@@ -61,9 +66,10 @@ class AuthController extends Controller
             return redirect()->intended('/admin/dashboard')->with('success', 'Selamat datang kembali!');
         }
 
+        // 3. Pesan error diubah agar lebih jelas jika salah peran
         return back()->withErrors([
-            'email' => 'Email atau kata sandi yang Anda masukkan salah.',
-        ])->onlyInput('email');
+            'email' => 'Akses ditolak! Email, kata sandi, atau pilihan peran Anda tidak sesuai.',
+        ])->onlyInput('email', 'role');
     }
 
     public function logout(Request $request)

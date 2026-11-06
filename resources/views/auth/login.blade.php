@@ -13,13 +13,8 @@
     <!-- Overlay semi-transparan -->
     <div class="absolute inset-0 bg-blue-900/40 backdrop-blur-sm z-0"></div>
 
-    <!--
-      =============================================================
-      POP-UP TOAST NOTIFICATION (MELAYANG DI KANAN ATAS)
-      =============================================================
-    -->
+    <!-- POP-UP TOAST NOTIFICATION -->
     <div class="fixed top-5 right-5 z-50 flex flex-col gap-3">
-
         <!-- Pop-up Sukses -->
         @if(session('success'))
             <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
@@ -55,29 +50,45 @@
                 </button>
             </div>
         @endif
-
     </div>
 
-    <!--
-      =============================================================
-      KOTAK FORM LOGIN (UKURAN STATIS)
-      =============================================================
-    -->
+    <!-- KOTAK FORM LOGIN -->
     <div class="w-full max-w-[400px] rounded-3xl shadow-2xl border border-white/20 overflow-hidden relative z-10 bg-white/95 backdrop-blur-md">
         <div class="p-6 sm:p-8">
 
-           <div class="text-center mb-6">
+           <div class="text-center mb-5">
                 <div class="h-16 w-16 mx-auto mb-3 bg-white rounded-2xl p-1.5 shadow-md border border-gray-100 overflow-hidden flex items-center justify-center">
                     <img src="{{ asset('images/sd.png') }}" alt="Logo SDN 6 Ciseureuh" class="w-full h-full object-contain">
                 </div>
-
                 <h1 class="text-xl font-black text-gray-900 tracking-tight">Perpustakaan Digital</h1>
                 <p class="text-xs font-bold text-blue-600 mt-1">SDN 6 Ciseureuh Purwakarta</p>
             </div>
 
-            <!-- Form Login -->
-            <form action="{{ route('login.process') }}" method="POST" class="flex flex-col gap-4">
+            <!-- Form Login (Gap dirapatkan agar tinggi total sama) -->
+            <form action="{{ route('login.process') }}" method="POST" class="flex flex-col gap-3.5">
                 @csrf
+
+                <!-- PILIHAN ROLE (ADMIN / PETUGAS) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Masuk Sebagai</label>
+                    <div class="grid grid-cols-2 gap-1 p-1 bg-gray-100/80 rounded-xl border border-gray-200 relative">
+                        <!-- Pilihan Admin -->
+                        <label class="cursor-pointer relative text-center">
+                            <input type="radio" name="role" value="admin" class="peer sr-only" required>
+                            <div class="py-1.5 text-xs font-bold text-gray-500 rounded-lg peer-checked:bg-white peer-checked:text-blue-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-1.5">
+                                <i class="ph-fill ph-shield-check text-sm"></i> Admin
+                            </div>
+                        </label>
+                        <!-- Pilihan Petugas -->
+                        <label class="cursor-pointer relative text-center">
+                            <input type="radio" name="role" value="petugas" class="peer sr-only" checked required>
+                            <div class="py-1.5 text-xs font-bold text-gray-500 rounded-lg peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-1.5">
+                                <i class="ph-fill ph-user text-sm"></i> Petugas
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1.5">Alamat Email</label>
                     <div class="relative group">
@@ -112,11 +123,10 @@
 
                 <button type="submit" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-2.5 rounded-xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 text-sm">
                     Masuk
-                    <i class="ph ph-sign-in text-lg"></i>
                 </button>
             </form>
 
-            <p class="text-center text-[11px] text-gray-500 mt-6 font-semibold">
+            <p class="text-center text-[11px] text-gray-500 mt-5 font-semibold">
                 &copy; {{ date('Y') }} UPTD SDN 6 Ciseureuh
             </p>
 
