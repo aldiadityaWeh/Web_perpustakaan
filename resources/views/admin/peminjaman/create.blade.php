@@ -21,7 +21,7 @@
 
                 @if ($errors->any())
                     <div class="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-sm transition-colors">
-                        <ul class="list-disc pl-5">
+                        <ul class="list-disc pl-5 space-y-1">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -31,20 +31,20 @@
 
                 <!-- X-DATA UNTUK FILTER ANGGOTA BERDASARKAN KELAS -->
                 <div class="mb-6" x-data="{
-                    semuaAnggota: {{ $anggotas->map(fn($a) => ['id' => $a->id, 'nama' => $a->nama_lengkap, 'nis' => $a->nis, 'kelas' => $a->kelas])->toJson() }},
-                    kelasDipilih: '{{ old('kelas_filter') ?? '' }}',
-                    anggotaDipilih: '{{ old('anggota_id') ?? '' }}',
+                    semuaAnggota: @js($anggotas->map(fn($a) => ['id' => (string) $a->id, 'nama' => $a->nama_lengkap, 'nis' => $a->nis, 'kelas' => $a->kelas])->values()),
+                    kelasDipilih: @js(old('kelas_filter', '')),
+                    anggotaDipilih: @js((string) old('anggota_id', '')),
                     daftarKelas: ['1A','1B','1C','2A','2B','2C','3A','3B','3C','4A','4B','4C','5A','5B','5C','6A','6B','6C']
                 }">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 border border-purple-100 dark:border-purple-500/20 bg-purple-50/30 dark:bg-purple-500/10 rounded-2xl transition-colors">
 
                         <!-- 1. Pilih Kelas (Filter) -->
                         <div>
-                            <label for="kelas_filter" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Filter Kelas Siswa <span class="text-red-500">*</span></label>
+                            <label for="kelas_filter" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">1. Filter Kelas Siswa <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <select id="kelas_filter" name="kelas_filter" x-model="kelasDipilih" @change="anggotaDipilih = ''" class="appearance-none w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer shadow-sm">
                                     <option value="" disabled class="font-bold">-- Pilih Kelas --</option>
-                                    <template x-for="kls in daftarKelas">
+                                    <template x-for="kls in daftarKelas" :key="kls">
                                         <option :value="kls" x-text="'Kelas ' + kls" class="text-sm"></option>
                                     </template>
                                 </select>
@@ -84,20 +84,20 @@
                     <!-- Tanggal Pinjam -->
                     <div>
                         <label for="tanggal_pinjam" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Tanggal Pinjam <span class="text-red-500">*</span></label>
-                        <input type="date" id="tanggal_pinjam" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', date('Y-m-d')) }}" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm text-gray-800 dark:text-slate-200 shadow-sm" required>
+                        <input type="date" id="tanggal_pinjam" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', date('Y-m-d')) }}" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm text-gray-800 dark:text-slate-200 shadow-sm [color-scheme:light] dark:[color-scheme:dark]" required>
                     </div>
 
                     <!-- Tanggal Kembali -->
                     <div>
                         <label for="tanggal_kembali" class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Batas Tanggal Kembali <span class="text-red-500">*</span></label>
-                        <!-- Otomatis diatur 7 hari dari sekarang sebagai default -->
-                        <input type="date" id="tanggal_kembali" name="tanggal_kembali" value="{{ old('tanggal_kembali', date('Y-m-d', strtotime('+7 days'))) }}" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm text-gray-800 dark:text-slate-200 shadow-sm" required>
+                        <input type="date" id="tanggal_kembali" name="tanggal_kembali" value="{{ old('tanggal_kembali', date('Y-m-d', strtotime('+' . ($pengaturan->maksimal_hari_pinjam ?? 7) . ' days'))) }}" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none transition text-sm text-gray-800 dark:text-slate-200 shadow-sm [color-scheme:light] dark:[color-scheme:dark]" required>
                     </div>
                 </div>
 
-                <!-- x-data mendefinisikan array data lokal dari PHP agar bisa disaring secara instan dengan JS -->
+                <!-- x-data untuk daftar buku yang dipinjam -->
                 <div class="mb-8 pt-6 border-t border-gray-100 dark:border-slate-700 transition-colors" x-data="{
-                    semuaBuku: {{ $bukus->map(fn($b) => ['id' => $b->id, 'judul' => $b->judul, 'stok' => $b->stok, 'kategori' => $b->kategori])->toJson() }},
+                    maksBuku: {{ $pengaturan->maksimal_buku_pinjam ?? 3 }},
+                    semuaBuku: @js($bukus->map(fn($b) => ['id' => (string) $b->id, 'judul' => $b->judul, 'stok' => $b->stok, 'kategori' => (string) $b->kategori])->values()),
                     kategoriList: [
                         { id: '000', nama: '000 - Komputer & Info' },
                         { id: '100', nama: '100 - Filsafat & Psikologi' },
@@ -111,14 +111,26 @@
                         { id: '900', nama: '900 - Sejarah & Geografi' }
                     ],
                     rows: [{ id: Date.now(), kategori_id: '', buku_id: '' }],
-                    addRow() { this.rows.push({ id: Date.now(), kategori_id: '', buku_id: '' }) },
-                    removeRow(idToRemove) { this.rows = this.rows.filter(row => row.id !== idToRemove) }
+                    addRow() {
+                        if (this.rows.length < this.maksBuku) {
+                            this.rows.push({ id: Date.now() + Math.random(), kategori_id: '', buku_id: '' });
+                        }
+                    },
+                    removeRow(idToRemove) {
+                        this.rows = this.rows.filter(row => row.id !== idToRemove);
+                    },
+                    isBukuSudahDipilih(bukuId, currentRowId) {
+                        return this.rows.some(r => r.id !== currentRowId && String(r.buku_id) === String(bukuId));
+                    }
                 }">
                     <div class="flex items-center justify-between mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300">Daftar Buku yang Dipinjam <span class="text-red-500">*</span></label>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300">Daftar Buku yang Dipinjam <span class="text-red-500">*</span></label>
+                            <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Maksimal <span class="font-bold text-purple-600 dark:text-purple-400" x-text="maksBuku"></span> buku per siswa</p>
+                        </div>
 
-                        <!-- Tombol Tambah Baris Buku -->
-                        <button type="button" @click="addRow()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-500/30 rounded-lg text-xs font-bold transition-colors">
+                        <!-- Tombol Tambah Baris Buku (Otomatis sembunyi jika sudah mencapai batas maksimal) -->
+                        <button type="button" @click="addRow()" x-show="rows.length < maksBuku" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-500/30 rounded-lg text-xs font-bold transition-colors cursor-pointer">
                             <i class="ph ph-plus-circle text-base"></i> Tambah Buku Lain
                         </button>
                     </div>
@@ -128,13 +140,13 @@
                         <template x-for="(row, index) in rows" :key="row.id">
                             <div class="flex flex-col md:flex-row md:items-center gap-3 bg-white dark:bg-slate-800 p-3 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm relative transition-colors">
                                 <!-- Kotak Nomor -->
-                                <div class="w-8 h-8 shrink-0 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 rounded-lg flex items-center justify-center font-bold text-sm hidden md:flex transition-colors" x-text="index + 1"></div>
+                                <div class="w-8 h-8 shrink-0 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 rounded-lg items-center justify-center font-bold text-sm hidden md:flex transition-colors" x-text="index + 1"></div>
 
                                 <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
                                     <div class="relative w-full">
                                         <!-- Saat kategori diganti, pilihan buku otomatis di-reset jadi kosong -->
                                         <select x-model="row.kategori_id" @change="row.buku_id = ''" class="appearance-none w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-700 dark:text-slate-200 bg-gray-50 dark:bg-slate-900 hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer shadow-sm">
-                                            <option value="" disabled selected class="font-bold">1. Pilih Kategori</option>
+                                            <option value="" disabled class="font-bold">1. Pilih Kategori</option>
                                             <template x-for="kat in kategoriList" :key="kat.id">
                                                 <option :value="kat.id" x-text="kat.nama"></option>
                                             </template>
@@ -147,11 +159,14 @@
                                     <div class="relative w-full">
                                         <!-- Select ini terkunci (disabled) jika kategori belum dipilih -->
                                         <select x-model="row.buku_id" name="buku_id[]" :disabled="!row.kategori_id" class="appearance-none w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-sm text-gray-800 dark:text-slate-200 disabled:bg-gray-100 dark:disabled:bg-slate-800 disabled:text-gray-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed bg-white dark:bg-slate-900 cursor-pointer shadow-sm" required>
-                                            <option value="" disabled selected class="font-bold">2. Pilih Buku Tersedia</option>
+                                            <option value="" disabled class="font-bold">2. Pilih Buku Tersedia</option>
 
                                             <!-- Looping hanya untuk buku yang kategorinya sama dengan pilihan di atas -->
                                             <template x-for="buku in semuaBuku.filter(b => b.kategori === row.kategori_id)" :key="buku.id">
-                                                <option :value="buku.id" x-text="buku.judul + ' (Sisa: ' + buku.stok + ')'"></option>
+                                                <option :value="buku.id"
+                                                        :disabled="isBukuSudahDipilih(buku.id, row.id)"
+                                                        x-text="buku.judul + ' (Sisa: ' + buku.stok + ')' + (isBukuSudahDipilih(buku.id, row.id) ? ' — Sudah dipilih' : '')">
+                                                </option>
                                             </template>
 
                                             <!-- Tampilkan pesan ini jika di kategori tersebut stok bukunya kosong semua -->
@@ -165,7 +180,7 @@
                                     </div>
                                 </div>
 
-                                <button type="button" @click="removeRow(row.id)" x-show="rows.length > 1" class="absolute -top-2 -right-2 md:static md:w-10 md:h-10 shrink-0 flex items-center justify-center text-red-500 dark:text-red-400 bg-white dark:bg-slate-800 border border-red-100 dark:border-red-500/30 md:border-transparent hover:bg-red-50 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-300 rounded-full md:rounded-xl transition-colors shadow-sm md:shadow-none p-1.5 md:p-0 z-10" title="Hapus Baris">
+                                <button type="button" @click="removeRow(row.id)" x-show="rows.length > 1" class="absolute -top-2 -right-2 md:static md:w-10 md:h-10 shrink-0 flex items-center justify-center text-red-500 dark:text-red-400 bg-white dark:bg-slate-800 border border-red-100 dark:border-red-500/30 md:border-transparent hover:bg-red-50 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-300 rounded-full md:rounded-xl transition-colors shadow-sm md:shadow-none p-1.5 md:p-0 z-10 cursor-pointer" title="Hapus Baris">
                                     <i class="ph ph-trash text-base md:text-lg"></i>
                                 </button>
                                 <!-- Spacer desktop -->
@@ -180,7 +195,7 @@
                     <a href="{{ route('peminjaman.index') }}" class="w-full sm:w-auto text-center px-6 py-3 text-sm font-semibold text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition-colors shadow-sm">
                         Batal
                     </a>
-                    <button type="submit" class="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-white bg-purple-600 border border-transparent rounded-xl hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition-colors shadow-sm flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-white bg-purple-600 border border-transparent rounded-xl hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition-colors shadow-sm flex items-center justify-center gap-2 cursor-pointer">
                         <i class="ph ph-handshake text-lg"></i>
                         Proses Peminjaman
                     </button>
@@ -192,36 +207,33 @@
     <!-- Otomatisasi Tanggal Kembali -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Ambil batas hari dari database Pengaturan (via Blade)
             const batasHari = {{ $pengaturan->maksimal_hari_pinjam ?? 7 }};
+            const hasOldTanggalKembali = @js(old('tanggal_kembali') !== null);
 
-            // 2. Ambil elemen input tanggalnya (Pastikan input Anda memiliki id="tanggal_pinjam" dan id="tanggal_kembali")
             const inputPinjam = document.getElementById('tanggal_pinjam');
             const inputKembali = document.getElementById('tanggal_kembali');
 
-            // Fungsi untuk menghitung dan mengisi tanggal kembali
             function otomatisIsiTanggalKembali() {
                 if (inputPinjam && inputKembali && inputPinjam.value) {
-                    // Buat objek Date dari tanggal pinjam yang dipilih
                     let tgl = new Date(inputPinjam.value);
-
-                    // Tambahkan harinya sesuai batas dari Pengaturan
                     tgl.setDate(tgl.getDate() + batasHari);
 
-                    // Format kembali menjadi YYYY-MM-DD agar terbaca oleh input type="date"
                     let yyyy = tgl.getFullYear();
                     let mm = String(tgl.getMonth() + 1).padStart(2, '0');
                     let dd = String(tgl.getDate()).padStart(2, '0');
 
-                    // Set nilainya ke kolom Tanggal Kembali
                     inputKembali.value = `${yyyy}-${mm}-${dd}`;
+                    inputKembali.min = inputPinjam.value;
                 }
             }
 
-            // Jalankan fungsi saat halaman pertama kali dibuka
-            otomatisIsiTanggalKembali();
+            // Hanya jalankan otomatis saat pertama kali dibuka jika tidak sedang kembali dari error validasi
+            if (!hasOldTanggalKembali) {
+                otomatisIsiTanggalKembali();
+            } else if (inputPinjam && inputKembali) {
+                inputKembali.min = inputPinjam.value;
+            }
 
-            // Jalankan ulang fungsi JIKA Admin mengubah Tanggal Pinjam
             if (inputPinjam) {
                 inputPinjam.addEventListener('change', otomatisIsiTanggalKembali);
             }

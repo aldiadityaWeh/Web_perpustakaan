@@ -37,11 +37,37 @@
 
         <div id="table-container" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors flex-1 flex flex-col">
 
-            <!-- Toolbar Pencarian Menyatu dengan Tabel -->
-            <div class="p-4 border-b border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
-                <h2 class="text-sm font-bold text-gray-600 dark:text-slate-300 hidden sm:block">Daftar Sirkulasi Berjalan</h2>
+            <!-- Toolbar Filter & Pencarian Menyatu dengan Tabel -->
+            <div class="p-4 border-b border-gray-100 dark:border-slate-700 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
 
-                <form action="{{ route('peminjaman.index') }}" method="GET" class="flex w-full sm:w-auto min-w-[280px]">
+                <!-- Tab Filter Status (Terhubung dengan $request->filter di Controller) -->
+                @php
+                    $currentFilter = request('filter', 'semua');
+                @endphp
+                <div class="flex flex-wrap items-center gap-1.5 bg-gray-200/70 dark:bg-slate-900 p-1 rounded-xl w-fit">
+                    <a href="{{ route('peminjaman.index', ['filter' => 'semua', 'search' => request('search')]) }}"
+                       class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $currentFilter == 'semua' ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200' }}">
+                        Semua
+                    </a>
+                    <a href="{{ route('peminjaman.index', ['filter' => 'dipinjam', 'search' => request('search')]) }}"
+                       class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $currentFilter == 'dipinjam' ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200' }}">
+                        Dipinjam
+                    </a>
+                    <a href="{{ route('peminjaman.index', ['filter' => 'terlambat', 'search' => request('search')]) }}"
+                       class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $currentFilter == 'terlambat' ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm' : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200' }}">
+                        Terlambat
+                    </a>
+                    <a href="{{ route('peminjaman.index', ['filter' => 'dikembalikan', 'search' => request('search')]) }}"
+                       class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $currentFilter == 'dikembalikan' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200' }}">
+                        Dikembalikan
+                    </a>
+                </div>
+
+                <!-- Form Pencarian -->
+                <form action="{{ route('peminjaman.index') }}" method="GET" class="flex w-full lg:w-auto min-w-[280px]">
+                    @if(request('filter'))
+                        <input type="hidden" name="filter" value="{{ request('filter') }}">
+                    @endif
                     <div class="relative flex-1">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="ph ph-magnifying-glass text-gray-400 dark:text-slate-500 text-lg"></i>
@@ -72,6 +98,8 @@
                         @forelse($peminjamans as $pinjam)
                         @php
                             $statusAkurat = strtolower(trim($pinjam->status_aktual));
+                            $catatanTransaksi = $pinjam->catatan ?? '';
+                            $isRusakHilang = str_contains($catatanTransaksi, 'Kondisi: Rusak / Hilang');
                         @endphp
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors text-sm group">
 
@@ -114,20 +142,24 @@
                                             Denda: Rp {{ number_format($pinjam->denda_berjalan, 0, ',', '.') }}
                                         </span>
                                     @elseif($statusAkurat == 'dikembalikan' || $statusAkurat == 'sudah kembali')
-                                            @if($pinjam->status_denda == 'Belum Lunas')
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors" title="Denda belum dibayar">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400 animate-pulse"></span> Belum Lunas
-                                                </span>
-                                            @elseif(str_contains($pinjam->catatan, 'Kondisi: Rusak / Hilang'))
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors" title="Menunggu fisik buku pengganti">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse"></span> Tunggu Buku Ganti
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Selesai
-                                                </span>
-                                            @endif
-                                        @else
+                                        @if($pinjam->status_denda == 'Belum Lunas')
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors" title="Denda belum dibayar">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400 animate-pulse"></span> Belum Lunas
+                                            </span>
+                                        @endif
+
+                                        @if($isRusakHilang)
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors" title="Menunggu fisik buku pengganti">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse"></span> Tunggu Buku Ganti
+                                            </span>
+                                        @endif
+
+                                        @if($pinjam->status_denda != 'Belum Lunas' && !$isRusakHilang)
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Selesai
+                                            </span>
+                                        @endif
+                                    @else
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap transition-colors">
                                             {{ $pinjam->status_aktual }}
                                         </span>
@@ -138,8 +170,8 @@
                             <td class="py-4 px-6 text-center">
                                 <div class="inline-flex items-center justify-center p-1 bg-white dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm gap-1 transition-colors">
 
-                                   <!-- LOGIKA TERIMA BUKU GANTI -->
-                                    @if(str_contains($pinjam->catatan, 'Kondisi: Rusak / Hilang'))
+                                    <!-- LOGIKA TERIMA BUKU GANTI -->
+                                    @if($isRusakHilang)
                                         <form action="{{ route('peminjaman.terimaGanti', $pinjam->id) }}" method="POST" class="m-0 p-0" onsubmit="event.preventDefault(); konfirmasiTerimaGanti(this);">
                                             @csrf
                                             <button type="submit" class="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center gap-1" title="Terima Buku Fisik Pengganti">

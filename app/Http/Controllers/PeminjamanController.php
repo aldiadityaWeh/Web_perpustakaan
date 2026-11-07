@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\Peminjaman;
 use App\Models\Anggota;
 use App\Models\Buku;
@@ -14,14 +16,17 @@ class PeminjamanController extends Controller
     {
         $query = Peminjaman::with(['anggota', 'buku']);
 
+        // PERBAIKAN: Dibungkus closure function($q) agar tidak bocor saat digabung dengan filter status
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->whereHas('anggota', function($q) use ($search) {
-                $q->where('nama_lengkap', 'like', '%' . $search . '%')
-                  ->orWhere('nis', 'like', '%' . $search . '%');
-            })->orWhereHas('buku', function($q) use ($search) {
-                $q->where('judul', 'like', '%' . $search . '%');
-            })->orWhere('status', 'like', '%' . $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('anggota', function ($subQ) use ($search) {
+                    $subQ->where('nama_lengkap', 'like', '%' . $search . '%')
+                         ->orWhere('nis', 'like', '%' . $search . '%');
+                })->orWhereHas('buku', function ($subQ) use ($search) {
+                    $subQ->where('judul', 'like', '%' . $search . '%');
+                })->orWhere('status', 'like', '%' . $search . '%');
+            });
         }
 
         if ($request->has('filter') && $request->filter != 'semua') {
@@ -56,13 +61,13 @@ class PeminjamanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'anggota_id' => 'required|exists:anggota,id',
-            'buku_id' => 'required|array|min:1',
-            'buku_id.*' => 'required|exists:buku,id',
-            'tanggal_pinjam' => 'required|date',
+            'anggota_id'      => 'required|exists:anggota,id',
+            'buku_id'         => 'required|array|min:1',
+            'buku_id.*'       => 'required|exists:buku,id',
+            'tanggal_pinjam'  => 'required|date',
             'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
         ], [
-            'buku_id.required' => 'Pilih minimal 1 buku untuk dipinjam.',
+            'buku_id.required'              => 'Pilih minimal 1 buku untuk dipinjam.',
             'tanggal_kembali.after_or_equal' => 'Tanggal kembali tidak boleh mundur dari tanggal pinjam.'
         ]);
 
@@ -91,12 +96,12 @@ class PeminjamanController extends Controller
 
         if (($sedangDipinjam + $akanDipinjam) > $pengaturan->maksimal_buku_pinjam) {
 
-            // PERBAIKAN: Typo operasi matematika pengurangan stok diperbaiki
+            // PERBAIKAN SYNTAX: Operasi pengurangan dalam satu baris yang benar
             $sisaKuota = $pengaturan->maksimal_buku_pinjam - $sedangDipinjam;
 
             if ($sedangDipinjam == 0) {
                 $pesanError = "Peminjaman ditolak. Anda mencoba meminjam $akanDipinjam buku sekaligus, padahal batas maksimal peminjaman hanya {$pengaturan->maksimal_buku_pinjam} buku per siswa.";
-            } else if ($sisaKuota <= 0) {
+            } elseif ($sisaKuota <= 0) {
                 $pesanError = "Peminjaman ditolak. Siswa ini telah mencapai batas maksimal pinjaman ({$pengaturan->maksimal_buku_pinjam} buku) yang belum dikembalikan.";
             } else {
                 $pesanError = "Peminjaman ditolak. Siswa ini masih memiliki tunggakan $sedangDipinjam buku. Sisa kuota pinjamannya saat ini hanya $sisaKuota buku lagi.";
@@ -116,11 +121,11 @@ class PeminjamanController extends Controller
                     }
 
                     Peminjaman::create([
-                        'anggota_id' => $request->anggota_id,
-                        'buku_id' => $buku_id,
-                        'tanggal_pinjam' => $request->tanggal_pinjam,
+                        'anggota_id'          => $request->anggota_id,
+                        'buku_id'             => $buku_id,
+                        'tanggal_pinjam'      => $request->tanggal_pinjam,
                         'tanggal_jatuh_tempo' => $request->tanggal_kembali,
-                        'status' => 'Dipinjam',
+                        'status'              => 'Dipinjam',
                     ]);
 
                     $buku->decrement('stok');
@@ -145,7 +150,7 @@ class PeminjamanController extends Controller
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        if($peminjaman->status == 'Dipinjam') {
+        if ($peminjaman->status == 'Dipinjam' && $peminjaman->buku) {
             $peminjaman->buku->increment('stok');
         }
 
@@ -160,7 +165,7 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.validasi', compact('peminjaman'));
     }
 
-  public function prosesValidasi(Request $request, $id)
+    public function prosesValidasi(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
@@ -189,15 +194,13 @@ class PeminjamanController extends Controller
         // 3. KUNCI DATA: Masukkan tanggal dikembalikan agar denda berhenti!
         $peminjaman->update([
             'tanggal_dikembalikan' => now(),
-            'status' => 'Dikembalikan',
-            'denda' => $totalDenda,
-            'status_denda' => $statusDenda,
-            'catatan' => $catatanAkhir,
+            'status'               => 'Dikembalikan',
+            'denda'                => $totalDenda,
+            'status_denda'         => $statusDenda,
+            'catatan'              => $catatanAkhir,
         ]);
 
         // 4. LOGIKA ATURAN MUTLAK (DISESUAIKAN DENGAN FORM BARU)
-        // Jika buku dalam keadaan Normal, kembalikan stoknya.
-        // Jika Rusak / Hilang, stok TIDAK dikembalikan (tertahan hingga siswa mengganti fisik bukunya).
         if ($request->kondisi_buku === 'Normal' && $peminjaman->buku) {
             $peminjaman->buku->increment('stok');
         }
@@ -212,7 +215,7 @@ class PeminjamanController extends Controller
 
     public function daftarDenda(Request $request)
     {
-        // PERBAIKAN: Hanya mengambil yang Belum Lunas
+        // Hanya mengambil yang Belum Lunas
         $query = Peminjaman::with(['anggota', 'buku'])
                            ->where('denda', '>', 0)
                            ->where('status_denda', 'Belum Lunas');
@@ -220,12 +223,11 @@ class PeminjamanController extends Controller
         // Jika ada inputan pencarian
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            // PERBAIKAN: Dibungkus closure function($q) agar filter denda tidak bocor
-            $query->where(function($q) use ($search) {
-                $q->whereHas('anggota', function($subQ) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('anggota', function ($subQ) use ($search) {
                     $subQ->where('nama_lengkap', 'like', '%' . $search . '%')
                          ->orWhere('nis', 'like', '%' . $search . '%');
-                })->orWhereHas('buku', function($subQ) use ($search) {
+                })->orWhereHas('buku', function ($subQ) use ($search) {
                     $subQ->where('judul', 'like', '%' . $search . '%');
                 });
             });
@@ -241,18 +243,25 @@ class PeminjamanController extends Controller
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // PERBAIKAN: Sinkronisasi waktu updated_at agar masuk ke laporan kas denda dengan waktu yang tepat
+        // Sinkronisasi waktu updated_at agar masuk ke laporan kas denda dengan waktu yang tepat
         $peminjaman->update([
             'status_denda' => 'Lunas',
-            'updated_at' => now(),
+            'updated_at'   => now(),
         ]);
 
-        return back()->with('success', 'Uang denda dari ' . $peminjaman->anggota->nama_lengkap . ' sebesar Rp' . number_format($peminjaman->denda, 0, ',', '.') . ' telah diterima (LUNAS).');
+        $namaAnggota = $peminjaman->anggota->nama_lengkap ?? 'Anggota';
+
+        return back()->with('success', 'Uang denda dari ' . $namaAnggota . ' sebesar Rp' . number_format($peminjaman->denda, 0, ',', '.') . ' telah diterima (LUNAS).');
     }
 
     public function terimaBukuGanti($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
+
+        // Pengaman agar tidak bisa diklik dua kali
+        if (!str_contains($peminjaman->catatan ?? '', 'Kondisi: Rusak / Hilang')) {
+            return back()->with('error', 'Buku pengganti untuk transaksi ini sudah pernah diterima sebelumnya.');
+        }
 
         // 1. Tambahkan kembali stok buku karena siswa sudah membawa gantinya
         if ($peminjaman->buku) {
@@ -260,7 +269,6 @@ class PeminjamanController extends Controller
         }
 
         // 2. Ubah teks catatan agar sistem tahu buku sudah diganti
-        // Ini juga akan membuat tombol "Terima Buku Ganti" hilang otomatis dari UI
         $catatanBaru = str_replace('Kondisi: Rusak / Hilang', 'Kondisi: SUDAH DIGANTI', $peminjaman->catatan);
 
         $peminjaman->update([

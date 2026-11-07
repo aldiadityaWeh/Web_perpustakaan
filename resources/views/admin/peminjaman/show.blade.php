@@ -29,9 +29,9 @@
                         <p class="text-base font-bold text-gray-800 dark:text-slate-200 mb-1 transition-colors">{{ $peminjaman->buku->judul ?? 'Buku Dihapus' }}</p>
                         <p class="text-sm text-gray-500 dark:text-slate-400 mb-3 font-mono transition-colors">ISBN: {{ $peminjaman->buku->isbn ?? '-' }}</p>
 
-                        <!-- Kategori DDC -->
+                        <!-- Kategori DDC (Disesuaikan dengan kolom 'kategori') -->
                         <span class="inline-block px-2.5 py-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md text-[11px] font-bold text-emerald-600 dark:text-emerald-400 transition-colors">
-                            <i class="ph ph-bookmark-simple"></i> {{ $peminjaman->buku->nama_kategori ?? 'Kategori Umum' }}
+                            <i class="ph ph-bookmark-simple"></i> Kategori: {{ $peminjaman->buku->kategori ?? 'Umum' }}
                         </span>
                     </div>
                 </div>
@@ -77,7 +77,11 @@
                 <!-- STATUS -->
                 <div>
                     <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">Status Saat Ini</p>
-                    @php $statusAkurat = strtolower(trim($peminjaman->status_aktual)); @endphp
+                    @php
+                        $statusAkurat = strtolower(trim($peminjaman->status_aktual));
+                        $catatanTransaksi = $peminjaman->catatan ?? '';
+                        $isRusakHilang = str_contains($catatanTransaksi, 'Kondisi: Rusak / Hilang');
+                    @endphp
 
                     @if($statusAkurat == 'dipinjam')
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-xs font-bold rounded-lg uppercase tracking-wider transition-colors">
@@ -89,9 +93,19 @@
                         </span>
                         <p class="mt-2 text-xs font-bold text-red-600 dark:text-red-400 transition-colors">Denda: Rp {{ number_format($peminjaman->denda_berjalan, 0, ',', '.') }}</p>
                     @elseif($statusAkurat == 'dikembalikan' || $statusAkurat == 'sudah kembali')
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-xs font-bold rounded-lg uppercase tracking-wider transition-colors">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Selesai
-                        </span>
+                        @if($pinjam->status_denda ?? $peminjaman->status_denda == 'Belum Lunas')
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-xs font-bold rounded-lg uppercase tracking-wider transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400"></span> Belum Lunas
+                            </span>
+                        @elseif($isRusakHilang)
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-xs font-bold rounded-lg uppercase tracking-wider transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400"></span> Tunggu Buku Ganti
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-xs font-bold rounded-lg uppercase tracking-wider transition-colors">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span> Selesai
+                            </span>
+                        @endif
                     @else
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600 text-xs font-bold rounded-lg uppercase tracking-wider transition-colors">
                             {{ $peminjaman->status_aktual }}
@@ -101,9 +115,9 @@
 
                 <!-- PETUGAS -->
                 <div>
-                    <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">Petugas Pendaftar</p>
+                    <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">Petugas Sistem</p>
                     <p class="text-sm font-bold text-gray-800 dark:text-slate-200 flex items-center gap-2 transition-colors">
-                        <i class="ph ph-user-circle text-purple-500 text-lg"></i> {{ Auth::user()->name ?? 'Administrator' }}
+                        <i class="ph ph-user-circle text-purple-500 text-lg"></i> {{ $peminjaman->user->name ?? Auth::user()->name ?? 'Administrator' }}
                     </p>
                 </div>
 
