@@ -18,13 +18,13 @@ class LaporanController extends Controller
 
     public function peminjaman(Request $request)
     {
-        // 1. PERBAIKAN LOGIKA: Wajibkan isi tanggal dan cegah tanggal terbalik
+        // 1. Wajibkan isi tanggal dan cegah tanggal terbalik
         $request->validate([
             'start_date' => 'required|date',
             'end_date'   => 'required|date|after_or_equal:start_date',
         ], [
-            'start_date.required' => 'Pilih tanggal awal laporan terlebih dahulu.',
-            'end_date.required'   => 'Pilih tanggal akhir laporan terlebih dahulu.',
+            'start_date.required'     => 'Pilih tanggal awal laporan terlebih dahulu.',
+            'end_date.required'       => 'Pilih tanggal akhir laporan terlebih dahulu.',
             'end_date.after_or_equal' => 'Logika salah: Tanggal akhir tidak boleh lebih mundur dari tanggal awal.',
         ]);
 
@@ -79,99 +79,122 @@ class LaporanController extends Controller
     private function exportExcelSirkulasi($peminjaman, $startDate, $endDate, $pengaturan)
     {
         $filename = "Laporan_Sirkulasi_{$startDate}_sampai_{$endDate}.xls";
+        $namaSekolah = e($pengaturan->nama_sekolah ?? 'SDN 6 Ciseureuh');
 
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-
-        echo "<table border='1'>";
-        echo "<tr><th colspan='7' style='font-size:16px; font-weight:bold;'>REKAP LAPORAN SIRKULASI PEMINJAMAN</th></tr>";
-        echo "<tr><th colspan='7'>Instansi: {$pengaturan->nama_sekolah}</th></tr>";
-        echo "<tr><th colspan='7'>Periode: {$startDate} s/d {$endDate}</th></tr>";
-        echo "<tr><td colspan='7'></td></tr>";
-        echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>";
-        echo "<th>No</th><th>Tanggal Pinjam</th><th>Nama Siswa</th><th>NIS</th><th>Judul Buku</th><th>Status</th><th>Denda (Rp)</th>";
-        echo "</tr>";
-
-        $totalDendaKeseluruhan = 0;
-
-        foreach ($peminjaman as $index => $item) {
-            $totalDendaKeseluruhan += $item->denda;
-            echo "<tr>";
-            echo "<td>" . ($index + 1) . "</td>";
-            echo "<td>" . $item->tanggal_pinjam . "</td>";
-            echo "<td>" . ($item->anggota->nama_lengkap ?? '-') . "</td>";
-            echo "<td>'" . ($item->anggota->nis ?? '-') . "</td>";
-            echo "<td>" . ($item->buku->judul ?? '-') . "</td>";
-            echo "<td>" . $item->status . "</td>";
-            echo "<td>" . $item->denda . "</td>";
+        return response()->streamDownload(function () use ($peminjaman, $startDate, $endDate, $namaSekolah) {
+            echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
+            echo "<table border='1'>";
+            echo "<tr><th colspan='7' style='font-size:16px; font-weight:bold;'>REKAP LAPORAN SIRKULASI PEMINJAMAN</th></tr>";
+            echo "<tr><th colspan='7'>Instansi: {$namaSekolah}</th></tr>";
+            echo "<tr><th colspan='7'>Periode: {$startDate} s/d {$endDate}</th></tr>";
+            echo "<tr><td colspan='7'></td></tr>";
+            echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>";
+            echo "<th>No</th><th>Tanggal Pinjam</th><th>Nama Siswa</th><th>NIS</th><th>Judul Buku</th><th>Status</th><th>Denda (Rp)</th>";
             echo "</tr>";
-        }
 
-        // --- DIPERBAIKI: Penambahan tag td pada baris total ---
-        echo "<tr style='background-color:#e6e6e6; font-weight:bold;'>";
-        echo "<td colspan='6' style='text-align:right;'>TOTAL KESELURUHAN DENDA:</td>";
-        echo "<td>Rp " . number_format($totalDendaKeseluruhan, 0, ',', '.') . "</td>";
-        echo "</tr>";
+            $totalDendaKeseluruhan = 0;
 
-        echo "</table>";
-        exit;
+            foreach ($peminjaman as $index => $item) {
+                $denda = (int) ($item->denda ?? 0);
+                $totalDendaKeseluruhan += $denda;
+                $tglPinjam = Carbon::parse($item->tanggal_pinjam)->format('d-m-Y');
+
+                echo "<tr>";
+                echo "<td style='text-align:center;'>" . ($index + 1) . "</td>";
+                echo "<td style='text-align:center;'>" . $tglPinjam . "</td>";
+                echo "<td>" . e($item->anggota->nama_lengkap ?? '-') . "</td>";
+                echo "<td>'" . e($item->anggota->nis ?? '-') . "</td>";
+                echo "<td>" . e($item->buku->judul ?? '-') . "</td>";
+                echo "<td style='text-align:center;'>" . ucfirst(e($item->status)) . "</td>";
+                echo "<td style='text-align:right;'>" . number_format($denda, 0, ',', '.') . "</td>";
+                echo "</tr>";
+            }
+
+            echo "<tr style='background-color:#e6e6e6; font-weight:bold;'>";
+            echo "<td colspan='6' style='text-align:right;'>TOTAL KESELURUHAN DENDA:</td>";
+            echo "<td style='text-align:right;'>Rp " . number_format($totalDendaKeseluruhan, 0, ',', '.') . "</td>";
+            echo "</tr>";
+
+            echo "</table>";
+        }, $filename, [
+            'Content-Type' => 'application/vnd.ms-excel',
+        ]);
     }
 
     private function exportExcelBuku($buku, $pengaturan)
     {
         $filename = "Inventaris_Buku_" . date('Y-m-d') . ".xls";
+        $namaSekolah = e($pengaturan->nama_sekolah ?? 'SDN 6 Ciseureuh');
 
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-
-        echo "<table border='1'>";
-        echo "<tr><th colspan='6' style='font-size:16px; font-weight:bold;'>LAPORAN INVENTARIS BUKU PERPUSTAKAAN</th></tr>";
-        echo "<tr><th colspan='6'>Instansi: {$pengaturan->nama_sekolah}</th></tr>";
-        echo "<tr><td colspan='6'></td></tr>";
-        echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>";
-        echo "<th>No</th><th>Judul Buku</th><th>ISBN</th><th>Pengarang</th><th>Kategori DDC</th><th>Stok</th>";
-        echo "</tr>";
-
-        foreach ($buku as $index => $item) {
-            echo "<tr>";
-            echo "<td>" . ($index + 1) . "</td>";
-            echo "<td>" . $item->judul . "</td>";
-            echo "<td>'" . $item->isbn . "</td>";
-            echo "<td>" . $item->pengarang . "</td>";
-            echo "<td>" . $item->kategori . "</td>";
-            echo "<td>" . $item->stok . "</td>";
+        return response()->streamDownload(function () use ($buku, $namaSekolah) {
+            echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
+            echo "<table border='1'>";
+            echo "<tr><th colspan='6' style='font-size:16px; font-weight:bold;'>LAPORAN INVENTARIS BUKU PERPUSTAKAAN</th></tr>";
+            echo "<tr><th colspan='6'>Instansi: {$namaSekolah}</th></tr>";
+            echo "<tr><td colspan='6'></td></tr>";
+            echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>";
+            echo "<th>No</th><th>Judul Buku</th><th>ISBN</th><th>Pengarang</th><th>Kategori DDC</th><th>Stok</th>";
             echo "</tr>";
-        }
-        echo "</table>";
-        exit;
+
+            $totalStok = 0;
+
+            foreach ($buku as $index => $item) {
+                $totalStok += (int) $item->stok;
+                echo "<tr>";
+                echo "<td style='text-align:center;'>" . ($index + 1) . "</td>";
+                echo "<td>" . e($item->judul) . "</td>";
+                echo "<td>'" . e($item->isbn ?? '-') . "</td>";
+                echo "<td>" . e($item->pengarang) . "</td>";
+                echo "<td>" . e($item->kategori) . "</td>";
+                echo "<td style='text-align:center;'>" . (int) $item->stok . "</td>";
+                echo "</tr>";
+            }
+
+            echo "<tr style='background-color:#e6e6e6; font-weight:bold;'>";
+            echo "<td colspan='5' style='text-align:right;'>TOTAL STOK BUKU:</td>";
+            echo "<td style='text-align:center;'>" . number_format($totalStok, 0, ',', '.') . "</td>";
+            echo "</tr>";
+
+            echo "</table>";
+        }, $filename, [
+            'Content-Type' => 'application/vnd.ms-excel',
+        ]);
     }
 
     private function exportExcelAnggota($anggota, $pengaturan)
     {
         $filename = "Data_Anggota_" . date('Y-m-d') . ".xls";
+        $namaSekolah = e($pengaturan->nama_sekolah ?? 'SDN 6 Ciseureuh');
 
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-
-        echo "<table border='1'>";
-        echo "<tr><th colspan='6' style='font-size:16px; font-weight:bold;'>LAPORAN DATA ANGGOTA PERPUSTAKAAN</th></tr>";
-        echo "<tr><th colspan='6'>Instansi: {$pengaturan->nama_sekolah}</th></tr>";
-        echo "<tr><td colspan='6'></td></tr>";
-        echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>";
-        echo "<th>No</th><th>Nama Lengkap</th><th>NIS</th><th>Kelas</th><th>Jenis Kelamin</th><th>Status</th>";
-        echo "</tr>";
-
-        foreach ($anggota as $index => $item) {
-            echo "<tr>";
-            echo "<td>" . ($index + 1) . "</td>";
-            echo "<td>" . $item->nama_lengkap . "</td>";
-            echo "<td>'" . $item->nis . "</td>";
-            echo "<td>" . $item->kelas . "</td>";
-            echo "<td>" . $item->jenis_kelamin . "</td>";
-            echo "<td>" . $item->status . "</td>";
+        return response()->streamDownload(function () use ($anggota, $namaSekolah) {
+            echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
+            echo "<table border='1'>";
+            echo "<tr><th colspan='6' style='font-size:16px; font-weight:bold;'>LAPORAN DATA ANGGOTA PERPUSTAKAAN</th></tr>";
+            echo "<tr><th colspan='6'>Instansi: {$namaSekolah}</th></tr>";
+            echo "<tr><td colspan='6'></td></tr>";
+            echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>";
+            echo "<th>No</th><th>Nama Lengkap</th><th>NIS</th><th>Kelas</th><th>Jenis Kelamin</th><th>Status</th>";
             echo "</tr>";
-        }
-        echo "</table>";
-        exit;
+
+            foreach ($anggota as $index => $item) {
+                echo "<tr>";
+                echo "<td style='text-align:center;'>" . ($index + 1) . "</td>";
+                echo "<td>" . e($item->nama_lengkap) . "</td>";
+                echo "<td>'" . e($item->nis) . "</td>";
+                echo "<td style='text-align:center;'>" . e($item->kelas) . "</td>";
+                echo "<td style='text-align:center;'>" . e($item->jenis_kelamin) . "</td>";
+                echo "<td style='text-align:center;'>" . ucfirst(e($item->status)) . "</td>";
+                echo "</tr>";
+            }
+
+            echo "<tr style='background-color:#e6e6e6; font-weight:bold;'>";
+            echo "<td colspan='5' style='text-align:right;'>TOTAL ANGGOTA TERDAFTAR:</td>";
+            echo "<td style='text-align:center;'>" . $anggota->count() . " Siswa</td>";
+            echo "</tr>";
+
+            echo "</table>";
+        }, $filename, [
+            'Content-Type' => 'application/vnd.ms-excel',
+        ]);
     }
 }

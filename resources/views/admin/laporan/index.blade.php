@@ -10,6 +10,14 @@
             <p class="text-sm text-gray-500 dark:text-slate-400 mt-1 transition-colors">Unduh atau cetak dokumen rekap data perpustakaan dalam format PDF maupun Excel.</p>
         </div>
 
+        <!-- ALERT ERROR VALIDASI TANGGAL -->
+        @if ($errors->any())
+            <div class="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium shadow-sm">
+                <i class="ph-fill ph-warning-circle text-xl shrink-0"></i>
+                <span>{{ $errors->first() }}</span>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
             <!-- 1. Laporan Peminjaman (Sirkulasi) -->
@@ -22,25 +30,32 @@
                 <h3 class="text-[17px] font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors">Laporan Sirkulasi</h3>
                 <p class="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed transition-colors">Rekap riwayat peminjaman, pengembalian, dan denda.</p>
 
-                <!-- Form Filter Tanggal -->
-                <form action="{{ route('laporan.peminjaman') }}" method="GET" target="_blank" class="mt-auto flex flex-col gap-4">
+                <!-- Form Filter Tanggal (Dilengkapi Alpine.js untuk validasi rentang otomatis) -->
+                <form action="{{ route('laporan.peminjaman') }}" method="GET"
+                      x-data="{
+                          startDate: '{{ old('start_date', now()->startOfMonth()->format('Y-m-d')) }}',
+                          endDate: '{{ old('end_date', now()->format('Y-m-d')) }}'
+                      }"
+                      class="mt-auto flex flex-col gap-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 transition-colors">Dari Tgl</label>
-                            <input type="date" name="start_date" class="w-full text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-colors [color-scheme:light] dark:[color-scheme:dark]" required>
+                            <input type="date" name="start_date" x-model="startDate" @change="if(endDate < startDate) endDate = startDate" class="w-full text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-colors [color-scheme:light] dark:[color-scheme:dark]" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 transition-colors">Sampai Tgl</label>
-                            <input type="date" name="end_date" class="w-full text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-colors [color-scheme:light] dark:[color-scheme:dark]" required>
+                            <input type="date" name="end_date" x-model="endDate" :min="startDate" class="w-full text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-colors [color-scheme:light] dark:[color-scheme:dark]" required>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 mt-1">
-                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                        <!-- Membuka tab baru khusus untuk Cetak PDF -->
+                        <button type="submit" formtarget="_blank" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
                             <i class="ph ph-printer text-base"></i>
                             <span>Cetak PDF</span>
                         </button>
-                        <button type="submit" name="export" value="excel" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                        <!-- Unduh langsung untuk Excel tanpa meninggalkan tab kosong -->
+                        <button type="submit" name="export" value="excel" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
                             <i class="ph ph-file-xls text-base"></i>
                             <span>Unduh Excel</span>
                         </button>
@@ -63,7 +78,7 @@
                         <i class="ph ph-printer text-base"></i>
                         <span>Cetak PDF</span>
                     </a>
-                    <a href="{{ route('laporan.buku', ['export' => 'excel']) }}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                    <a href="{{ route('laporan.buku', ['export' => 'excel']) }}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
                         <i class="ph ph-file-xls text-base"></i>
                         <span>Unduh Excel</span>
                     </a>
@@ -81,11 +96,11 @@
                 <p class="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed transition-colors">Daftar siswa yang aktif sebagai anggota perpustakaan.</p>
 
                 <div class="mt-auto grid grid-cols-2 gap-2">
-                    <a href="{{ route('laporan.anggota') }}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                    <a href="{{ route('laporan.anggota') }}" target="_blank" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
                         <i class="ph ph-printer text-base"></i>
                         <span>Cetak PDF</span>
                     </a>
-                    <a href="{{ route('laporan.anggota', ['export' => 'excel']) }}" target="_blank" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                    <a href="{{ route('laporan.anggota', ['export' => 'excel']) }}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
                         <i class="ph ph-file-xls text-base"></i>
                         <span>Unduh Excel</span>
                     </a>
