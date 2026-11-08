@@ -193,7 +193,7 @@ class PeminjamanController extends Controller
 
         // 3. KUNCI DATA: Masukkan tanggal dikembalikan agar denda berhenti!
         $peminjaman->update([
-            'tanggal_dikembalikan' => now(),
+            'tanggal_kembali' => now(),
             'status'               => 'Dikembalikan',
             'denda'                => $totalDenda,
             'status_denda'         => $statusDenda,

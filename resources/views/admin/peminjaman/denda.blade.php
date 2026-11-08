@@ -31,18 +31,11 @@
                         <input type="text" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik pencarian..."
                             class="pl-10 pr-3 w-full py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 border-r-0 rounded-l-lg focus:ring-2 focus:ring-red-600 outline-none transition-colors text-sm text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500">
                     </div>
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-r-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0 text-sm border border-red-600 hover:border-red-700">
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-r-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0 text-sm border border-red-600 hover:border-red-700 cursor-pointer">
                         Cari Tagihan
                     </button>
                 </form>
             </div>
-
-            @if(session('success'))
-                <div class="bg-emerald-50 dark:bg-emerald-500/10 border-b border-emerald-100 dark:border-emerald-500/20 p-4 flex items-center gap-3 text-emerald-700 dark:text-emerald-400 text-sm font-medium transition-colors">
-                    <i class="ph ph-check-circle text-xl"></i>
-                    {{ session('success') }}
-                </div>
-            @endif
 
             <div class="overflow-x-auto w-full">
                 <table class="w-full text-left border-collapse min-w-[900px]">
@@ -59,7 +52,9 @@
                     <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-50 dark:divide-slate-700/50 transition-colors">
                         @forelse($peminjamans as $pinjam)
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors text-sm group">
-                            <td class="py-4 px-6 text-gray-500 dark:text-slate-400 font-medium text-center">{{ $peminjamans->firstItem() + $loop->index }}</td>
+                            <td class="py-4 px-6 text-gray-500 dark:text-slate-400 font-medium text-center">
+                                {{ $peminjamans->firstItem() + $loop->index }}
+                            </td>
 
                             <td class="py-4 px-6">
                                 <span class="font-bold text-gray-800 dark:text-slate-200 block">{{ $pinjam->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</span>
@@ -68,7 +63,7 @@
 
                             <td class="py-4 px-6">
                                 <span class="font-medium text-gray-800 dark:text-slate-200 block line-clamp-1" title="{{ $pinjam->buku->judul ?? '-' }}">{{ $pinjam->buku->judul ?? 'Buku Dihapus' }}</span>
-                                <span class="text-[11px] text-gray-400 dark:text-slate-500 mt-1 line-clamp-1 block">{{ $pinjam->catatan ?? 'Tidak ada catatan khusus' }}</span>
+                                <span class="text-[11px] text-gray-400 dark:text-slate-500 mt-1 line-clamp-1 block" title="{{ $pinjam->catatan ?? 'Tidak ada catatan khusus' }}">{{ $pinjam->catatan ?? 'Tidak ada catatan khusus' }}</span>
                             </td>
 
                             <td class="py-4 px-6 text-right">
@@ -80,11 +75,11 @@
                             <td class="py-4 px-6 text-center">
                                 @if($pinjam->status_denda == 'Lunas')
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold rounded-full uppercase tracking-wider transition-colors">
-                                        <i class="ph ph-check-circle-fill text-sm"></i> LUNAS
+                                        <i class="ph-fill ph-check-circle text-sm"></i> LUNAS
                                     </span>
                                 @else
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold rounded-full uppercase tracking-wider animate-pulse transition-colors">
-                                        <i class="ph ph-warning-circle-fill text-sm"></i> BELUM LUNAS
+                                        <i class="ph-fill ph-warning-circle text-sm"></i> BELUM LUNAS
                                     </span>
                                 @endif
                             </td>
@@ -99,37 +94,43 @@
                                     @if($pinjam->status_denda != 'Lunas')
                                         <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
 
-                                        <div x-data="{ showLunasModal: false }" class="inline-block relative">
-                                            <button @click="showLunasModal = true" type="button" class="bg-gray-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 border border-transparent dark:border-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                                        <div x-data="{ showLunasModal: false, submitting: false }" class="inline-block relative">
+                                            <button @click="showLunasModal = true" type="button" class="bg-gray-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 border border-transparent dark:border-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
                                                 <i class="ph ph-hand-coins text-base"></i> Terima Uang
                                             </button>
 
-                                            <!-- Modal Konfirmasi Lunas -->
-                                            <div x-show="showLunasModal" x-cloak class="fixed inset-0 z-[99] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-left">
-                                                <div @click.away="showLunasModal = false" class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl transform transition-all border border-transparent dark:border-slate-700">
-                                                    <div class="flex items-center gap-4 mb-5">
-                                                        <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl shrink-0 transition-colors">
-                                                            <i class="ph ph-money"></i>
+                                            <!-- Modal Konfirmasi Lunas (Teleport ke body agar tidak terpotong tabel) -->
+                                            <template x-teleport="body">
+                                                <div x-show="showLunasModal" x-cloak class="fixed inset-0 z-[99] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-left">
+                                                    <div @click.away="if(!submitting) showLunasModal = false" class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl transform transition-all border border-transparent dark:border-slate-700">
+                                                        <div class="flex items-center gap-4 mb-5">
+                                                            <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl shrink-0 transition-colors">
+                                                                <i class="ph ph-money"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h3 class="font-bold text-gray-900 dark:text-slate-100 text-base">Konfirmasi Pembayaran</h3>
+                                                                <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Pastikan Anda sudah menerima uangnya dari <strong>{{ $pinjam->anggota->nama_lengkap ?? 'Siswa' }}</strong>.</p>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <h3 class="font-bold text-gray-900 dark:text-slate-100 text-base">Konfirmasi Pembayaran</h3>
-                                                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Pastikan Anda sudah menerima uangnya.</p>
+                                                        <div class="bg-gray-50 dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-700 mb-6 text-center transition-colors">
+                                                            <p class="text-[10px] text-gray-500 dark:text-slate-400 mb-1 uppercase font-bold tracking-widest">Total Terima</p>
+                                                            <p class="text-2xl font-black text-gray-900 dark:text-slate-100">Rp {{ number_format($pinjam->denda, 0, ',', '.') }}</p>
                                                         </div>
-                                                    </div>
-                                                    <div class="bg-gray-50 dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-700 mb-6 text-center transition-colors">
-                                                        <p class="text-[10px] text-gray-500 dark:text-slate-400 mb-1 uppercase font-bold tracking-widest">Total Terima</p>
-                                                        <p class="text-2xl font-black text-gray-900 dark:text-slate-100">Rp {{ number_format($pinjam->denda, 0, ',', '.') }}</p>
-                                                    </div>
-                                                    <div class="flex justify-end gap-3">
-                                                        <button @click="showLunasModal = false" type="button" class="px-4 py-2.5 text-sm font-bold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 flex-1 transition-colors">Batal</button>
+                                                        <div class="flex justify-end gap-3">
+                                                            <button @click="showLunasModal = false" :disabled="submitting" type="button" class="px-4 py-2.5 text-sm font-bold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 flex-1 transition-colors cursor-pointer disabled:opacity-50">
+                                                                Batal
+                                                            </button>
 
-                                                        <form action="{{ route('denda.lunas', $pinjam->id) }}" method="POST" class="flex-1 m-0 p-0">
-                                                            @csrf
-                                                            <button type="submit" class="w-full px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-md transition-colors">Sudah Lunas</button>
-                                                        </form>
+                                                            <form action="{{ route('denda.lunas', $pinjam->id) }}" method="POST" class="flex-1 m-0 p-0" @submit="submitting = true">
+                                                                @csrf
+                                                                <button type="submit" :disabled="submitting" class="w-full px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-md transition-colors cursor-pointer disabled:opacity-50">
+                                                                    <span x-text="submitting ? 'Memproses...' : 'Sudah Lunas'">Sudah Lunas</span>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </template>
                                         </div>
                                     @endif
                                 </div>
@@ -152,16 +153,15 @@
                 </table>
             </div>
 
-            <!-- Pagination dengan CSS override untuk mode gelap -->
-            <div class="p-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 mt-auto transition-colors">
+            <!-- Pagination dengan ID spesifik agar tidak merusak nav sidebar -->
+            <div id="area-pagination" class="p-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 mt-auto transition-colors">
                 <style>
-                    /* Penyesuaian SVG agar pagination default Laravel terlihat sejajar di dark mode */
-                    .p-4 nav svg { width: 1.25rem; height: 1.25rem; display: inline-block; }
-                    .p-4 nav p { margin-top: 0; margin-bottom: 0; }
-                    .dark .p-4 nav span[aria-disabled="true"] span { background-color: #1e293b; border-color: #334155; color: #64748b; }
-                    .dark .p-4 nav span[aria-current="page"] span { background-color: #3b82f6; border-color: #3b82f6; color: white; }
-                    .dark .p-4 nav a { background-color: #1e293b; border-color: #334155; color: #cbd5e1; }
-                    .dark .p-4 nav a:hover { background-color: #334155; color: white; }
+                    #area-pagination nav svg { width: 1.25rem; height: 1.25rem; display: inline-block; }
+                    #area-pagination nav p { margin-top: 0; margin-bottom: 0; }
+                    .dark #area-pagination nav span[aria-disabled="true"] span { background-color: #1e293b; border-color: #334155; color: #64748b; }
+                    .dark #area-pagination nav span[aria-current="page"] span { background-color: #3b82f6; border-color: #3b82f6; color: white; }
+                    .dark #area-pagination nav a { background-color: #1e293b; border-color: #334155; color: #cbd5e1; }
+                    .dark #area-pagination nav a:hover { background-color: #334155; color: white; }
                 </style>
                 {{ $peminjamans->links() }}
             </div>

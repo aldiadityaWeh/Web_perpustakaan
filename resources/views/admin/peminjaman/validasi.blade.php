@@ -26,8 +26,8 @@
                             <i class="ph ph-user"></i>
                         </div>
                         <div>
-                            <p class="font-bold text-gray-900 dark:text-slate-100 transition-colors">{{ $peminjaman->anggota->nama_lengkap }}</p>
-                            <p class="text-xs text-gray-500 dark:text-slate-400 font-mono transition-colors">NIS: {{ $peminjaman->anggota->nis }}</p>
+                            <p class="font-bold text-gray-900 dark:text-slate-100 transition-colors">{{ $peminjaman->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-slate-400 font-mono transition-colors">NIS: {{ $peminjaman->anggota->nis ?? '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -38,15 +38,15 @@
                             <i class="ph ph-book-open"></i>
                         </div>
                         <div>
-                            <p class="font-bold text-gray-900 dark:text-slate-100 line-clamp-1 transition-colors">{{ $peminjaman->buku->judul }}</p>
-                            <p class="text-xs text-gray-500 dark:text-slate-400 font-mono transition-colors">Kode/ISBN: {{ $peminjaman->buku->isbn }}</p>
+                            <p class="font-bold text-gray-900 dark:text-slate-100 line-clamp-1 transition-colors" title="{{ $peminjaman->buku->judul ?? 'Buku Dihapus' }}">{{ $peminjaman->buku->judul ?? 'Buku Dihapus' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-slate-400 font-mono transition-colors">Kode/ISBN: {{ $peminjaman->buku->isbn ?? '-' }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-           <!-- Form Validasi (Ubah x-data kondisi default menjadi 'Normal') -->
-            <form action="{{ route('peminjaman.prosesValidasi', $peminjaman->id) }}" method="POST" class="p-6 space-y-6" x-data="{ kondisi: 'Normal' }">
+            <!-- Form Validasi -->
+            <form action="{{ route('peminjaman.prosesValidasi', $peminjaman->id) }}" method="POST" class="p-6 space-y-6" x-data="{ kondisi: 'Normal', submitting: false }" @submit="submitting = true">
                 @csrf
 
                 <!-- Alert Keterlambatan -->
@@ -76,13 +76,13 @@
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <span class="text-gray-500 dark:text-slate-400 font-bold">Rp</span>
                             </div>
-                            <input type="number" name="denda" value="{{ $peminjaman->denda_berjalan }}" required min="0"
+                            <input type="number" name="denda" value="{{ $peminjaman->denda_berjalan ?? 0 }}" required min="0"
                                 class="pl-12 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition-colors font-bold text-gray-900 dark:text-slate-100 text-lg">
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-slate-400 mt-1.5">*Isi angka denda kerterlambatan / denda khusus di sini.</p>
+                        <p class="text-xs text-gray-500 dark:text-slate-400 mt-1.5">*Isi angka denda keterlambatan / denda khusus di sini.</p>
                     </div>
 
-                    <!-- Kondisi Buku (Disederhanakan jadi 2 pilihan) -->
+                    <!-- Kondisi Buku -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Kondisi Saat Dikembalikan</label>
                         <div class="relative">
@@ -91,10 +91,8 @@
                             </div>
                             <select name="kondisi_buku" x-model="kondisi" required
                                 class="pl-11 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 outline-none transition-colors appearance-none cursor-pointer font-bold text-gray-700 dark:text-slate-200">
-
                                 <option value="Normal" class="dark:bg-slate-800">Normal / Bagus</option>
                                 <option value="Rusak / Hilang" class="dark:bg-slate-800">Rusak / Hilang</option>
-
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <i class="ph ph-caret-down text-gray-400 dark:text-slate-500"></i>
@@ -103,8 +101,8 @@
                     </div>
                 </div>
 
-                <!-- ATURAN MUTLAK WARNING (Logika x-show disesuaikan) -->
-                <div x-show="kondisi === 'Rusak / Hilang'" style="display: none;" x-transition
+                <!-- ATURAN MUTLAK WARNING -->
+                <div x-show="kondisi === 'Rusak / Hilang'" x-cloak x-transition
                      class="bg-red-50 dark:bg-red-500/10 border-l-4 border-red-600 dark:border-red-500 p-5 rounded-r-xl shadow-sm transition-colors">
                     <div class="flex items-start gap-3">
                         <i class="ph ph-prohibit text-red-600 dark:text-red-400 text-3xl animate-pulse shrink-0"></i>
@@ -119,20 +117,25 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Catatan Tambahan -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Catatan Kepala Perpus (Opsional)</label>
-                    <textarea name="catatan" rows="3" placeholder="Tuliskan catatan kondisi buku, janji ganti buku, atau rincian kerusakan di sini..."
-                        class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 resize-none"></textarea>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
+                        Catatan Petugas / Kepala Perpus
+                        <span x-show="kondisi === 'Normal'" class="text-xs font-normal text-gray-400">(Opsional)</span>
+                        <span x-show="kondisi === 'Rusak / Hilang'" x-cloak class="text-xs font-bold text-red-500">*Wajib diisi untuk buku rusak/hilang</span>
+                    </label>
+                    <textarea name="catatan" rows="3" :required="kondisi === 'Rusak / Hilang'" placeholder="Tuliskan catatan kondisi buku, janji ganti buku, atau rincian kerusakan di sini..."
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 resize-none">{{ old('catatan', $peminjaman->catatan) }}</textarea>
                 </div>
 
                 <div class="pt-6 border-t border-gray-100 dark:border-slate-700 flex justify-end gap-3 transition-colors">
                     <a href="{{ route('peminjaman.index') }}" class="px-6 py-3 text-sm font-bold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
                         Batal
                     </a>
-                    <button type="submit" class="px-8 py-3 text-sm font-bold text-white bg-purple-600 rounded-xl hover:bg-purple-700 shadow-md transition-all flex items-center gap-2">
-                        Validasi & Kunci <i class="ph ph-lock-key text-lg"></i>
+                    <button type="submit" :disabled="submitting" class="px-8 py-3 text-sm font-bold text-white bg-purple-600 rounded-xl hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed shadow-md transition-all flex items-center gap-2 cursor-pointer">
+                        <span x-text="submitting ? 'Memproses...' : 'Validasi & Kunci'">Validasi & Kunci</span>
+                        <i class="ph ph-lock-key text-lg"></i>
                     </button>
                 </div>
             </form>

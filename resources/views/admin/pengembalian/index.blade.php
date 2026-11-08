@@ -33,7 +33,7 @@
                         <input type="text" id="searchInput" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik pencarian..."
                             class="pl-10 pr-3 w-full py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 border-r-0 rounded-l-lg focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500">
                     </div>
-                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-r-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0 flex items-center justify-center gap-2 text-sm border border-purple-600 hover:border-purple-700">
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-r-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0 flex items-center justify-center gap-2 text-sm border border-purple-600 hover:border-purple-700 cursor-pointer">
                         <span>Cari Data</span>
                     </button>
                 </form>
@@ -53,6 +53,10 @@
                     </thead>
                     <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-50 dark:divide-slate-700/50 transition-colors">
                         @forelse($pengembalians as $kembali)
+                        @php
+                            $tglKembali = $kembali->tanggal_kembali ?? $kembali->updated_at;
+                            $catatan = $kembali->catatan ?? '';
+                        @endphp
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors text-sm group">
 
                             <!-- Kolom Nomor Urut -->
@@ -68,16 +72,23 @@
 
                             <!-- Kolom Tanggal Dikembalikan -->
                             <td class="py-4 px-6 text-center text-gray-600 dark:text-slate-300 font-medium">
-                                {{ \Carbon\Carbon::parse($kembali->updated_at)->format('d M Y') }}
+                                {{ \Carbon\Carbon::parse($tglKembali)->format('d M Y') }}
                                 <span class="block text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{{ \Carbon\Carbon::parse($kembali->updated_at)->format('H:i') }} WIB</span>
                             </td>
 
                             <!-- Kolom Denda -->
                             <td class="py-4 px-6 text-center">
                                 @if($kembali->denda > 0)
-                                    <span class="inline-flex items-center px-2.5 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[11px] font-bold rounded-lg tracking-wider transition-colors">
-                                        Rp {{ number_format($kembali->denda, 0, ',', '.') }}
-                                    </span>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <span class="inline-flex items-center px-2.5 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[11px] font-bold rounded-lg tracking-wider transition-colors">
+                                            Rp {{ number_format($kembali->denda, 0, ',', '.') }}
+                                        </span>
+                                        @if($kembali->status_denda == 'Lunas')
+                                            <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Lunas</span>
+                                        @else
+                                            <span class="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider animate-pulse">Belum Lunas</span>
+                                        @endif
+                                    </div>
                                 @else
                                     <span class="text-[11px] font-medium text-gray-400 dark:text-slate-500">Gratis / Rp 0</span>
                                 @endif
@@ -85,11 +96,17 @@
 
                             <!-- Kolom Catatan -->
                             <td class="py-4 px-6">
-                                <div class="max-w-[200px] truncate text-xs text-gray-600 dark:text-slate-300 transition-colors" title="{{ $kembali->catatan ?? 'Kondisi Aman' }}">
-                                    @if(str_contains($kembali->catatan, 'Kondisi: Rusak') || str_contains($kembali->catatan, 'Hilang'))
-                                        <span class="text-red-600 dark:text-red-400 font-bold flex items-center gap-1.5"><i class="ph ph-warning"></i> {{ $kembali->catatan }}</span>
+                                <div class="max-w-[220px] truncate text-xs text-gray-600 dark:text-slate-300 transition-colors" title="{{ $catatan !== '' ? $catatan : 'Kondisi Aman' }}">
+                                    @if(str_contains($catatan, 'Kondisi: Rusak') || str_contains($catatan, 'Hilang'))
+                                        <span class="text-red-600 dark:text-red-400 font-bold flex items-center gap-1.5">
+                                            <i class="ph ph-warning shrink-0"></i> <span class="truncate">{{ $catatan }}</span>
+                                        </span>
+                                    @elseif(str_contains($catatan, 'Kondisi: SUDAH DIGANTI'))
+                                        <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+                                            <i class="ph ph-check-circle shrink-0"></i> <span class="truncate">{{ $catatan }}</span>
+                                        </span>
                                     @else
-                                        {{ $kembali->catatan ?? 'Kondisi Aman' }}
+                                        {{ $catatan !== '' ? $catatan : 'Kondisi Aman' }}
                                     @endif
                                 </div>
                             </td>
@@ -123,7 +140,6 @@
             <!-- PAGINATION -->
             <div id="area-pagination" class="p-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 mt-auto transition-colors">
                 <style>
-                    /* Penyesuaian SVG agar pagination terlihat sejajar & rapi, serta mendukung Dark Mode */
                     #area-pagination nav svg { width: 1.25rem; height: 1.25rem; display: inline-block; }
                     #area-pagination nav p { margin-top: 0; margin-bottom: 0; }
                     .dark #area-pagination nav span[aria-disabled="true"] span { background-color: #1e293b; border-color: #334155; color: #64748b; }
