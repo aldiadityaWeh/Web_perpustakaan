@@ -23,7 +23,7 @@
                 <div class="flex items-center gap-2 px-2">
                     <input type="date" name="end_date" value="{{ $endDate }}" class="text-sm text-gray-700 dark:text-slate-200 bg-transparent outline-none cursor-pointer [color-scheme:light] dark:[color-scheme:dark]" required>
                 </div>
-                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 shadow-sm">
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="ph ph-funnel"></i> Filter
                 </button>
             </form>
@@ -126,15 +126,18 @@
                 <h3 class="font-bold text-gray-800 dark:text-slate-100 text-base mb-5 transition-colors">Peminjaman Terbaru</h3>
                 <div class="flex flex-col gap-3 flex-1">
                     @forelse($peminjamanTerbaru as $trx)
+                        @php
+                            $status = strtolower(trim($trx->status));
+                        @endphp
                         <div class="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-slate-900/50 rounded-xl border border-gray-100/50 dark:border-slate-700/50 transition-colors">
                             <div>
                                 <p class="text-sm font-bold text-gray-800 dark:text-slate-200 transition-colors">{{ $trx->buku->judul ?? 'Buku Dihapus' }}</p>
                                 <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 transition-colors">{{ $trx->anggota->nama_lengkap ?? 'Anggota Dihapus' }}</p>
                             </div>
                             <span class="px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wider transition-colors
-                                {{ $trx->status == 'dipinjam' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : '' }}
-                                {{ $trx->status == 'dikembalikan' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : '' }}
-                                {{ $trx->status == 'terlambat' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' : '' }}">
+                                {{ $status == 'dipinjam' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : '' }}
+                                {{ $status == 'dikembalikan' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : '' }}
+                                {{ $status == 'terlambat' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' : '' }}">
                                 {{ $trx->status }}
                             </span>
                         </div>
@@ -146,7 +149,6 @@
                 <!-- Area Pagination -->
                 <div class="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 transition-colors">
                     <style>
-                        /* Styling khusus agar pagination Tailwind bawaan Laravel lebih rapi di dalam card */
                         .mt-4.pt-4 nav svg { width: 1.25rem; height: 1.25rem; }
                         .mt-4.pt-4 nav p { margin-top: 0; margin-bottom: 0; font-size: 0.75rem; }
                         .dark .mt-4.pt-4 nav span[aria-disabled="true"] span { background-color: #1e293b; border-color: #334155; color: #64748b; }
@@ -165,7 +167,7 @@
                     @forelse($bukuPopuler as $index => $populer)
                         <div class="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-slate-900/50 rounded-xl border border-gray-100/50 dark:border-slate-700/50 transition-colors">
                             <div class="flex items-center gap-3">
-                                <!-- Kotak Nomor Peringkat Berwarna dengan Dukungan Dark Mode -->
+                                <!-- Kotak Nomor Peringkat Berwarna -->
                                 <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm transition-colors
                                     {{ $index == 0 ? 'bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-600 dark:to-amber-500 text-amber-900 dark:text-amber-50' :
                                       ($index == 1 ? 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-slate-600 dark:to-slate-500 text-gray-700 dark:text-slate-50' :
@@ -195,10 +197,10 @@
     <!-- MENYIAPKAN DATA LARAVEL UNTUK FILE EXTERNAL JS -->
     <script>
         window.analisisData = {
-            chartDates: @json($chartDates),
-            chartData: @json($chartData),
-            labelKategori: @json($labelKategori),
-            dataKategori: @json($dataKategori)
+            chartDates: @js($chartDates),
+            chartData: @js($chartData),
+            labelKategori: @js($labelKategori),
+            dataKategori: @js($dataKategori)
         };
     </script>
 

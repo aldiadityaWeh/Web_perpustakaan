@@ -12,34 +12,36 @@ class TransaksiController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. KUNCI LOGIKA DIPERBAIKI:
-        // Ambil data HANYA yang sudah dikembalikan, memiliki denda, DAN SUDAH LUNAS.
+        // 1. Ambil data HANYA yang sudah dikembalikan, memiliki denda, DAN SUDAH LUNAS.
         $query = Peminjaman::with(['buku', 'anggota'])
                     ->where('status', 'Dikembalikan')
                     ->where('denda', '>', 0)
-                    ->where('status_denda', 'Lunas'); // <-- PERBAIKAN DI SINI
+                    ->where('status_denda', 'Lunas');
 
-        // 2. KUNCI LOGIKA DIPERBAIKI:
-        // Hitung total uang kas denda HANYA dari denda yang sudah diserahkan (Lunas)
-        $totalKas = Peminjaman::where('status', 'Dikembalikan')
-                    ->where('denda', '>', 0)
-                    ->where('status_denda', 'Lunas') // <-- PERBAIKAN DI SINI
-                    ->sum('denda');
+        // 2. Hitung total uang kas denda HANYA dari denda yang sudah diserahkan (Lunas)
+        $totalKas = (clone $query)->sum('denda');
 
         // 3. Logika Pencarian
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                // Cari berdasarkan ID Transaksi (Hanya angka)
-                $q->where('id', 'like', '%' . str_replace('TRX-', '', $search) . '%')
+            $search = trim($request->search);
+            // Bersihkan awalan TRX- (case-insensitive) dan angka nol di depan (misal TRX-0005 -> 5)
+            $cleanId = ltrim(str_ireplace('trx-', '', $search), '0');
+
+            $query->where(function ($q) use ($search, $cleanId) {
+                if ($cleanId !== '' && is_numeric($cleanId)) {
+                    $q->where('id', $cleanId)
+                      ->orWhere('id', 'like', '%' . $cleanId . '%');
+                }
+
                 // Atau Nama Siswa & NIS
-                ->orWhereHas('anggota', function($subQ) use ($search) {
+                $q->orWhereHas('anggota', function ($subQ) use ($search) {
                     $subQ->where('nama_lengkap', 'like', '%' . $search . '%')
                          ->orWhere('nis', 'like', '%' . $search . '%');
                 })
-                // Atau Judul Buku
-                ->orWhereHas('buku', function($subQ) use ($search) {
-                    $subQ->where('judul', 'like', '%' . $search . '%');
+                // Atau Judul Buku & ISBN
+                ->orWhereHas('buku', function ($subQ) use ($search) {
+                    $subQ->where('judul', 'like', '%' . $search . '%')
+                         ->orWhere('isbn', 'like', '%' . $search . '%');
                 });
             });
         }
@@ -51,29 +53,26 @@ class TransaksiController extends Controller
     }
 
     /**
-     * Menampilkan detail spesifik satu transaksi (seperti struk/bon)
+     * Menampilkan detail spesifik satu transaksi
      */
     public function show(string $id)
     {
-        // Ambil data transaksi beserta data relasi buku dan anggotanya
-        $transaksi = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
+        $peminjaman = Peminjaman::with(['buku', 'anggota'])->findOrFail($id);
 
-        // Arahkan ke file resources/views/admin/transaksi/show.blade.php
-        return view('admin.transaksi.show', compact('transaksi'));
+        // Gunakan view detail peminjaman yang sudah ada agar tidak error View Not Found
+        return view('admin.peminjaman.show', compact('peminjaman'));
     }
 
     /**
-     * Hapus permanen riwayat Kas/Transaksi
+     * Hapus riwayat Kas Denda
      */
     public function destroy(string $id)
     {
         $transaksi = Peminjaman::findOrFail($id);
 
         // Keamanan tambahan: Jika yang dihapus ternyata masih berstatus 'dipinjam', otomatis kembalikan stok buku
-        if (strtolower(trim($transaksi->status)) == 'dipinjam') {
-            if ($transaksi->buku) {
-                $transaksi->buku->increment('stok', 1);
-            }
+        if (strtolower(trim($transaksi->status)) == 'dipinjam' && $transaksi->buku) {
+            $transaksi->buku->increment('stok', 1);
         }
 
         $transaksi->delete();
