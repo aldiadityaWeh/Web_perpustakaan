@@ -162,22 +162,32 @@
 
             <!-- Buku Populer -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col p-6 transition-colors">
-                <h3 class="font-bold text-gray-800 dark:text-slate-100 text-base mb-5 transition-colors">Buku Paling Populer</h3>
+                <div class="flex items-center gap-2 mb-5">
+                    <i class="ph-fill ph-trophy text-amber-500 text-xl"></i>
+                    <h3 class="font-bold text-gray-800 dark:text-slate-100 text-base transition-colors">Buku Paling Populer</h3>
+                </div>
                 <div class="flex flex-col gap-3">
                     @forelse($bukuPopuler as $index => $populer)
                         <div class="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-slate-900/50 rounded-xl border border-gray-100/50 dark:border-slate-700/50 transition-colors">
                             <div class="flex items-center gap-3">
-                                <!-- Kotak Nomor Peringkat Berwarna -->
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm transition-colors
-                                    {{ $index == 0 ? 'bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-600 dark:to-amber-500 text-amber-900 dark:text-amber-50' :
-                                      ($index == 1 ? 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-slate-600 dark:to-slate-500 text-gray-700 dark:text-slate-50' :
+                                <!-- Kotak Ikon Piala Berwarna (Emas, Perak, Perunggu, Ungu) -->
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0 transition-colors
+                                    {{ $index == 0 ? 'bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-500 dark:to-amber-600 text-amber-900 dark:text-white' :
+                                      ($index == 1 ? 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-slate-600 dark:to-slate-500 text-gray-700 dark:text-slate-100' :
                                       ($index == 2 ? 'bg-gradient-to-br from-orange-200 to-orange-300 dark:from-orange-700 dark:to-orange-600 text-orange-900 dark:text-orange-50' :
-                                      'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-500/20')) }}">
-                                    #{{ $index + 1 }}
+                                      'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-500/20')) }}"
+                                     title="Peringkat #{{ $index + 1 }}">
+                                    @if($index < 3)
+                                        <i class="ph-fill ph-trophy text-xl"></i>
+                                    @else
+                                        <i class="ph ph-trophy text-xl"></i>
+                                    @endif
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold text-gray-800 dark:text-slate-200 line-clamp-1 transition-colors">{{ $populer->buku->judul ?? 'Buku Dihapus' }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 transition-colors">Kategori: {{ ucfirst($populer->buku->kategori ?? '-') }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 transition-colors">
+                                        <span class="font-semibold text-purple-600 dark:text-purple-400">Top {{ $index + 1 }}</span> &bull; Kategori: {{ ucfirst($populer->buku->kategori ?? '-') }}
+                                    </p>
                                 </div>
                             </div>
                             <div class="text-right shrink-0">

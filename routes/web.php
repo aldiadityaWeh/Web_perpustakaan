@@ -91,22 +91,10 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    // --- Akses Tulis (Create, Edit, Update, Destroy) Buku ---
-    // PERHATIKAN: Route 'create' diletakkan secara eksplisit
-    Route::get('/admin/buku/create/baru', [BukuController::class, 'create'])->name('buku.create');
-    Route::post('/admin/buku', [BukuController::class, 'store'])->name('buku.store');
-    Route::get('/admin/buku/{buku}/edit', [BukuController::class, 'edit'])->name('buku.edit');
-    Route::put('/admin/buku/{buku}', [BukuController::class, 'update'])->name('buku.update');
-    Route::delete('/admin/buku/{buku}', [BukuController::class, 'destroy'])->name('buku.destroy');
-
-    // --- Akses Tulis (Create, Edit, Update, Destroy) Anggota ---
-    // PERHATIKAN: Route 'create' diletakkan secara eksplisit
-    Route::get('/admin/anggota/create/baru', [AnggotaController::class, 'create'])->name('anggota.create');
-    Route::post('/admin/anggota', [AnggotaController::class, 'store'])->name('anggota.store');
-    Route::get('/admin/anggota/{anggota}/edit', [AnggotaController::class, 'edit'])->name('anggota.edit');
-    Route::put('/admin/anggota/{anggota}', [AnggotaController::class, 'update'])->name('anggota.update');
-    Route::delete('/admin/anggota/{anggota}', [AnggotaController::class, 'destroy'])->name('anggota.destroy');
-
+   // --- Akses Tulis Master Data Buku & Anggota (Create, Store, Edit, Update, Destroy) ---
+    Route::resource('/admin/buku', BukuController::class)->except(['index', 'show']);
+    Route::resource('/admin/anggota', AnggotaController::class)->except(['index', 'show']);
+    
     // --- Pengaturan Sistem & Manajemen Petugas ---
     Route::get('/admin/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::put('/admin/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
