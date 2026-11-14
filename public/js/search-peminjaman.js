@@ -1,33 +1,41 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Cari elemen berdasarkan ID yang benar di Blade
-    const kolomPencarian = document.getElementById('searchInput');
-    const formPencarian = kolomPencarian ? kolomPencarian.closest('form') : null;
     const wadahTabel = document.getElementById('table-container');
-
-    // Ambil URL tujuan dari form action (misal: /admin/peminjaman)
-    const urlDasar = formPencarian ? formPencarian.getAttribute('action') : window.location.pathname;
     let batasWaktu = null;
 
-    // Cegah reload halaman saat tombol enter/cari ditekan
-    if (formPencarian) {
-        formPencarian.addEventListener('submit', function(e) {
-            e.preventDefault();
-        });
-    }
+    if (!wadahTabel) return;
 
-    if (kolomPencarian && wadahTabel) {
-        kolomPencarian.addEventListener('input', function() {
+    // Cegah reload halaman saat form submit ditekan di dalam wadah tabel
+    wadahTabel.addEventListener('submit', function(e) {
+        if (e.target && e.target.closest('form')) {
+            e.preventDefault();
+        }
+    });
+
+    wadahTabel.addEventListener('input', function(e) {
+        if (e.target && e.target.id === 'searchInput') {
+            const kolomPencarian = e.target;
+            const formPencarian = kolomPencarian.closest('form');
+            const urlDasar = formPencarian ? formPencarian.getAttribute('action') : window.location.pathname;
+
+            // Pertahankan parameter filter aktif jika ada di URL saat ini (misal: ?filter=dipinjam&search=...)
+            const urlParamsAktif = new URLSearchParams(window.location.search);
+            const filterAktif = urlParamsAktif.get('filter');
+
             clearTimeout(batasWaktu);
 
-            // Beri efek buram saat sedang mencari
-            wadahTabel.style.opacity = '0.5';
+            // Beri efek loading hanya pada tbody agar kotak pencarian tetap responsif dan tidak buram
+            const tbodySaatIni = wadahTabel.querySelector('tbody');
+            if (tbodySaatIni) tbodySaatIni.style.opacity = '0.4';
 
-            // Jeda 300ms agar server tidak kelebihan beban saat mengetik cepat
             batasWaktu = setTimeout(() => {
-                const kueri = this.value;
-                const urlTujuan = `${urlDasar}?search=${encodeURIComponent(kueri)}`;
+                const kueri = kolomPencarian.value;
 
-                // Jalankan AJAX ke Controller
+                // Susun URL tujuan dengan menggabungkan filter aktif dan parameter pencarian
+                let urlTujuan = `${urlDasar}?search=${encodeURIComponent(kueri)}`;
+                if (filterAktif) {
+                    urlTujuan += `&filter=${encodeURIComponent(filterAktif)}`;
+                }
+
                 fetch(urlTujuan, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
@@ -35,27 +43,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(respon => respon.text())
                 .then(html => {
-                    // Ubah teks HTML dari server menjadi elemen DOM
                     const parser = new DOMParser();
                     const dokumenBaru = parser.parseFromString(html, 'text/html');
 
-                    // Ambil isi tabel baru dan gantikan ke tabel lama
-                    const wadahTabelBaru = dokumenBaru.getElementById('table-container');
-                    if (wadahTabelBaru) {
-                        wadahTabel.innerHTML = wadahTabelBaru.innerHTML;
+                    // 1. Perbarui hanya isi tabel (tbody) agar fokus kursor di #searchInput tidak hilang
+                    const tbodyBaru = dokumenBaru.querySelector('#table-container tbody');
+                    if (tbodyBaru && tbodySaatIni) {
+                        tbodySaatIni.innerHTML = tbodyBaru.innerHTML;
+                        tbodySaatIni.style.opacity = '1';
                     }
 
-                    // Kembalikan efek buram
-                    wadahTabel.style.opacity = '1';
+                    // 2. Perbarui area pagination bawaan Laravel
+                    const paginationSaatIni = document.getElementById('area-pagination');
+                    const paginationBaru = dokumenBaru.getElementById('area-pagination');
+                    if (paginationBaru && paginationSaatIni) {
+                        paginationSaatIni.innerHTML = paginationBaru.innerHTML;
+                    }
 
-                    // Ubah URL di browser tanpa reload (agar rapi)
+                    // Perbarui URL history browser tanpa reload halaman
                     window.history.pushState(null, '', urlTujuan);
                 })
                 .catch(err => {
                     console.error('Terjadi kesalahan pencarian AJAX:', err);
-                    wadahTabel.style.opacity = '1';
+                    if (tbodySaatIni) tbodySaatIni.style.opacity = '1';
                 });
             }, 300);
-        });
-    }
+        }
+    });
 });

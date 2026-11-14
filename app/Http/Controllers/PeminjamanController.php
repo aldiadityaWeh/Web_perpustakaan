@@ -67,7 +67,7 @@ class PeminjamanController extends Controller
             'tanggal_pinjam'  => 'required|date',
             'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
         ], [
-            'buku_id.required'              => 'Pilih minimal 1 buku untuk dipinjam.',
+            'buku_id.required'               => 'Pilih minimal 1 buku untuk dipinjam.',
             'tanggal_kembali.after_or_equal' => 'Tanggal kembali tidak boleh mundur dari tanggal pinjam.'
         ]);
 

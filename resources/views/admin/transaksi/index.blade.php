@@ -117,7 +117,7 @@
                                         <form action="{{ route('transaksi.destroy', $trx->id) }}" method="POST" class="m-0 p-0" onsubmit="event.preventDefault(); konfirmasiHapusKas(this);">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer" title="Hapus Riwayat Kas">
+                                            <button type="submit" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer" title="Hapus Riwayat Kas (Admin)">
                                                 <i class="ph ph-trash text-lg"></i>
                                             </button>
                                         </form>
@@ -157,6 +157,9 @@
         </div>
 
     </div>
+
+    <!-- LIBRARY SWEETALERT2 (WAJIB ADA AGAR FUNGSI HAPUS BERJALAN) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Panggil File JS Eksternal di folder Public -->
     <script src="{{ asset('js/search-transaksi.js') }}"></script>

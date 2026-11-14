@@ -11,10 +11,17 @@
                 <p class="text-sm text-gray-500 dark:text-slate-400 mt-1 transition-colors">Kelola data pembayaran denda keterlambatan atau kerusakan buku.</p>
             </div>
 
-            <a href="{{ route('peminjaman.index') }}" class="inline-flex items-center gap-2 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600 px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm focus:outline-none shrink-0">
-                <i class="ph ph-arrow-left text-lg"></i>
-                Kembali ke Peminjaman
-            </a>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('transaksi.index') }}" class="inline-flex items-center gap-2 bg-purple-50 dark:bg-purple-500/10 hover:bg-purple-100 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-500/30 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm shrink-0">
+                    <i class="ph ph-wallet text-lg font-bold"></i>
+                    Lihat Kas Denda
+                </a>
+
+                <a href="{{ route('peminjaman.index') }}" class="inline-flex items-center gap-2 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm focus:outline-none shrink-0">
+                    <i class="ph ph-arrow-left text-lg"></i>
+                    Kembali ke Peminjaman
+                </a>
+            </div>
         </div>
 
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors flex-1 flex flex-col">
@@ -28,7 +35,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="ph ph-magnifying-glass text-gray-400 dark:text-slate-500 text-lg"></i>
                         </div>
-                        <input type="text" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik pencarian..."
+                        <input type="text" name="search" value="{{ request('search') }}" autocomplete="off" placeholder="Ketik nama, NIS, atau buku..."
                             class="pl-10 pr-3 w-full py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 border-r-0 rounded-l-lg focus:ring-2 focus:ring-red-600 outline-none transition-colors text-sm text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500">
                     </div>
                     <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-r-lg font-medium transition-colors shadow-sm focus:outline-none shrink-0 text-sm border border-red-600 hover:border-red-700 cursor-pointer">
@@ -51,6 +58,10 @@
                     </thead>
                     <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-50 dark:divide-slate-700/50 transition-colors">
                         @forelse($peminjamans as $pinjam)
+                        @php
+                            $catatanTransaksi = $pinjam->catatan ?? '';
+                            $isRusakHilang = str_contains($catatanTransaksi, 'Kondisi: Rusak / Hilang');
+                        @endphp
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors text-sm group">
                             <td class="py-4 px-6 text-gray-500 dark:text-slate-400 font-medium text-center">
                                 {{ $peminjamans->firstItem() + $loop->index }}
@@ -63,39 +74,61 @@
 
                             <td class="py-4 px-6">
                                 <span class="font-medium text-gray-800 dark:text-slate-200 block line-clamp-1" title="{{ $pinjam->buku->judul ?? '-' }}">{{ $pinjam->buku->judul ?? 'Buku Dihapus' }}</span>
-                                <span class="text-[11px] text-gray-400 dark:text-slate-500 mt-1 line-clamp-1 block" title="{{ $pinjam->catatan ?? 'Tidak ada catatan khusus' }}">{{ $pinjam->catatan ?? 'Tidak ada catatan khusus' }}</span>
+                                <span class="text-[11px] text-gray-400 dark:text-slate-500 mt-1 line-clamp-1 block" title="{{ filled($pinjam->catatan) ? $pinjam->catatan : 'Keterlambatan pengembalian' }}">
+                                    {{ filled($pinjam->catatan) ? $pinjam->catatan : 'Keterlambatan pengembalian' }}
+                                </span>
                             </td>
 
-                            <td class="py-4 px-6 text-right">
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
                                 <span class="font-black text-red-600 dark:text-red-400 text-base block transition-colors">
                                     Rp {{ number_format($pinjam->denda, 0, ',', '.') }}
                                 </span>
                             </td>
 
                             <td class="py-4 px-6 text-center">
-                                @if($pinjam->status_denda == 'Lunas')
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold rounded-full uppercase tracking-wider transition-colors">
-                                        <i class="ph-fill ph-check-circle text-sm"></i> LUNAS
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold rounded-full uppercase tracking-wider animate-pulse transition-colors">
-                                        <i class="ph-fill ph-warning-circle text-sm"></i> BELUM LUNAS
-                                    </span>
-                                @endif
+                                <div class="flex flex-col items-center justify-center gap-1">
+                                    @if($pinjam->status_denda == 'Lunas')
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold rounded-full uppercase tracking-wider transition-colors">
+                                            <i class="ph-fill ph-check-circle text-sm"></i> LUNAS
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold rounded-full uppercase tracking-wider animate-pulse transition-colors">
+                                            <i class="ph-fill ph-warning-circle text-sm"></i> BELUM LUNAS
+                                        </span>
+                                    @endif
+
+                                    @if($isRusakHilang)
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-[10px] font-bold rounded-full uppercase tracking-wider whitespace-nowrap">
+                                            Tunggu Buku Ganti
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
 
                             <td class="py-4 px-6 text-center">
                                 <!-- Desain Aksi Border Menyatu -->
                                 <div class="inline-flex items-center justify-center p-1 bg-white dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm gap-1 transition-colors">
+
+                                    <!-- Tombol Terima Buku Ganti (Jika Rusak / Hilang) -->
+                                    @if($isRusakHilang)
+                                        <form action="{{ route('peminjaman.terimaGanti', $pinjam->id) }}" method="POST" class="m-0 p-0" onsubmit="event.preventDefault(); konfirmasiTerimaGantiDenda(this);">
+                                            @csrf
+                                            <button type="submit" class="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors flex items-center cursor-pointer" title="Terima Buku Fisik Pengganti">
+                                                <i class="ph ph-arrows-clockwise text-lg"></i>
+                                            </button>
+                                        </form>
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700 mx-0.5"></div>
+                                    @endif
+
                                     <a href="{{ route('peminjaman.show', $pinjam->id) }}" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors" title="Lihat Detail Transaksi">
                                         <i class="ph ph-eye text-lg font-bold"></i>
                                     </a>
 
                                     @if($pinjam->status_denda != 'Lunas')
-                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700"></div>
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700 mx-0.5"></div>
 
                                         <div x-data="{ showLunasModal: false, submitting: false }" class="inline-block relative">
-                                            <button @click="showLunasModal = true" type="button" class="bg-gray-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 border border-transparent dark:border-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                                            <button @click="showLunasModal = true" type="button" class="bg-gray-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 border border-transparent dark:border-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
                                                 <i class="ph ph-hand-coins text-base"></i> Terima Uang
                                             </button>
 
@@ -133,6 +166,19 @@
                                             </template>
                                         </div>
                                     @endif
+
+                                    <!-- TOMBOL HAPUS TAGIHAN (KHUSUS ADMIN) -->
+                                    @if(auth()->user()->role === 'admin')
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700 mx-0.5"></div>
+                                        <form action="{{ route('peminjaman.destroy', $pinjam->id) }}" method="POST" class="m-0 p-0" onsubmit="event.preventDefault(); konfirmasiHapusDenda(this);">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer" title="Hapus Tagihan & Transaksi (Admin)">
+                                                <i class="ph ph-trash text-lg"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+
                                 </div>
                             </td>
                         </tr>
@@ -153,7 +199,7 @@
                 </table>
             </div>
 
-            <!-- Pagination dengan ID spesifik agar tidak merusak nav sidebar -->
+            <!-- Pagination -->
             <div id="area-pagination" class="p-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 mt-auto transition-colors">
                 <style>
                     #area-pagination nav svg { width: 1.25rem; height: 1.25rem; display: inline-block; }
@@ -168,4 +214,63 @@
         </div>
 
     </div>
+
+    <!-- LIBRARY SWEETALERT2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function konfirmasiTerimaGantiDenda(form) {
+            const isDark = document.documentElement.classList.contains('dark');
+
+            Swal.fire({
+                title: 'Terima Buku Ganti?',
+                text: "Apakah siswa sudah menyerahkan buku fisik pengganti yang baru? Stok akan ditambahkan ke sistem.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: isDark ? '#334155' : '#6b7280',
+                confirmButtonText: 'Ya, Terima & Putar Stok',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#1e293b',
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl border ' + (isDark ? 'border-slate-700' : 'border-transparent'),
+                    confirmButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm',
+                    cancelButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+
+        function konfirmasiHapusDenda(form) {
+            const isDark = document.documentElement.classList.contains('dark');
+
+            Swal.fire({
+                title: 'Hapus Tagihan Denda?',
+                text: "Transaksi dan tagihan denda ini akan dihapus permanen dari sistem.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: isDark ? '#334155' : '#6b7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#1e293b',
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl border ' + (isDark ? 'border-slate-700' : 'border-transparent'),
+                    confirmButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm',
+                    cancelButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </x-admin-layout>

@@ -24,12 +24,24 @@ class PengembalianController extends Controller
             });
         }
 
-        // Mengurutkan berdasarkan kolom tanggal_kembali[cite: 2]
+        // Mengurutkan berdasarkan kolom tanggal_kembali
         $pengembalians = $query->latest('tanggal_kembali')
                                ->latest('updated_at')
                                ->paginate(6)
                                ->withQueryString();
 
         return view('admin.pengembalian.index', compact('pengembalians'));
+    }
+
+    /**
+     * Menghapus riwayat pengembalian (Khusus Admin)
+     */
+    public function destroy($id)
+    {
+        $pengembalian = Peminjaman::findOrFail($id);
+
+        $pengembalian->delete();
+
+        return redirect()->route('pengembalian.index')->with('success', 'Riwayat pengembalian berhasil dihapus permanen.');
     }
 }

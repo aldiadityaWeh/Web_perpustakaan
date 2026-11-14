@@ -67,9 +67,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/denda/{id}/lunas', [PeminjamanController::class, 'lunasiDenda'])->name('denda.lunas');
     Route::post('/admin/peminjaman/{id}/terima-ganti', [PeminjamanController::class, 'terimaBukuGanti'])->name('peminjaman.terimaGanti');
 
-    Route::resource('/admin/peminjaman', PeminjamanController::class);
-    Route::resource('/admin/pengembalian', PengembalianController::class);
-    Route::resource('/admin/transaksi', TransaksiController::class);
+    // Petugas HANYA BISA Create, Store, Index, dan Show. Tidak bisa Edit, Update, Destroy.
+    Route::resource('/admin/peminjaman', PeminjamanController::class)->except(['edit', 'update', 'destroy']);
+    Route::resource('/admin/pengembalian', PengembalianController::class)->except(['edit', 'update', 'destroy']);
+    Route::resource('/admin/transaksi', TransaksiController::class)->except(['edit', 'update', 'destroy']);
 
     // --- Analisis & Laporan ---
     Route::get('/admin/analisis', [AnalisisController::class, 'index'])->name('analisis.index');
@@ -91,10 +92,15 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->group(function () {
-   // --- Akses Tulis Master Data Buku & Anggota (Create, Store, Edit, Update, Destroy) ---
+    // --- Akses Tulis Master Data Buku & Anggota ---
     Route::resource('/admin/buku', BukuController::class)->except(['index', 'show']);
     Route::resource('/admin/anggota', AnggotaController::class)->except(['index', 'show']);
-    
+
+    // --- FITUR BARU: Hak Hapus (Destroy) Penuh Admin untuk Sirkulasi & Kas ---
+    Route::resource('/admin/peminjaman', PeminjamanController::class)->only(['destroy']);
+    Route::resource('/admin/pengembalian', PengembalianController::class)->only(['destroy']);
+    Route::resource('/admin/transaksi', TransaksiController::class)->only(['destroy']);
+
     // --- Pengaturan Sistem & Manajemen Petugas ---
     Route::get('/admin/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::put('/admin/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');

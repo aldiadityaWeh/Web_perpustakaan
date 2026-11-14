@@ -40,7 +40,7 @@
             <!-- Toolbar Filter & Pencarian Menyatu dengan Tabel -->
             <div class="p-4 border-b border-gray-100 dark:border-slate-700 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
 
-                <!-- Tab Filter Status (Terhubung dengan $request->filter di Controller) -->
+                <!-- Tab Filter Status -->
                 @php
                     $currentFilter = request('filter', 'semua');
                 @endphp
@@ -192,6 +192,18 @@
                                         <i class="ph ph-eye text-lg"></i>
                                     </a>
 
+                                    <!-- TOMBOL EDIT & HAPUS (KHUSUS ADMIN) -->
+                                    @if(auth()->user()->role === 'admin')
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700 mx-0.5"></div>
+                                        <form action="{{ route('peminjaman.destroy', $pinjam->id) }}" method="POST" class="m-0 p-0" onsubmit="event.preventDefault(); konfirmasiHapusPeminjaman(this);">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Hapus Transaksi (Admin)">
+                                                <i class="ph ph-trash text-lg"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+
                                 </div>
                             </td>
                         </tr>
@@ -214,7 +226,6 @@
 
             <div id="area-pagination" class="p-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 mt-auto transition-colors">
                 <style>
-                    /* Penyesuaian SVG agar pagination default Laravel terlihat sejajar di dark mode */
                     #area-pagination nav svg { width: 1.25rem; height: 1.25rem; display: inline-block; }
                     #area-pagination nav p { margin-top: 0; margin-bottom: 0; }
                     .dark #area-pagination nav span[aria-disabled="true"] span { background-color: #1e293b; border-color: #334155; color: #64748b; }
@@ -242,8 +253,8 @@
                 text: "Apakah siswa sudah menyerahkan buku fisik pengganti yang baru? Stok akan ditambahkan ke sistem.",
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#f59e0b', // Warna Amber
-                cancelButtonColor: '#ef4444', // Warna Merah
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#ef4444',
                 confirmButtonText: 'Ya, Terima & Putar Stok',
                 cancelButtonText: 'Batal',
                 background: isDark ? '#1e293b' : '#ffffff',
@@ -255,7 +266,6 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Animasi Loading agar tidak diklik berkali-kali
                     Swal.fire({
                         title: 'Memproses Stok...',
                         allowOutsideClick: false,
@@ -264,8 +274,34 @@
                         color: isDark ? '#f8fafc' : '#1e293b',
                         didOpen: () => { Swal.showLoading(); }
                     });
+                    form.submit();
+                }
+            });
+        }
 
-                    // Lanjutkan submit form ke Laravel
+        // Script Hapus Transaksi Peminjaman (Khusus Admin)
+        function konfirmasiHapusPeminjaman(form) {
+            const isDark = document.documentElement.classList.contains('dark');
+
+            Swal.fire({
+                title: 'Hapus Transaksi?',
+                text: "Transaksi ini akan dihapus permanen. Jika status masih dipinjam, stok buku akan otomatis dikembalikan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: isDark ? '#334155' : '#6b7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#1e293b',
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl border ' + (isDark ? 'border-slate-700' : 'border-transparent'),
+                    confirmButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm',
+                    cancelButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
                     form.submit();
                 }
             });

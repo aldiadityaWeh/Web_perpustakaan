@@ -117,6 +117,18 @@
                                     <a href="{{ route('peminjaman.show', $kembali->id) }}" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors flex items-center gap-1.5 px-2" title="Lihat Detail Transaksi">
                                         <i class="ph ph-eye text-lg"></i> <span class="text-xs font-bold">Detail</span>
                                     </a>
+
+                                    <!-- TOMBOL HAPUS RIWAYAT (KHUSUS ADMIN) -->
+                                    @if(auth()->user()->role === 'admin')
+                                        <div class="w-px h-4 bg-gray-200 dark:bg-slate-700 mx-0.5"></div>
+                                        <form action="{{ route('pengembalian.destroy', $kembali->id) }}" method="POST" class="m-0 p-0" onsubmit="event.preventDefault(); konfirmasiHapusPengembalian(this);">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer" title="Hapus Riwayat (Admin)">
+                                                <i class="ph ph-trash text-lg"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -153,6 +165,39 @@
 
     </div>
 
+    <!-- LIBRARY SWEETALERT2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Script Live Search Pengembalian -->
     <script src="{{ asset('js/search-pengembalian.js') }}"></script>
+
+    <!-- Konfirmasi SweetAlert untuk Hapus Riwayat Pengembalian -->
+    <script>
+        function konfirmasiHapusPengembalian(form) {
+            const isDark = document.documentElement.classList.contains('dark');
+
+            Swal.fire({
+                title: 'Hapus Riwayat Pengembalian?',
+                text: "Data riwayat transaksi ini akan dihapus permanen dari sistem.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: isDark ? '#334155' : '#6b7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#1e293b',
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl border ' + (isDark ? 'border-slate-700' : 'border-transparent'),
+                    confirmButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm',
+                    cancelButton: 'px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </x-admin-layout>
