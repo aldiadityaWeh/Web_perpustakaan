@@ -125,7 +125,7 @@
                         <span x-show="kondisi === 'Normal'" class="text-xs font-normal text-gray-400">(Opsional)</span>
                         <span x-show="kondisi === 'Rusak / Hilang'" x-cloak class="text-xs font-bold text-red-500">*Wajib diisi untuk buku rusak/hilang</span>
                     </label>
-                    <textarea name="catatan" rows="3" :required="kondisi === 'Rusak / Hilang'" placeholder="Tuliskan catatan kondisi buku, janji ganti buku, atau rincian kerusakan di sini..."
+                    <textarea name="catatan" rows="3" :required="kondisi === 'Rusak / Hilang'" placeholder="Tuliskan catatan kondisi buku..."
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-purple-600 outline-none transition-colors text-sm text-gray-800 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 resize-none">{{ old('catatan', $peminjaman->catatan) }}</textarea>
                 </div>
 
@@ -134,7 +134,7 @@
                         Batal
                     </a>
                     <button type="submit" :disabled="submitting" class="px-8 py-3 text-sm font-bold text-white bg-purple-600 rounded-xl hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed shadow-md transition-all flex items-center gap-2 cursor-pointer">
-                        <span x-text="submitting ? 'Memproses...' : 'Validasi & Kunci'">Validasi & Kunci</span>
+                        <span x-text="submitting ? 'Memproses...' : 'Validasi'">Validasi</span>
                         <i class="ph ph-lock-key text-lg"></i>
                     </button>
                 </div>

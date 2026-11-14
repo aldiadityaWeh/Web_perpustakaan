@@ -16,21 +16,21 @@
                 <a href="{{ route('kiosk.index') }}" target="_blank"
                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 rounded-xl text-sm font-semibold transition-all shadow-sm">
                     <i class="ph ph-desktop text-lg font-bold"></i>
-                    Buka Kiosk
+                    Kiosk Peminjaman
                 </a>
 
                 <!-- TOMBOL MENUJU HALAMAN DENDA -->
                 <a href="{{ route('denda.index') }}"
                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/30 rounded-xl text-sm font-semibold transition-all shadow-sm">
                     <i class="ph ph-receipt text-lg font-bold"></i>
-                    Tagihan Denda
+                    Denda
                 </a>
 
                 <!-- TOMBOL TAMBAH PEMINJAMAN -->
                 <a href="{{ route('peminjaman.create') }}"
                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 dark:bg-purple-500 hover:bg-purple-700 dark:hover:bg-purple-600 text-white border border-purple-600 dark:border-purple-500 rounded-xl text-sm font-semibold transition-all shadow-sm">
                     <i class="ph ph-plus-circle text-lg font-bold"></i>
-                    Tambah Peminjaman
+                    Pinjam
                 </a>
             </div>
         </div>

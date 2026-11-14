@@ -129,16 +129,6 @@
                     </p>
                 </div>
             </div>
-
-            <!-- Tombol Tambahan Jika Belum Selesai -->
-            @if($statusAkurat == 'dipinjam' || $statusAkurat == 'terlambat')
-                <div class="mt-8 flex justify-end">
-                    <a href="{{ route('peminjaman.validasi', $peminjaman->id) }}" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2">
-                        Validasi Pengembalian <i class="ph ph-arrow-right"></i>
-                    </a>
-                </div>
-            @endif
-
         </div>
     </div>
 </x-admin-layout>
