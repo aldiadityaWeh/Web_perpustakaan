@@ -40,12 +40,23 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 | RUTE UMUM (ADMIN & PETUGAS)
 |--------------------------------------------------------------------------
 */
+
 Route::middleware('auth')->group(function () {
     // --- Dashboard & Profil ---
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/admin/dashboard/index', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/admin/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/admin/profil', [ProfilController::class, 'update'])->name('profil.update');
+
+    // --- RUTE CREATE DILETAKKAN DI ATAS SEBELUM PARAMETER DINAMIS ---
+    Route::get('/admin/buku/create', [BukuController::class, 'create'])->name('buku.create');
+    Route::post('/admin/buku', [BukuController::class, 'store'])->name('buku.store');
+
+    Route::get('/admin/anggota/create', [AnggotaController::class, 'create'])->name('anggota.create');
+    Route::post('/admin/anggota', [AnggotaController::class, 'store'])->name('anggota.store');
+
+    Route::get('/admin/peminjaman/create', [PeminjamanController::class, 'create'])->name('peminjaman.create');
+    Route::get('/admin/pengembalian/create', [PengembalianController::class, 'create'])->name('pengembalian.create');
 
     // --- Akses Baca (Read-Only) Buku & Anggota ---
     Route::get('/admin/buku', [BukuController::class, 'index'])->name('buku.index');
@@ -67,9 +78,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/denda/{id}/lunas', [PeminjamanController::class, 'lunasiDenda'])->name('denda.lunas');
     Route::post('/admin/peminjaman/{id}/terima-ganti', [PeminjamanController::class, 'terimaBukuGanti'])->name('peminjaman.terimaGanti');
 
-    // Petugas HANYA BISA Create, Store, Index, dan Show. Tidak bisa Edit, Update, Destroy.
-    Route::resource('/admin/peminjaman', PeminjamanController::class)->except(['edit', 'update', 'destroy']);
-    Route::resource('/admin/pengembalian', PengembalianController::class)->except(['edit', 'update', 'destroy']);
+    Route::resource('/admin/peminjaman', PeminjamanController::class)->except(['create', 'edit', 'update', 'destroy']);
+    Route::resource('/admin/pengembalian', PengembalianController::class)->except(['create', 'edit', 'update', 'destroy']);
     Route::resource('/admin/transaksi', TransaksiController::class)->except(['edit', 'update', 'destroy']);
 
     // --- Analisis & Laporan ---
@@ -92,11 +102,17 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    // --- Akses Tulis Master Data Buku & Anggota ---
-    Route::resource('/admin/buku', BukuController::class)->except(['index', 'show']);
-    Route::resource('/admin/anggota', AnggotaController::class)->except(['index', 'show']);
+    // --- Rute Edit, Update, & Destroy Buku ---
+    Route::get('/admin/buku/{buku}/edit', [BukuController::class, 'edit'])->name('buku.edit');
+    Route::put('/admin/buku/{buku}', [BukuController::class, 'update'])->name('buku.update');
+    Route::delete('/admin/buku/{buku}', [BukuController::class, 'destroy'])->name('buku.destroy');
 
-    // --- FITUR BARU: Hak Hapus (Destroy) Penuh Admin untuk Sirkulasi & Kas ---
+    // --- Rute Edit, Update, & Destroy Anggota ---
+    Route::get('/admin/anggota/{anggota}/edit', [AnggotaController::class, 'edit'])->name('anggota.edit');
+    Route::put('/admin/anggota/{anggota}', [AnggotaController::class, 'update'])->name('anggota.update');
+    Route::delete('/admin/anggota/{anggota}', [AnggotaController::class, 'destroy'])->name('anggota.destroy');
+
+    // --- Hak Hapus Sirkulasi & Kas ---
     Route::resource('/admin/peminjaman', PeminjamanController::class)->only(['destroy']);
     Route::resource('/admin/pengembalian', PengembalianController::class)->only(['destroy']);
     Route::resource('/admin/transaksi', TransaksiController::class)->only(['destroy']);

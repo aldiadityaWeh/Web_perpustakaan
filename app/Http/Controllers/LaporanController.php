@@ -13,7 +13,15 @@ class LaporanController extends Controller
 {
     public function index()
     {
-        return view('admin.laporan.index');
+        // Ambil daftar kelas unik yang ada di tabel anggota untuk dropdown filter
+        $daftarKelas = Anggota::select('kelas')
+            ->whereNotNull('kelas')
+            ->where('kelas', '!=', '')
+            ->distinct()
+            ->orderBy('kelas', 'asc')
+            ->pluck('kelas');
+
+        return view('admin.laporan.index', compact('daftarKelas'));
     }
 
     public function peminjaman(Request $request)
@@ -50,28 +58,57 @@ class LaporanController extends Controller
 
     public function buku(Request $request)
     {
-        $buku = Buku::orderBy('judul')->get();
+        // Validasi opsional: jika mengisi tanggal, pastikan tanggal akhir >= tanggal awal
+        if ($request->filled('start_date') || $request->filled('end_date')) {
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date'   => 'required|date|after_or_equal:start_date',
+            ], [
+                'start_date.required'     => 'Pilih tanggal awal periode buku terlebih dahulu.',
+                'end_date.required'       => 'Pilih tanggal akhir periode buku terlebih dahulu.',
+                'end_date.after_or_equal' => 'Tanggal akhir tidak boleh lebih mundur dari tanggal awal.',
+            ]);
+        }
+
+        $query = Buku::query();
+
+        // Filter berdasarkan periode tanggal buku diinput (created_at) jika diisi
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $start = Carbon::parse($request->start_date)->startOfDay();
+            $end   = Carbon::parse($request->end_date)->endOfDay();
+            $query->whereBetween('created_at', [$start, $end]);
+        }
+
+        $buku = $query->latest('id')->get();
         $pengaturan = Pengaturan::first() ?? new Pengaturan();
 
         // JIKA USER MEMILIH FORMAT EXCEL
         if ($request->has('export') && $request->export == 'excel') {
-            return $this->exportExcelBuku($buku, $pengaturan);
+            return $this->exportExcelBuku($buku, $pengaturan, $request->start_date, $request->end_date);
         }
 
-        return view('admin.laporan.cetak-buku', compact('buku', 'pengaturan'));
+        return view('admin.laporan.cetak-buku', compact('buku', 'pengaturan', 'request'));
     }
 
     public function anggota(Request $request)
     {
-        $anggota = Anggota::orderBy('nama_lengkap')->get();
+        $query = Anggota::query();
+
+        // Filter berdasarkan kelas jika dipilih dan bukan 'all' / 'semua'
+        $kelasDipilih = $request->input('kelas', 'all');
+        if ($kelasDipilih !== 'all' && $kelasDipilih !== 'semua' && $kelasDipilih !== '') {
+            $query->where('kelas', $kelasDipilih);
+        }
+
+        $anggota = $query->orderBy('kelas', 'asc')->orderBy('nama_lengkap', 'asc')->get();
         $pengaturan = Pengaturan::first() ?? new Pengaturan();
 
         // JIKA USER MEMILIH FORMAT EXCEL
         if ($request->has('export') && $request->export == 'excel') {
-            return $this->exportExcelAnggota($anggota, $pengaturan);
+            return $this->exportExcelAnggota($anggota, $pengaturan, $kelasDipilih);
         }
 
-        return view('admin.laporan.cetak-anggota', compact('anggota', 'pengaturan'));
+        return view('admin.laporan.cetak-anggota', compact('anggota', 'pengaturan', 'request', 'kelasDipilih'));
     }
 
     // --- FUNGSI PRIVAT UNTUK PROSES EXCEL (.XLS) ---
@@ -121,38 +158,51 @@ class LaporanController extends Controller
         ]);
     }
 
-    private function exportExcelBuku($buku, $pengaturan)
+    private function exportExcelBuku($buku, $pengaturan, $startDate = null, $endDate = null)
     {
-        $filename = "Inventaris_Buku_" . date('Y-m-d') . ".xls";
+        $periodeFile = ($startDate && $endDate) ? "{$startDate}_sd_{$endDate}" : date('Y-m-d');
+        $filename = "Laporan_Stok_Buku_{$periodeFile}.xls";
         $namaSekolah = e($pengaturan->nama_sekolah ?? 'SDN 6 Ciseureuh');
+        $judulPeriode = ($startDate && $endDate)
+            ? "Laporan Stok Buku Periode " . Carbon::parse($startDate)->format('d/m/Y') . " - " . Carbon::parse($endDate)->format('d/m/Y')
+            : "Laporan Stok Buku (Semua Periode)";
 
-        return response()->streamDownload(function () use ($buku, $namaSekolah) {
+        return response()->streamDownload(function () use ($buku, $namaSekolah, $judulPeriode) {
             echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
             echo "<table border='1'>";
-            echo "<tr><th colspan='6' style='font-size:16px; font-weight:bold;'>LAPORAN INVENTARIS BUKU PERPUSTAKAAN</th></tr>";
-            echo "<tr><th colspan='6'>Instansi: {$namaSekolah}</th></tr>";
-            echo "<tr><td colspan='6'></td></tr>";
+            echo "<tr><th colspan='9' style='font-size:15px; font-weight:bold;'>{$judulPeriode}</th></tr>";
+            echo "<tr><th colspan='9'>Instansi: {$namaSekolah}</th></tr>";
+            echo "<tr><td colspan='9'></td></tr>";
             echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>";
-            echo "<th>No</th><th>Judul Buku</th><th>ISBN</th><th>Pengarang</th><th>Kategori DDC</th><th>Stok</th>";
+            echo "<th>No Buku</th><th>ISBN</th><th>Judul Buku</th><th>Katalog</th><th>Pengarang</th><th>Penerbit</th><th>Tanggal Penerimaan</th><th>Jumlah Buku</th><th>Keterangan</th>";
             echo "</tr>";
 
             $totalStok = 0;
 
-            foreach ($buku as $index => $item) {
+            foreach ($buku as $item) {
                 $totalStok += (int) $item->stok;
+                $tglKode = $item->created_at ? Carbon::parse($item->created_at)->format('dmy') : date('dmy');
+                $noBuku = $item->kode_buku ?? ('KDBK' . $tglKode . str_pad($item->id, 3, '0', STR_PAD_LEFT));
+                $tglInput = $item->created_at ? Carbon::parse($item->created_at)->format('d/m/Y') : '-';
+                $ket = $item->keterangan ?? ($item->lokasi_rak ? 'Rak ' . $item->lokasi_rak : '-');
+
                 echo "<tr>";
-                echo "<td style='text-align:center;'>" . ($index + 1) . "</td>";
-                echo "<td>" . e($item->judul) . "</td>";
-                echo "<td>'" . e($item->isbn ?? '-') . "</td>";
-                echo "<td>" . e($item->pengarang) . "</td>";
-                echo "<td>" . e($item->kategori) . "</td>";
+                echo "<td style='text-align:center;'>" . e($noBuku) . "</td>";
+                echo "<td style='text-align:center;'>'" . e($item->isbn ?? '-') . "</td>";
+                echo "<td style='text-align:center;'>" . e($item->judul) . "</td>";
+                echo "<td style='text-align:center;'>" . e($item->kategori ?? '-') . "</td>";
+                echo "<td style='text-align:center;'>" . e($item->pengarang ?? '-') . "</td>";
+                echo "<td style='text-align:center;'>" . e($item->penerbit ?? '-') . "</td>";
+                echo "<td style='text-align:center;'>" . $tglInput . "</td>";
                 echo "<td style='text-align:center;'>" . (int) $item->stok . "</td>";
+                echo "<td style='text-align:center;'>" . e($ket) . "</td>";
                 echo "</tr>";
             }
 
             echo "<tr style='background-color:#e6e6e6; font-weight:bold;'>";
-            echo "<td colspan='5' style='text-align:right;'>TOTAL STOK BUKU:</td>";
+            echo "<td colspan='7' style='text-align:right;'>Total Jumlah Buku:</td>";
             echo "<td style='text-align:center;'>" . number_format($totalStok, 0, ',', '.') . "</td>";
+            echo "<td style='text-align:center;'>-</td>";
             echo "</tr>";
 
             echo "</table>";
@@ -161,16 +211,19 @@ class LaporanController extends Controller
         ]);
     }
 
-    private function exportExcelAnggota($anggota, $pengaturan)
+    private function exportExcelAnggota($anggota, $pengaturan, $kelasDipilih = 'all')
     {
-        $filename = "Data_Anggota_" . date('Y-m-d') . ".xls";
+        $suffixKelas = ($kelasDipilih !== 'all' && $kelasDipilih !== 'semua' && $kelasDipilih !== '') ? "Kelas_" . str_replace(' ', '_', $kelasDipilih) : "Semua_Kelas";
+        $filename = "Data_Anggota_{$suffixKelas}_" . date('Y-m-d') . ".xls";
         $namaSekolah = e($pengaturan->nama_sekolah ?? 'SDN 6 Ciseureuh');
+        $labelKelas = ($kelasDipilih !== 'all' && $kelasDipilih !== 'semua' && $kelasDipilih !== '') ? "Kelas {$kelasDipilih}" : "Semua Kelas";
 
-        return response()->streamDownload(function () use ($anggota, $namaSekolah) {
+        return response()->streamDownload(function () use ($anggota, $namaSekolah, $labelKelas) {
             echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
             echo "<table border='1'>";
             echo "<tr><th colspan='6' style='font-size:16px; font-weight:bold;'>LAPORAN DATA ANGGOTA PERPUSTAKAAN</th></tr>";
             echo "<tr><th colspan='6'>Instansi: {$namaSekolah}</th></tr>";
+            echo "<tr><th colspan='6'>Filter Kelas: {$labelKelas}</th></tr>";
             echo "<tr><td colspan='6'></td></tr>";
             echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>";
             echo "<th>No</th><th>Nama Lengkap</th><th>NIS</th><th>Kelas</th><th>Jenis Kelamin</th><th>Status</th>";

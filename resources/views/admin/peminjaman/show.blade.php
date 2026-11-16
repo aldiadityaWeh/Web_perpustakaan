@@ -51,20 +51,29 @@
                 </div>
             </div>
 
-            <!-- GRID TENGAH: Waktu -->
+            <!-- GRID TENGAH: Waktu (Diubah menggunakan Ikon Gambar dari public/images) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 p-5 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-sm transition-colors">
+                <!-- Tanggal Pinjam -->
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                        <i class="ph ph-calendar-arrow-up text-2xl"></i>
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center shrink-0 transition-colors">
+                        <img src="{{ asset('images/peminjaman.png') }}"
+                             onerror="this.onerror=null; this.src='{{ asset('images/calendar.png') }}';"
+                             alt="Tanggal Pinjam"
+                             class="w-7 h-7 object-contain dark:opacity-90">
                     </div>
                     <div>
                         <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Tanggal Pinjam</p>
                         <p class="text-sm font-bold text-gray-800 dark:text-slate-200 transition-colors">{{ \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->translatedFormat('d F Y') }}</p>
                     </div>
                 </div>
+
+                <!-- Batas Kembali -->
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                        <i class="ph ph-calendar-arrow-down text-2xl"></i>
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 flex items-center justify-center shrink-0 transition-colors">
+                        <img src="{{ asset('images/pengembalian.png') }}"
+                             onerror="this.onerror=null; this.src='{{ asset('images/deadline.png') }}';"
+                             alt="Batas Kembali"
+                             class="w-7 h-7 object-contain dark:opacity-90">
                     </div>
                     <div>
                         <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Batas Kembali</p>
@@ -93,7 +102,7 @@
                         </span>
                         <p class="mt-2 text-xs font-bold text-red-600 dark:text-red-400 transition-colors">Denda: Rp {{ number_format($peminjaman->denda_berjalan, 0, ',', '.') }}</p>
                     @elseif($statusAkurat == 'dikembalikan' || $statusAkurat == 'sudah kembali')
-                        @if($pinjam->status_denda ?? $peminjaman->status_denda == 'Belum Lunas')
+                        @if(($pinjam->status_denda ?? $peminjaman->status_denda) == 'Belum Lunas')
                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-xs font-bold rounded-lg uppercase tracking-wider transition-colors">
                                 <span class="w-1.5 h-1.5 rounded-full bg-red-500 dark:bg-red-400"></span> Belum Lunas
                             </span>
@@ -125,7 +134,7 @@
                 <div class="sm:col-span-3 pt-4 border-t border-gray-100 dark:border-slate-700 transition-colors">
                     <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">Catatan Tambahan</p>
                     <p class="text-sm font-medium text-gray-700 dark:text-slate-300 leading-relaxed transition-colors">
-                        {{ $peminjaman->catatan ?? 'Kondisi buku baik, tidak ada catatan khusus yang ditinggalkan.' }}
+                        {{ filled($peminjaman->catatan) ? $peminjaman->catatan : 'Kondisi buku baik, tidak ada catatan khusus yang ditinggalkan.' }}
                     </p>
                 </div>
             </div>

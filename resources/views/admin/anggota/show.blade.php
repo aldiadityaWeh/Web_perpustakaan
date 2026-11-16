@@ -17,7 +17,7 @@
             <!-- TOMBOL CETAK KARTU PDF (Membuka Tab Baru) -->
             <a href="{{ route('anggota.cetak_kartu', $anggota->id) }}" target="_blank" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer">
                 <i class="ph ph-printer text-lg"></i>
-                Cetak Kartu (PDF)
+                Cetak Kartu
             </a>
 
             <!-- HANYA ADMIN YANG BISA MELIHAT TOMBOL EDIT -->

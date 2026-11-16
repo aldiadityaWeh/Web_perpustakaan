@@ -28,9 +28,9 @@
                 </div>
 
                 <h3 class="text-[17px] font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors">Laporan Sirkulasi</h3>
-                <p class="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed transition-colors">Rekap riwayat peminjaman, pengembalian, dan denda.</p>
+                <p class="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed transition-colors">Rekap riwayat peminjaman, pengembalian, dan denda berdasarkan periode transaksi.</p>
 
-                <!-- Form Filter Tanggal (Dilengkapi Alpine.js untuk validasi rentang otomatis) -->
+                <!-- Form Filter Tanggal Sirkulasi (Wajib Isi) -->
                 <form action="{{ route('laporan.peminjaman') }}" method="GET"
                       x-data="{
                           startDate: '{{ old('start_date', now()->startOfMonth()->format('Y-m-d')) }}',
@@ -63,48 +63,98 @@
                 </form>
             </div>
 
-            <!-- 2. Laporan Buku (Inventaris) -->
+            <!-- 2. Laporan Buku (Inventaris & Stok per Periode) -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col h-full hover:shadow-md transition-all group">
                 <!-- Ikon Kotak (Biru) -->
                 <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-5 border border-blue-100 dark:border-blue-500/20 shrink-0 transition-all group-hover:scale-110">
                     <img src="{{ asset('images/buku.png') }}" alt="Ikon Buku" class="w-7 h-7 object-contain dark:opacity-90">
                 </div>
 
-                <h3 class="text-[17px] font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors">Inventaris Buku</h3>
-                <p class="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed transition-colors">Daftar ketersediaan judul buku dan stok saat ini.</p>
+                <h3 class="text-[17px] font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors">Laporan Stok Buku</h3>
+                <p class="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed transition-colors">Daftar penerimaan dan ketersediaan stok buku. Kosongkan tanggal untuk mencetak semua periode.</p>
 
-                <div class="mt-auto grid grid-cols-2 gap-2">
-                    <a href="{{ route('laporan.buku') }}" target="_blank" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="ph ph-printer text-base"></i>
-                        <span>Cetak PDF</span>
-                    </a>
-                    <a href="{{ route('laporan.buku', ['export' => 'excel']) }}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="ph ph-file-xls text-base"></i>
-                        <span>Unduh Excel</span>
-                    </a>
-                </div>
+                <!-- Form Filter Periode Buku (Opsional: Jika dikosongkan = Semua Periode) -->
+                <form action="{{ route('laporan.buku') }}" method="GET"
+                      x-data="{
+                          startDate: '',
+                          endDate: ''
+                      }"
+                      class="mt-auto flex flex-col gap-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider transition-colors">Dari Tgl</label>
+                                <span class="text-[9px] text-gray-400 dark:text-slate-500 italic">Opsional</span>
+                            </div>
+                            <input type="date" name="start_date" x-model="startDate" @change="if(endDate && endDate < startDate) endDate = startDate" class="w-full text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors [color-scheme:light] dark:[color-scheme:dark]">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider transition-colors">Sampai Tgl</label>
+                                <button type="button" x-show="startDate || endDate" @click="startDate = ''; endDate = ''" class="text-[9px] font-bold text-red-500 hover:underline cursor-pointer">Reset</button>
+                            </div>
+                            <input type="date" name="end_date" x-model="endDate" :min="startDate" class="w-full text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors [color-scheme:light] dark:[color-scheme:dark]">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <button type="submit" formtarget="_blank" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="ph ph-printer text-base"></i>
+                            <span>Cetak PDF</span>
+                        </button>
+                        <button type="submit" name="export" value="excel" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="ph ph-file-xls text-base"></i>
+                            <span>Unduh Excel</span>
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <!-- 3. Laporan Anggota -->
+            <!-- 3. Laporan Anggota (Filter Kelas / All) -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col h-full hover:shadow-md transition-all group">
                 <!-- Ikon Kotak (Hijau/Emerald) -->
                 <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-5 border border-emerald-100 dark:border-emerald-500/20 shrink-0 transition-all group-hover:scale-110">
                     <img src="{{ asset('images/anggota.png') }}" alt="Ikon Anggota" class="w-7 h-7 object-contain dark:opacity-90">
                 </div>
 
-                <h3 class="text-[17px] font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors">Data Anggota</h3>
-                <p class="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed transition-colors">Daftar siswa yang aktif sebagai anggota perpustakaan.</p>
+                <h3 class="text-[17px] font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors">Laporan Data Anggota</h3>
+                <p class="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed transition-colors">Daftar siswa yang terdaftar sebagai anggota perpustakaan berdasarkan kelas.</p>
 
-                <div class="mt-auto grid grid-cols-2 gap-2">
-                    <a href="{{ route('laporan.anggota') }}" target="_blank" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="ph ph-printer text-base"></i>
-                        <span>Cetak PDF</span>
-                    </a>
-                    <a href="{{ route('laporan.anggota', ['export' => 'excel']) }}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="ph ph-file-xls text-base"></i>
-                        <span>Unduh Excel</span>
-                    </a>
-                </div>
+                <!-- Form Filter Kelas Anggota -->
+                <form action="{{ route('laporan.anggota') }}" method="GET" class="mt-auto flex flex-col gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 transition-colors">Pilih Kelas</label>
+                        <div class="relative">
+                            <select name="kelas" class="w-full text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-colors appearance-none cursor-pointer">
+                                <option value="all">Semua Kelas (All)</option>
+                                @if(isset($daftarKelas) && $daftarKelas->count() > 0)
+                                    @foreach($daftarKelas as $kls)
+                                        <option value="{{ $kls }}">Kelas {{ $kls }}</option>
+                                    @endforeach
+                                @else
+                                    <!-- Fallback standar kelas SD jika tabel masih kosong -->
+                                    @foreach(['1', '2', '3', '4', '5', '6'] as $kls)
+                                        <option value="{{ $kls }}">Kelas {{ $kls }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 dark:text-slate-500">
+                                <i class="ph ph-caret-down text-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <button type="submit" formtarget="_blank" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="ph ph-printer text-base"></i>
+                            <span>Cetak PDF</span>
+                        </button>
+                        <button type="submit" name="export" value="excel" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="ph ph-file-xls text-base"></i>
+                            <span>Unduh Excel</span>
+                        </button>
+                    </div>
+                </form>
             </div>
 
         </div>

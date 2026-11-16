@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Laporan Inventaris Buku</title>
+    <title>Cetak Laporan Stok Buku</title>
     <style>
         body { font-family: 'Times New Roman', Times, serif; color: #000; margin: 0; padding: 20px; font-size: 12px; }
-        .kop-surat { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
-        .kop-surat h1 { margin: 0; font-size: 20px; text-transform: uppercase; }
-        .kop-surat p { margin: 5px 0 0 0; font-size: 13px; }
-        .judul-laporan { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 15px; text-transform: uppercase; }
-        table { border-collapse: collapse; margin-bottom: 30px; width: 100%; }
-        table th, table td { border: 1px solid #000; padding: 8px 10px; text-align: left; }
-        table th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
+        .kop-surat { text-align: center; border-bottom: 1px solid #888; padding-bottom: 12px; margin-bottom: 20px; }
+        .kop-surat h1 { margin: 0; font-size: 18px; text-transform: uppercase; }
+        .kop-surat p { margin: 4px 0 0 0; font-size: 12px; }
+        .judul-laporan { text-align: center; margin-bottom: 18px; font-size: 16px; }
+        table { border-collapse: collapse; margin-bottom: 30px; width: 100%; border: 2px solid #000; }
+        table th, table td { border: 1px solid #000; padding: 6px 8px; text-align: center; vertical-align: middle; font-size: 11px; }
+        table th { font-weight: bold; background-color: #ffffff; }
         .text-center { text-align: center; }
 
         /* Area Tanda Tangan Dua Kolom (Kepala Perpustakaan & Kepala Sekolah) */
@@ -21,7 +21,7 @@
         .ttd-space { height: 60px; }
 
         @media print {
-            @page { margin: 1cm; }
+            @page { size: landscape; margin: 1cm; }
             .no-print { display: none; }
         }
     </style>
@@ -35,28 +35,32 @@
         <p>{{ $pengaturan->alamat_sekolah ?? 'Alamat Belum Diatur' }}</p>
     </div>
 
+    <!-- JUDUL LAPORAN SESUAI REFERENSI GAMBAR -->
     <div class="judul-laporan">
-        LAPORAN INVENTARIS BUKU PERPUSTAKAAN<br>
-        <span style="font-size: 12px; font-weight: normal;">
-            Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
-        </span>
+        @if(isset($request) && $request->filled('start_date') && $request->filled('end_date'))
+            <strong>Laporan Stok Buku Periode</strong> {{ \Carbon\Carbon::parse($request->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('d/m/Y') }}
+        @else
+            <strong>Laporan Stok Buku</strong> (Semua Periode)
+        @endif
     </div>
 
     <table>
         <thead>
             <tr>
-                <th width="5%">No</th>
-                <th width="35%">Judul Buku</th>
-                <th width="20%">Kategori (DDC)</th>
-                <th width="15%">Pengarang / Penerbit</th>
-                <th width="15%">Tahun Terbit</th>
-                <th width="10%">Sisa Stok</th>
+                <th width="11%">No Buku</th>
+                <th width="12%">ISBN</th>
+                <th width="18%">Judul Buku</th>
+                <th width="14%">Katalog</th>
+                <th width="13%">Pengarang</th>
+                <th width="13%">Penerbit</th>
+                <th width="8%">Tanggal<br>Penerimaan</th>
+                <th width="5%">Jumlah<br>Buku</th>
+                <th width="6%">Keterangan</th>
             </tr>
         </thead>
         <tbody>
             @php
                 $totalStok = 0;
-                // Kamus Klasifikasi DDC Standar Perpustakaan
                 $kamusDDC = [
                     '000' => '000 - Karya Umum',
                     '100' => '100 - Filsafat & Psikologi',
@@ -73,32 +77,39 @@
 
             @forelse($buku as $index => $item)
                 @php
+                    // Generate Kode Buku otomatis seperti KDBK201218001 jika tidak ada kolom kode_buku
+                    $tglKode = $item->created_at ? \Carbon\Carbon::parse($item->created_at)->format('dmy') : date('dmy');
+                    $noBuku = $item->kode_buku ?? ('KDBK' . $tglKode . str_pad($item->id, 3, '0', STR_PAD_LEFT));
+
                     $kategoriBuku = $item->kategori;
-                    $tampilKategori = $kamusDDC[$kategoriBuku] ?? ucfirst($kategoriBuku);
+                    $tampilKatalog = $kamusDDC[$kategoriBuku] ?? ($kategoriBuku ? ucfirst($kategoriBuku) : '-');
+                    $totalStok += (int) $item->stok;
                 @endphp
                 <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td>{{ $noBuku }}</td>
+                    <td>{{ $item->isbn ?? '-' }}</td>
                     <td>{{ $item->judul }}</td>
-                    <!-- Menampilkan Kategori DDC -->
-                    <td class="text-center" style="font-size: 11px;">{{ $tampilKategori }}</td>
-                    <td>{{ $item->pengarang ?? '-' }} <br> <span style="font-size: 10px; color: #555;">{{ $item->penerbit ?? '' }}</span></td>
-                    <td class="text-center">{{ $item->tahun_terbit ?? '-' }}</td>
-                    <td class="text-center">
-                        <strong>{{ $item->stok }}</strong>
-                        @php $totalStok += $item->stok; @endphp
-                    </td>
+                    <td>{{ $tampilKatalog }}</td>
+                    <td>{{ $item->pengarang ?? '-' }}</td>
+                    <td>{{ $item->penerbit ?? '-' }}</td>
+                    <td>{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') : '-' }}</td>
+                    <td>{{ $item->stok }}</td>
+                    <td>{{ $item->keterangan ?? ($item->lokasi_rak ? 'Rak ' . $item->lokasi_rak : '-') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center" style="padding: 20px;">Belum ada data buku di dalam sistem.</td>
+                    <td colspan="9" class="text-center" style="padding: 20px;">
+                        Tidak ada data buku yang ditemukan pada periode ini.
+                    </td>
                 </tr>
             @endforelse
         </tbody>
         @if(count($buku) > 0)
         <tfoot>
             <tr>
-                <th colspan="5" style="text-align: right;">Total Keseluruhan Buku Fisik Tersedia:</th>
-                <th class="text-center">{{ $totalStok }}</th>
+                <th colspan="7" style="text-align: right; background-color: #f9f9f9;">Total Jumlah Buku:</th>
+                <th style="background-color: #f9f9f9;">{{ $totalStok }}</th>
+                <th style="background-color: #f9f9f9;">-</th>
             </tr>
         </tfoot>
         @endif

@@ -10,11 +10,12 @@
         .kop-surat { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
         .kop-surat h1 { margin: 0; font-size: 20px; text-transform: uppercase; }
         .kop-surat p { margin: 5px 0 0 0; font-size: 13px; }
-        .judul-laporan { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 15px; text-transform: uppercase; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        table th, table td { border: 1px solid #000; padding: 8px 10px; text-align: left; }
+        .judul-laporan { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 15px; text-transform: uppercase; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 2px solid #000; }
+        table th, table td { border: 1px solid #000; padding: 8px 10px; text-align: left; vertical-align: middle; }
         table th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
         .text-center { text-align: center; }
+        .text-right { text-align: right; }
 
         /* Area Tanda Tangan Dua Kolom (Kepala Perpustakaan & Kepala Sekolah) */
         .ttd-container { width: 100%; margin-top: 40px; display: table; page-break-inside: avoid; }
@@ -38,10 +39,10 @@
     </div>
 
     <div class="judul-laporan">
-        LAPORAN TRANSAKSI PEMINJAMAN BUKU<br>
-        <span style="font-size: 12px; font-weight: normal;">
+        LAPORAN TRANSAKSI SIRKULASI PEMINJAMAN BUKU<br>
+        <span style="font-size: 12px; font-weight: normal; text-transform: none;">
             @if(request('start_date') && request('end_date'))
-                Periode: {{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }} s.d {{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}
+                Periode: <strong>{{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }}</strong> s.d <strong>{{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}</strong>
             @else
                 Semua Riwayat Transaksi
             @endif
@@ -52,26 +53,34 @@
         <thead>
             <tr>
                 <th width="5%">No</th>
-                <th width="15%">Tanggal</th>
-                <th width="25%">Nama Peminjam</th>
-                <th width="30%">Judul Buku</th>
+                <th width="12%">Tgl Pinjam</th>
+                <th width="12%">NIS</th>
+                <th width="22%">Nama Peminjam</th>
+                <th width="25%">Judul Buku</th>
                 <th width="10%">Status</th>
-                <th width="15%">Denda</th>
+                <th width="14%">Denda (Rp)</th>
             </tr>
         </thead>
         <tbody>
             @php $totalDenda = 0; @endphp
             @forelse($peminjaman as $index => $trx)
+                @php
+                    $dendaNominal = (int) ($trx->denda ?? 0);
+                    $totalDenda += $dendaNominal;
+                @endphp
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td class="text-center">{{ \Carbon\Carbon::parse($trx->tanggal_pinjam)->format('d/m/Y') }}</td>
+                    <td class="text-center">{{ $trx->anggota->nis ?? '-' }}</td>
                     <td>{{ $trx->anggota->nama_lengkap ?? '-' }}</td>
                     <td>{{ $trx->buku->judul ?? '-' }}</td>
-                    <td class="text-center">{{ ucfirst($trx->status) }}</td>
-                    <td style="text-align: right;">
-                        @if($trx->denda > 0)
-                            Rp {{ number_format($trx->denda, 0, ',', '.') }}
-                            @php $totalDenda += $trx->denda; @endphp
+                    <td class="text-center">{{ ucfirst($trx->status_aktual ?? $trx->status) }}</td>
+                    <td class="text-right">
+                        @if($dendaNominal > 0)
+                            Rp {{ number_format($dendaNominal, 0, ',', '.') }}
+                            @if(!empty($trx->status_denda) && $trx->status_denda !== 'Bebas Denda')
+                                <br><span style="font-size: 10px; color: #444;">({{ $trx->status_denda }})</span>
+                            @endif
                         @else
                             -
                         @endif
@@ -79,15 +88,19 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center" style="padding: 20px;">Tidak ada transaksi pada periode ini.</td>
+                    <td colspan="7" class="text-center" style="padding: 20px;">Tidak ada transaksi peminjaman pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>
-        @if($totalDenda > 0)
+        @if(count($peminjaman) > 0)
         <tfoot>
             <tr>
-                <th colspan="5" style="text-align: right;">Total Pemasukan Denda:</th>
-                <th style="text-align: right;">Rp {{ number_format($totalDenda, 0, ',', '.') }}</th>
+                <th colspan="6" class="text-right" style="background-color: #f9f9f9;">Total Transaksi Sirkulasi:</th>
+                <th class="text-center" style="background-color: #f9f9f9;">{{ count($peminjaman) }} Transaksi</th>
+            </tr>
+            <tr>
+                <th colspan="6" class="text-right" style="background-color: #f9f9f9;">Total Keseluruhan Denda:</th>
+                <th class="text-right" style="background-color: #f9f9f9;">Rp {{ number_format($totalDenda, 0, ',', '.') }}</th>
             </tr>
         </tfoot>
         @endif

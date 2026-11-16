@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Kepala Perpustakaan',
             'email' => 'pwksdnciseureuh@gmail.com',
             'password' => Hash::make('AdminPerpus123'),
-            'role' => 'admin', // Baris ini ditambahkan agar menjadi Admin
+            'role' => 'admin',
         ]);
     }
 }

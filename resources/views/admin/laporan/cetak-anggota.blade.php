@@ -9,8 +9,8 @@
         .kop-surat { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
         .kop-surat h1 { margin: 0; font-size: 20px; text-transform: uppercase; }
         .kop-surat p { margin: 5px 0 0 0; font-size: 13px; }
-        .judul-laporan { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 15px; text-transform: uppercase; }
-        table { border-collapse: collapse; margin-bottom: 30px; width: 100%; }
+        .judul-laporan { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 15px; text-transform: uppercase; line-height: 1.5; }
+        table { border-collapse: collapse; margin-bottom: 30px; width: 100%; border: 2px solid #000; }
         table th, table td { border: 1px solid #000; padding: 8px 10px; text-align: left; }
         table th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
         .text-center { text-align: center; }
@@ -35,9 +35,16 @@
         <p>{{ $pengaturan->alamat_sekolah ?? 'Alamat Belum Diatur' }}</p>
     </div>
 
+    @php
+        $klsFilter = $kelasDipilih ?? request('kelas', 'all');
+        $labelKelas = ($klsFilter !== 'all' && $klsFilter !== 'semua' && $klsFilter !== '')
+            ? 'KELAS ' . strtoupper($klsFilter)
+            : 'SEMUA KELAS (ALL)';
+    @endphp
+
     <div class="judul-laporan">
-        LAPORAN DAFTAR ANGGOTA PERPUSTAKAAN<br>
-        <span style="font-size: 12px; font-weight: normal;">
+        LAPORAN DAFTAR ANGGOTA PERPUSTAKAAN ({{ $labelKelas }})<br>
+        <span style="font-size: 12px; font-weight: normal; text-transform: none;">
             Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
         </span>
     </div>
@@ -72,10 +79,20 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center" style="padding: 20px;">Belum ada data anggota di dalam sistem.</td>
+                    <td colspan="6" class="text-center" style="padding: 20px;">
+                        Tidak ada data anggota untuk filter {{ strtolower($labelKelas) }}.
+                    </td>
                 </tr>
             @endforelse
         </tbody>
+        @if(count($anggota) > 0)
+        <tfoot>
+            <tr>
+                <th colspan="5" style="text-align: right; background-color: #f9f9f9;">Total Anggota Terdaftar:</th>
+                <th class="text-center" style="background-color: #f9f9f9;">{{ count($anggota) }} Siswa</th>
+            </tr>
+        </tfoot>
+        @endif
     </table>
 
     <!-- TANDA TANGAN DINAMIS (KEPALA PERPUSTAKAAN & KEPALA SEKOLAH) -->
