@@ -126,7 +126,7 @@
                         <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 transition-colors">Pilih Kelas</label>
                         <div class="relative">
                             <select name="kelas" class="w-full text-sm text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-colors appearance-none cursor-pointer">
-                                <option value="all">Semua Kelas (All)</option>
+                                <option value="all">Semua Kelas</option>
                                 @if(isset($daftarKelas) && $daftarKelas->count() > 0)
                                     @foreach($daftarKelas as $kls)
                                         <option value="{{ $kls }}">Kelas {{ $kls }}</option>

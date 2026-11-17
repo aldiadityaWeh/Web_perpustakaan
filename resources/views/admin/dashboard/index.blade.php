@@ -71,12 +71,12 @@
             <!-- Aksi Cepat -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-5 sm:p-6 flex flex-col transition-colors">
                 <h3 class="font-bold text-gray-800 dark:text-slate-100 text-base mb-4 flex items-center gap-2">
-                    <i class="ph ph-lightning text-purple-600 dark:text-purple-400"></i> Aksi Cepat
+                    <i class="ph ph-lightning text-purple-600 dark:text-purple-400"></i> Fitur All
                 </h3>
 
                 <!-- Tombol Kiosk -->
                 <a href="{{ route('kiosk.index') }}" target="_blank" class="group w-full mb-4 flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 py-3 rounded-xl text-sm font-bold transition-all shadow-sm">
-                    <i class="ph ph-desktop text-xl group-hover:scale-110 transition-transform"></i>
+                    <img src="{{ asset('images/Monitor.png') }}" alt="Pinjam" class="w-7 h-7 object-contain group-hover:scale-110 transition-transform dark:opacity-90">
                     Buka Kiosk
                 </a>
 
@@ -88,7 +88,7 @@
                     </a>
 
                     <a href="{{ route('pengembalian.index') }}" class="group flex flex-col items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 rounded-xl border border-indigo-100 dark:border-indigo-500/20 transition-all text-center">
-                        <img src="{{ asset('images/kembali.png') }}" alt="Kembali" class="w-7 h-7 object-contain group-hover:scale-110 transition-transform dark:opacity-90">
+                        <img src="{{ asset('images/pengembalian.png') }}" alt="Kembali" class="w-7 h-7 object-contain group-hover:scale-110 transition-transform dark:opacity-90">
                         <span class="text-xs font-semibold">Pengembalian</span>
                     </a>
 

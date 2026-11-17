@@ -10,7 +10,6 @@
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-slate-100 transition-colors">Data Peminjaman</h1>
                 <p class="text-sm text-gray-500 dark:text-slate-400 mt-1 transition-colors">Kelola transaksi sirkulasi peminjaman buku</p>
             </div>
-
             <div class="flex flex-wrap items-center gap-3">
                 <!-- TOMBOL BUKA KIOSK -->
                 <a href="{{ route('kiosk.index') }}" target="_blank"
